@@ -1,10 +1,12 @@
 ﻿namespace NetWorkflow
 {
+    public abstract class Workflow { }
+
     /// <summary>
     /// Defines a Workflow and runs the various steps in sequence
     /// </summary>
     /// <typeparam name="TContext">The Workflow's context to be passed between the steps</typeparam>
-    public abstract class Workflow<TContext> : IWorkflow<TContext>
+    public abstract class Workflow<TContext> : Workflow, IWorkflow<TContext>
     {
         private readonly TContext _context;
 
@@ -36,7 +38,7 @@
     /// Defines a Workflow and runs the various steps in sequence
     /// </summary>
     /// <typeparam name="TContext">The Workflow's context to be passed between the steps</typeparam>
-    public abstract class Workflow<TContext, TResult> : IWorkflow<TContext, TResult>
+    public abstract class Workflow<TContext, TResult> : Workflow, IWorkflow<TContext, TResult>
     {
         private readonly TContext _context;
 

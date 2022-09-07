@@ -1,11 +1,13 @@
 ﻿
 namespace NetWorkflow
 {
+    public interface IWorkflow { } 
+
     /// <summary>
     /// Defines the required members and methods of the Workflow
     /// </summary>
     /// <typeparam name="TContext">The context of the Workflow</typeparam>
-    public interface IWorkflow<TContext>
+    public interface IWorkflow<TContext> : IWorkflow
     {
         /// <summary>
         /// Abstract method that injects a IWorkflowBuilder to build the steps of the Workflow
@@ -24,7 +26,7 @@ namespace NetWorkflow
     /// </summary>
     /// <typeparam name="TContext">The context of the Workflow</typeparam>
     /// <typeparam name="TResult">The result of the Workflow</typeparam>
-    public interface IWorkflow<TContext, TResult>
+    public interface IWorkflow<TContext, TResult> : IWorkflow
     {
         /// <summary>
         /// Abstract method that injects a IWorkflowBuilder to build the steps of the Workflow

@@ -6,9 +6,24 @@
         {
         }
 
-        public override void Build(IWorkflowBuilder<int> builder) =>
+        public override IWorkflowBuilderNext<int, int> Build(IWorkflowBuilder<int> builder) =>
             builder.StartWith(ctx => new HelloWorld())
                 .Then(ctx => new HelloWorld2(ctx));
+    }
+
+    public class HelloWorldWorkflow2 : Workflow<int>
+    {
+        public HelloWorldWorkflow2(int context) : base(context)
+        {
+        }
+
+        public override void Build(IWorkflowBuilder<int> builder) =>
+            builder.StartWith(ctx => new HelloWorld())
+                .Then(ctx => new HelloWorld2(ctx))
+                .Parallel(ctx => new WorkflowStep<int, object>[]
+                {
+                    new HelloWorld3()
+                });
     }
 
     public class HelloWorld : WorkflowStep<string>
@@ -31,6 +46,14 @@
         public override int Run(string args, CancellationToken token = default)
         {
             return _age;
+        }
+    }
+
+    public class HelloWorld3 : WorkflowStep<int, object>
+    {
+        public override string Run(int args, CancellationToken token = default)
+        {
+            return "HIT";
         }
     }
 }

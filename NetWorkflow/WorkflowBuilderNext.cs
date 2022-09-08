@@ -21,6 +21,20 @@ namespace NetWorkflow
             _context = context; 
         }
 
+        public IWorkflowBuilderNext<TContext, object[]> Parallel(Func<IEnumerable<WorkflowStep>> func)
+        {
+            Next = new WorkflowBuilderNext<TContext, object[]>(func, _context);
+
+            return (IWorkflowBuilderNext<TContext, object[]>)Next;
+        }
+
+        public IWorkflowBuilderNext<TContext, object[]> Parallel(Func<TContext, IEnumerable<WorkflowStep>> func)
+        {
+            Next = new WorkflowBuilderNext<TContext, object[]>(() => func.Invoke(_context), _context);
+
+            return (IWorkflowBuilderNext<TContext, object[]>)Next;
+        }
+
         public Tout Run(Tin args, CancellationToken token = default) => _func.Invoke().Run(args, token);
 
         public IWorkflowBuilderNext<TContext, Tout, TNext> Then<TNext>(Func<WorkflowStep<Tout, TNext>> func)
@@ -46,7 +60,9 @@ namespace NetWorkflow
     {
         private readonly TContext _context;
 
-        private readonly Func<WorkflowStep<Tout>> _func;
+        private readonly Func<WorkflowStep<Tout>>? _func;
+
+        private readonly Func<IEnumerable<WorkflowStep>>? _enumberableFunc;
 
         public WorkflowBuilderNext(Func<WorkflowStep<Tout>> func, TContext context)
         {
@@ -55,6 +71,29 @@ namespace NetWorkflow
             _func = func;
 
             _context = context;
+        }
+
+        public WorkflowBuilderNext(Func<IEnumerable<WorkflowStep>> func, TContext context)
+        {
+            if (func == null) throw new ArgumentNullException(nameof(func));
+
+            _enumberableFunc = func;
+
+            _context = context;
+        }
+
+        public IWorkflowBuilderNext<TContext, object[]> Parallel(Func<IEnumerable<WorkflowStep>> func)
+        {
+            Next = new WorkflowBuilderNext<TContext, object[]>(func, _context);
+
+            return (IWorkflowBuilderNext<TContext, object[]>)Next;
+        }
+
+        public IWorkflowBuilderNext<TContext, object[]> Parallel(Func<TContext, IEnumerable<WorkflowStep>> func)
+        {
+            Next = new WorkflowBuilderNext<TContext, object[]>(() => func.Invoke(_context), _context);
+
+            return (IWorkflowBuilderNext<TContext, object[]>)Next;
         }
 
         public Tout Run(CancellationToken token = default) => _func.Invoke().Run(token);

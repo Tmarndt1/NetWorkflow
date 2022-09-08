@@ -7,27 +7,27 @@ namespace NetWorkflow
     {
         private readonly TContext _context;
 
-        private WorkflowStepBuilder? _builder;
+        private WorkflowBuilderNext? _builder;
 
-        private WorkflowStepBuilder? _current;
+        private WorkflowBuilderNext? _current;
 
         public WorkflowBuilder(TContext context)
         {
             _context = context;
         }
 
-        public IWorkflowStepBuilder<TContext, Tout> StartWith<Tout>(Func<WorkflowStep<Tout>> func)
+        public IWorkflowBuilderNext<TContext, Tout> StartWith<Tout>(Func<WorkflowStep<Tout>> func)
         {
-            _builder = new WorkflowStepBuilder<TContext, Tout>(func, _context);
+            _builder = new WorkflowBuilderNext<TContext, Tout>(func, _context);
 
-            return (IWorkflowStepBuilder<TContext, Tout>)_builder;
+            return (IWorkflowBuilderNext<TContext, Tout>)_builder;
         }
 
-        public IWorkflowStepBuilder<TContext, Tout> StartWith<Tout>(Func<TContext, WorkflowStep<Tout>> func)
+        public IWorkflowBuilderNext<TContext, Tout> StartWith<Tout>(Func<TContext, WorkflowStep<Tout>> func)
         {
-            _builder = new WorkflowStepBuilder<TContext, Tout>(() => func.Invoke(_context), _context);
+            _builder = new WorkflowBuilderNext<TContext, Tout>(() => func.Invoke(_context), _context);
 
-            return (IWorkflowStepBuilder<TContext, Tout>)_builder;
+            return (IWorkflowBuilderNext<TContext, Tout>)_builder;
         }
 
         private bool MoveNext()

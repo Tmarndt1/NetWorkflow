@@ -1,6 +1,6 @@
 ﻿namespace NetWorkflow
 {
-    public abstract class Workflow { }
+    public abstract class Workflow : IWorkflow { }
 
     /// <summary>
     /// Defines a Workflow and runs the various steps in sequence
@@ -63,6 +63,6 @@
         /// Runs the Workflow and provides a WorkflowResult
         /// </summary>
         /// <returns>The TResult of the Workflow</returns>
-        public TResult Run(CancellationToken token = default) => (TResult)_builder.Run(token);
+        public TResult? Run(CancellationToken token = default) => (TResult?)_builder?.Run(token);
     }
 }

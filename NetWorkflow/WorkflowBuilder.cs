@@ -54,6 +54,11 @@ namespace NetWorkflow
                 var parameters = method.GetParameters().Length > 1 ? new object?[] { result, token } : new object[] { token };
 
                 result = method.Invoke(_current, parameters);
+
+                if (_current is WorkflowBuilderParallel && result is IEnumerable<Task> tasks)
+                {
+                    result = tasks.Select(x => x.GetType().GetProperty("Result")?.GetValue(x)).ToArray();
+                }
             }
 
             return result;

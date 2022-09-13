@@ -11,16 +11,16 @@
                 .Then(ctx => new HelloWorld2(ctx));
     }
 
-    public class HelloWorldWorkflow2 : Workflow<int>
+    public class HelloWorldWorkflow2 : Workflow<int, object[]>
     {
         public HelloWorldWorkflow2(int context) : base(context)
         {
         }
 
-        public override void Build(IWorkflowBuilder<int> builder) =>
+        public override IWorkflowBuilderNext<int, object[]> Build(IWorkflowBuilder<int> builder) =>
             builder.StartWith(ctx => new HelloWorld())
                 .Then(ctx => new HelloWorld2(ctx))
-                .Parallel(ctx => new WorkflowStep<int, object>[]
+                .Parallel(ctx => new WorkflowStepAsync<int, string>[]
                 {
                     new HelloWorld3()
                 });
@@ -49,11 +49,11 @@
         }
     }
 
-    public class HelloWorld3 : WorkflowStep<int, object>
+    public class HelloWorld3 : WorkflowStepAsync<int, string>
     {
-        public override string Run(int args, CancellationToken token = default)
+        public override Task<string> RunAsync(int args, CancellationToken token = default)
         {
-            return "HIT";
+            return Task.FromResult($"{nameof(HelloWorld3)} ran");
         }
     }
 }

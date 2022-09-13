@@ -21,16 +21,16 @@ namespace NetWorkflow
             _context = context; 
         }
 
-        public IWorkflowBuilderNext<TContext, object[]> Parallel(Func<IEnumerable<WorkflowStep>> func)
+        public IWorkflowBuilderNext<TContext, object[]> Parallel<TNext>(Func<IEnumerable<WorkflowStepAsync<Tout, TNext>>> func)
         {
-            Next = new WorkflowBuilderNext<TContext, object[]>(func, _context);
+            Next = new WorkflowBuilderParallel<TContext, Tout, object[]>(func, _context);
 
             return (IWorkflowBuilderNext<TContext, object[]>)Next;
         }
 
-        public IWorkflowBuilderNext<TContext, object[]> Parallel(Func<TContext, IEnumerable<WorkflowStep>> func)
+        public IWorkflowBuilderNext<TContext, object[]> Parallel<TNext>(Func<TContext, IEnumerable<WorkflowStepAsync<Tout, TNext>>> func)
         {
-            Next = new WorkflowBuilderNext<TContext, object[]>(() => func.Invoke(_context), _context);
+            Next = new WorkflowBuilderParallel<TContext, Tout, object[]>(() => func.Invoke(_context), _context);
 
             return (IWorkflowBuilderNext<TContext, object[]>)Next;
         }
@@ -60,38 +60,25 @@ namespace NetWorkflow
     {
         private readonly TContext _context;
 
-        private readonly Func<WorkflowStep<Tout>>? _func;
-
-        private readonly Func<IEnumerable<WorkflowStep>>? _enumberableFunc;
+        private readonly Func<WorkflowStep<Tout>> _func;
 
         public WorkflowBuilderNext(Func<WorkflowStep<Tout>> func, TContext context)
         {
-            if (func == null) throw new ArgumentNullException(nameof(func));
-
             _func = func;
 
             _context = context;
         }
 
-        public WorkflowBuilderNext(Func<IEnumerable<WorkflowStep>> func, TContext context)
+        public IWorkflowBuilderNext<TContext, object[]> Parallel<TNext>(Func<IEnumerable<WorkflowStepAsync<Tout, TNext>>> func)
         {
-            if (func == null) throw new ArgumentNullException(nameof(func));
-
-            _enumberableFunc = func;
-
-            _context = context;
-        }
-
-        public IWorkflowBuilderNext<TContext, object[]> Parallel(Func<IEnumerable<WorkflowStep>> func)
-        {
-            Next = new WorkflowBuilderNext<TContext, object[]>(func, _context);
+            Next = new WorkflowBuilderParallel<TContext, Tout, object[]>(func, _context);
 
             return (IWorkflowBuilderNext<TContext, object[]>)Next;
         }
 
-        public IWorkflowBuilderNext<TContext, object[]> Parallel(Func<TContext, IEnumerable<WorkflowStep>> func)
+        public IWorkflowBuilderNext<TContext, object[]> Parallel<TNext>(Func<TContext, IEnumerable<WorkflowStepAsync<Tout, TNext>>> func)
         {
-            Next = new WorkflowBuilderNext<TContext, object[]>(() => func.Invoke(_context), _context);
+            Next = new WorkflowBuilderParallel<TContext, Tout, object[]>(() => func.Invoke(_context), _context);
 
             return (IWorkflowBuilderNext<TContext, object[]>)Next;
         }

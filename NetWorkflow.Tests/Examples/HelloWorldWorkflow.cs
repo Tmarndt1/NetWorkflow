@@ -22,7 +22,8 @@
                 .Then(ctx => new HelloWorld2(ctx))
                 .Parallel(ctx => new WorkflowStepAsync<int, string>[]
                 {
-                    new HelloWorld3()
+                    new HelloWorld3(1000),
+                    new HelloWorld3(2000)
                 });
     }
 
@@ -51,9 +52,21 @@
 
     public class HelloWorld3 : WorkflowStepAsync<int, string>
     {
+        private readonly int _delay;
+
+        public HelloWorld3(int delay)
+        {
+            _delay = delay;
+        }
+
         public override Task<string> RunAsync(int args, CancellationToken token = default)
         {
-            return Task.FromResult($"{nameof(HelloWorld3)} ran");
+            return Task.Run(() =>
+            {
+                Thread.Sleep(_delay);
+
+                return $"{nameof(HelloWorld3)} ran";
+            });
         }
     }
 }

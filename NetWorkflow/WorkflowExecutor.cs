@@ -1,9 +1,15 @@
-﻿using System.Linq.Expressions;
+﻿using System.Collections;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace NetWorkflow
 {
-    public class WorkflowExecutor<TContext, TResult>
+    public abstract class WorkflowExecutor<TContext>
+    {
+        public abstract object? Run(object? args, CancellationToken token = default);
+    }
+
+    public class WorkflowExecutor<TContext, TResult> : WorkflowExecutor<TContext>
     {
         private readonly Expression _expression;
 
@@ -16,7 +22,7 @@ namespace NetWorkflow
             _context = context;
         }
 
-        public object? Run(object? args, CancellationToken token = default)
+        public override object? Run(object? args, CancellationToken token = default)
         {
             MethodInfo? executor = null;
 
@@ -47,7 +53,7 @@ namespace NetWorkflow
                 }
                 else if (body is IEnumerable<WorkflowStepAsync> asyncSteps)
                 {
-                    var tasks = asyncSteps.Select(async x =>
+                    var tasks = asyncSteps.Select(x =>
                     {
                         executor = x.GetType().GetMethod("RunAsync");
 
@@ -55,11 +61,11 @@ namespace NetWorkflow
 
                         if (executor.GetParameters().Length > 1)
                         {
-                            return ((Task)executor.Invoke(x, new object?[] { args, token }));
+                            return ((Task<TResult>)executor.Invoke(x, new object?[] { args, token }));
                         }
                         else
                         {
-                            return ((Task)executor.Invoke(x, new object[] { token }));
+                            return ((Task<TResult>)executor.Invoke(x, new object[] { token }));
                         }
                     }).ToArray();
 

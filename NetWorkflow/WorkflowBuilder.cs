@@ -34,22 +34,22 @@ namespace NetWorkflow
 
     public class WorkflowBuilder<TContext, Tout> : WorkflowBuilder<TContext>, IWorkflowBuilderNext<TContext, Tout>
     {
-        private readonly WorkflowExecutor<TContext, Tout> _executor;
-        public WorkflowBuilder(WorkflowExecutor<TContext, Tout> executor, TContext context) : base(context)
+        private readonly WorkflowExecutor<TContext> _executor;
+        public WorkflowBuilder(WorkflowExecutor<TContext> executor, TContext context) : base(context)
         {
             _executor = executor;
         }
 
         public IWorkflowBuilderNext<TContext, TNext[]> Parallel<TNext>(Expression<Func<IEnumerable<WorkflowStepAsync<Tout, TNext>>>> func)
         {
-            _next = new WorkflowBuilder<TContext, Tout, TNext[]>(new WorkflowExecutor<TContext, TNext[]>(func, _context), _context);
+            _next = new WorkflowBuilder<TContext, Tout, TNext[]>(new WorkflowExecutor<TContext, TNext>(func, _context), _context);
 
             return (IWorkflowBuilderNext<TContext, TNext[]>)_next;
         }
 
         public IWorkflowBuilderNext<TContext, TNext[]> Parallel<TNext>(Expression<Func<TContext, IEnumerable<WorkflowStepAsync<Tout, TNext>>>> func)
         {
-            _next = new WorkflowBuilder<TContext, Tout, TNext[]>(new WorkflowExecutor<TContext, TNext[]>(func, _context), _context);
+            _next = new WorkflowBuilder<TContext, Tout, TNext[]>(new WorkflowExecutor<TContext, TNext>(func, _context), _context);
 
             return (IWorkflowBuilderNext<TContext, TNext[]>)_next;
         }
@@ -80,23 +80,23 @@ namespace NetWorkflow
 
     public class WorkflowBuilder<TContext, Tin, Tout> : WorkflowBuilder<TContext>, IWorkflowBuilderNext<TContext, Tin, Tout>
     {
-        private readonly WorkflowExecutor<TContext, Tout> _executor;
+        private readonly WorkflowExecutor<TContext> _executor;
 
-        public WorkflowBuilder(WorkflowExecutor<TContext, Tout> executor, TContext context) : base(context)
+        public WorkflowBuilder(WorkflowExecutor<TContext> executor, TContext context) : base(context)
         {
             _executor = executor;
         }
 
         public IWorkflowBuilderNext<TContext, TNext[]> Parallel<TNext>(Expression<Func<IEnumerable<WorkflowStepAsync<Tout, TNext>>>> func)
         {
-            _next = new WorkflowBuilder<TContext, Tout, TNext[]>(new WorkflowExecutor<TContext, TNext[]>(func, _context), _context);
+            _next = new WorkflowBuilder<TContext, Tout, TNext[]>(new WorkflowExecutor<TContext, TNext>(func, _context), _context);
 
             return (IWorkflowBuilderNext<TContext, TNext[]>)_next;
         }
 
         public IWorkflowBuilderNext<TContext, TNext[]> Parallel<TNext>(Expression<Func<TContext, IEnumerable<WorkflowStepAsync<Tout, TNext>>>> func)
         {
-            _next = new WorkflowBuilder<TContext, Tout, TNext[]>(new WorkflowExecutor<TContext, TNext[]>(func, _context), _context);
+            _next = new WorkflowBuilder<TContext, Tout, TNext[]>(new WorkflowExecutor<TContext, TNext>(func, _context), _context);
 
             return (IWorkflowBuilderNext<TContext, TNext[]>)_next;
         }

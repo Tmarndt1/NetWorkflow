@@ -16,8 +16,8 @@ namespace NetWorkflow.Tests.Examples
                 })
                 .Parallel(ctx => new WorkflowStepAsync<string[], string>[]
                 {
-                    new StepThree(),
-                    new StepFour()
+                    new Step3(),
+                    new Step4()
                 });
     }
 
@@ -49,21 +49,21 @@ namespace NetWorkflow.Tests.Examples
         }
     }
 
-    public class StepThree : WorkflowStepAsync<string[], string>
+    public class Step3 : WorkflowStepAsync<string[], string>
     {
         public override Task<string> RunAsync(string[] args, CancellationToken token = default)
         {
-            return Task.FromResult(Guid.NewGuid().ToString());
+            return Task.FromResult($"{nameof(Step3)} ran");
         }
     }
 
-    public class StepFour : WorkflowStepAsync<string[], string>
+    public class Step4 : WorkflowStepAsync<string[], string>
     {
         public override Task<string> RunAsync(string[] args, CancellationToken token = default)
         {
             return Task.Run(() =>
             {
-                return $"{nameof(StepFour)} ran";
+                return $"{nameof(Step4)} ran";
             });
         }
     }

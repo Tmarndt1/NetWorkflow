@@ -63,11 +63,11 @@
         /// Runs the Workflow and provides a WorkflowResult
         /// </summary>
         /// <returns>The TResult of the Workflow</returns>
-        public TResult Run(CancellationToken token = default)
+        public TResult? Run(CancellationToken token = default)
         {
             var results = _next.Run(null, token);
 
-            return (TResult)results;
+            return (TResult?)results;
         }
     }
 }

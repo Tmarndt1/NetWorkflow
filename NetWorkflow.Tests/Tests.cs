@@ -27,7 +27,8 @@ namespace NetWorkflow.Tests
             var results = workflow.Run();
 
             // Assert
-            Assert.Equal($"{nameof(Step2)} ran", results?.First());
+            Assert.Equal($"{nameof(Step3)} ran", results?.First());
+            Assert.Equal($"{nameof(Step4)} ran", results?.ElementAt(1));
         }
     }
 }

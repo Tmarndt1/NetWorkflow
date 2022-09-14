@@ -34,7 +34,8 @@ namespace NetWorkflow
 
     public class WorkflowBuilder<TContext, Tout> : WorkflowBuilder<TContext>, IWorkflowBuilderNext<TContext, Tout>
     {
-        private readonly WorkflowExecutor<TContext> _executor;
+        protected readonly WorkflowExecutor<TContext> _executor;
+        
         public WorkflowBuilder(WorkflowExecutor<TContext> executor, TContext context) : base(context)
         {
             _executor = executor;
@@ -78,51 +79,9 @@ namespace NetWorkflow
         }
     }
 
-    public class WorkflowBuilder<TContext, Tin, Tout> : WorkflowBuilder<TContext>, IWorkflowBuilderNext<TContext, Tin, Tout>
+    public class WorkflowBuilder<TContext, Tin, Tout> : WorkflowBuilder<TContext, Tout>, IWorkflowBuilderNext<TContext, Tin, Tout>
     {
-        private readonly WorkflowExecutor<TContext> _executor;
-
-        public WorkflowBuilder(WorkflowExecutor<TContext> executor, TContext context) : base(context)
-        {
-            _executor = executor;
-        }
-
-        public IWorkflowBuilderNext<TContext, TNext[]> Parallel<TNext>(Expression<Func<IEnumerable<WorkflowStepAsync<Tout, TNext>>>> func)
-        {
-            _next = new WorkflowBuilder<TContext, Tout, TNext[]>(new WorkflowExecutor<TContext, TNext>(func, _context), _context);
-
-            return (IWorkflowBuilderNext<TContext, TNext[]>)_next;
-        }
-
-        public IWorkflowBuilderNext<TContext, TNext[]> Parallel<TNext>(Expression<Func<TContext, IEnumerable<WorkflowStepAsync<Tout, TNext>>>> func)
-        {
-            _next = new WorkflowBuilder<TContext, Tout, TNext[]>(new WorkflowExecutor<TContext, TNext>(func, _context), _context);
-
-            return (IWorkflowBuilderNext<TContext, TNext[]>)_next;
-        }
-
-        public IWorkflowBuilderNext<TContext, Tout, TNext> Then<TNext>(Expression<Func<WorkflowStep<Tout, TNext>>> func)
-        {
-            _next = new WorkflowBuilder<TContext, Tout, TNext>(new WorkflowExecutor<TContext, TNext>(func, _context), _context);
-
-            return (IWorkflowBuilderNext<TContext, Tout, TNext>)_next;
-        }
-
-        public IWorkflowBuilderNext<TContext, Tout, TNext> Then<TNext>(Expression<Func<TContext, WorkflowStep<Tout, TNext>>> func)
-        {
-            _next = new WorkflowBuilder<TContext, Tout, TNext>(new WorkflowExecutor<TContext, TNext>(func, _context), _context);
-
-            return (IWorkflowBuilderNext<TContext, Tout, TNext>)_next;
-        }
-
-        public override object? Run(object? args, CancellationToken token = default)
-        {
-            object? results = _executor.Run(args, token);
-
-            if (_next == null) return results;
-
-            return _next?.Run(results);
-        }
+        public WorkflowBuilder(WorkflowExecutor<TContext> executor, TContext context) : base(executor, context) { }
     }
 }
 

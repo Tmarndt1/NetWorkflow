@@ -21,7 +21,7 @@ namespace NetWorkflow.Tests
         public void Parallel_Success()
         {
             // Arrange
-            var workflow = new ParallelWorkflow(1991);
+            var workflow = new ParallelWorkflow(new object());
 
             // Act
             var results = workflow.Run();

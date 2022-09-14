@@ -9,13 +9,13 @@ namespace NetWorkflow.Tests.Examples
 
         public override IWorkflowBuilder<object, string[]> Build(IWorkflowBuilder<object> builder) =>
             builder
-                .StartWith(ctx => new Step1())
-                .Parallel(ctx => new WorkflowStepAsync<Guid, string>[]
+                .StartWith(() => new Step1())
+                .Parallel(() => new WorkflowStepAsync<Guid, string>[]
                 {
                     new Step2(1000),
                     new Step2(2000)
                 })
-                .Parallel(ctx => new WorkflowStepAsync<string[], string>[]
+                .Parallel(() => new WorkflowStepAsync<string[], string>[]
                 {
                     new Step3(),
                     new Step4()

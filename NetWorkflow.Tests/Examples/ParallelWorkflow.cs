@@ -7,7 +7,7 @@ namespace NetWorkflow.Tests.Examples
         {
         }
 
-        public override IWorkflowBuilderNext<object, string[]> Build(IWorkflowBuilderInitial<object> builder) =>
+        public override IWorkflowBuilder<object, string[]> Build(IWorkflowBuilder<object> builder) =>
             builder
                 .StartWith(ctx => new Step1())
                 .Parallel(ctx => new WorkflowStepAsync<Guid, string>[]

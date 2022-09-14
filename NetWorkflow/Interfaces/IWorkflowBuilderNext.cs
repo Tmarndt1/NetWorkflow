@@ -3,12 +3,7 @@ using System.Linq.Expressions;
 
 namespace NetWorkflow
 {
-    public interface IWorkflowBuilderNext<TContext> : IWorkflowBuilder<TContext>
-    {
-
-    }
-
-    public interface IWorkflowBuilderNext<TContext, Tout> : IWorkflowBuilderNext<TContext>
+    public interface IWorkflowBuilderNext<TContext, Tout> : IWorkflowBuilder<TContext, Tout>
     {
         public IWorkflowBuilderNext<TContext, Tout, TNext> Then<TNext>(Expression<Func<WorkflowStep<Tout, TNext>>> func);
 

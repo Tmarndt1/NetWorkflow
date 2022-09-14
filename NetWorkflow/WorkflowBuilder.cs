@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace NetWorkflow
 {
-    public class WorkflowBuilder<TContext> : IWorkflowBuilderInitial<TContext>
+    public class WorkflowBuilder<TContext> : IWorkflowBuilder<TContext>
     {
         protected readonly TContext _context;
 

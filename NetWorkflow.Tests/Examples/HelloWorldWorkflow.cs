@@ -6,7 +6,7 @@
         {
         }
 
-        public override IWorkflowBuilderNext<int, int> Build(IWorkflowBuilderInitial<int> builder) =>
+        public override IWorkflowBuilder<int, int> Build(IWorkflowBuilder<int> builder) =>
             builder
                 .StartWith(ctx => new HelloWorld())
                 .Then(ctx => new HelloWorld2(ctx));

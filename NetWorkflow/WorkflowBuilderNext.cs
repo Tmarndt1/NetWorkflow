@@ -21,18 +21,18 @@ namespace NetWorkflow
             _context = context; 
         }
 
-        public IWorkflowBuilderNext<TContext, object[]> Parallel<TNext>(Func<IEnumerable<WorkflowStepAsync<Tout, TNext>>> func)
+        public IWorkflowBuilderNext<TContext, TNext[]> Parallel<TNext>(Func<IEnumerable<WorkflowStepAsync<Tout, TNext>>> func)
         {
-            Next = new WorkflowBuilderParallel<TContext, Tout, object[]>(func, _context);
+            Next = new WorkflowBuilderParallel<TContext, Tout, TNext[]>(func, _context);
 
-            return (IWorkflowBuilderNext<TContext, object[]>)Next;
+            return (IWorkflowBuilderNext<TContext, TNext[]>)Next;
         }
 
-        public IWorkflowBuilderNext<TContext, object[]> Parallel<TNext>(Func<TContext, IEnumerable<WorkflowStepAsync<Tout, TNext>>> func)
+        public IWorkflowBuilderNext<TContext, TNext[]> Parallel<TNext>(Func<TContext, IEnumerable<WorkflowStepAsync<Tout, TNext>>> func)
         {
-            Next = new WorkflowBuilderParallel<TContext, Tout, object[]>(() => func.Invoke(_context), _context);
+            Next = new WorkflowBuilderParallel<TContext, Tout, TNext>(() => func.Invoke(_context), _context);
 
-            return (IWorkflowBuilderNext<TContext, object[]>)Next;
+            return (IWorkflowBuilderNext<TContext, TNext[]>)Next;
         }
 
         public Tout Run(Tin args, CancellationToken token = default) => _func.Invoke().Run(args, token);
@@ -69,18 +69,18 @@ namespace NetWorkflow
             _context = context;
         }
 
-        public IWorkflowBuilderNext<TContext, object[]> Parallel<TNext>(Func<IEnumerable<WorkflowStepAsync<Tout, TNext>>> func)
+        public IWorkflowBuilderNext<TContext, TNext[]> Parallel<TNext>(Func<IEnumerable<WorkflowStepAsync<Tout, TNext>>> func)
         {
-            Next = new WorkflowBuilderParallel<TContext, Tout, object[]>(func, _context);
+            Next = new WorkflowBuilderParallel<TContext, Tout, TNext[]>(func, _context);
 
-            return (IWorkflowBuilderNext<TContext, object[]>)Next;
+            return (IWorkflowBuilderNext<TContext, TNext[]>)Next;
         }
 
-        public IWorkflowBuilderNext<TContext, object[]> Parallel<TNext>(Func<TContext, IEnumerable<WorkflowStepAsync<Tout, TNext>>> func)
+        public IWorkflowBuilderNext<TContext, TNext[]> Parallel<TNext>(Func<TContext, IEnumerable<WorkflowStepAsync<Tout, TNext>>> func)
         {
-            Next = new WorkflowBuilderParallel<TContext, Tout, object[]>(() => func.Invoke(_context), _context);
+            Next = new WorkflowBuilderParallel<TContext, Tout, TNext>(() => func.Invoke(_context), _context);
 
-            return (IWorkflowBuilderNext<TContext, object[]>)Next;
+            return (IWorkflowBuilderNext<TContext, TNext[]>)Next;
         }
 
         public Tout Run(CancellationToken token = default) => _func.Invoke().Run(token);

@@ -11,13 +11,13 @@
                 .Then(ctx => new HelloWorld2(ctx));
     }
 
-    public class HelloWorldWorkflow2 : Workflow<int, object[]>
+    public class HelloWorldWorkflow2 : Workflow<int, string[]>
     {
         public HelloWorldWorkflow2(int context) : base(context)
         {
         }
 
-        public override IWorkflowBuilderNext<int, object[]> Build(IWorkflowBuilder<int> builder) =>
+        public override IWorkflowBuilderNext<int, string[]> Build(IWorkflowBuilder<int> builder) =>
             builder.StartWith(ctx => new HelloWorld())
                 .Then(ctx => new HelloWorld2(ctx))
                 .Parallel(ctx => new WorkflowStepAsync<int, string>[]

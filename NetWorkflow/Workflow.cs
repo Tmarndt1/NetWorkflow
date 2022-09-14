@@ -25,7 +25,7 @@
         /// Abstract method that injects a IWorkflowBuilder to build the steps of the Workflow
         /// </summary>
         /// <param name="builder">The IWorkflowBuilder to build the Workflow's steps</param>
-        public abstract void Build(IWorkflowBuilder<TContext> builder);
+        public abstract void Build(IWorkflowBuilderInitial<TContext> builder);
 
         /// <summary>
         /// Runs the Workflow and provides a WorkflowResult
@@ -42,27 +42,32 @@
     {
         private readonly TContext _context;
 
-        private readonly WorkflowBuilder<TContext> _builder;
+        private readonly WorkflowBuilder<TContext> _next;
 
         public Workflow(TContext context)
         {
             _context = context;
 
-            _builder = new WorkflowBuilder<TContext>(_context);
+            _next = new WorkflowBuilder<TContext>(_context);
 
-            Build(_builder);
+            Build(_next);
         }
 
         /// <summary>
         /// Abstract method that injects a IWorkflowBuilder to build the steps of the Workflow
         /// </summary>
         /// <param name="builder">The IWorkflowBuilder to build the Workflow's steps</param>
-        public abstract IWorkflowBuilderNext<TContext, TResult> Build(IWorkflowBuilder<TContext> builder);
+        public abstract IWorkflowBuilderNext<TContext, TResult> Build(IWorkflowBuilderInitial<TContext> builder);
 
         /// <summary>
         /// Runs the Workflow and provides a WorkflowResult
         /// </summary>
         /// <returns>The TResult of the Workflow</returns>
-        public TResult? Run(CancellationToken token = default) => (TResult?)_builder?.Run(token);
+        public TResult Run(CancellationToken token = default)
+        {
+            var results = _next.Run(null, token);
+
+            return (TResult)results;
+        }
     }
 }

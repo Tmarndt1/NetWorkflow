@@ -13,7 +13,7 @@ namespace NetWorkflow
         /// Abstract method that injects a IWorkflowBuilder to build the steps of the Workflow
         /// </summary>
         /// <param name="builder">The IWorkflowBuilder to build the Workflow's steps</param>
-        public abstract void Build(IWorkflowBuilder<TContext> builder);
+        public abstract void Build(IWorkflowBuilderInitial<TContext> builder);
 
         /// <summary>
         /// Runs the Workflow and provides a WorkflowResult
@@ -32,7 +32,7 @@ namespace NetWorkflow
         /// Abstract method that injects a IWorkflowBuilder to build the steps of the Workflow
         /// </summary>
         /// <param name="builder">The IWorkflowBuilder to build the Workflow's steps</param>
-        public abstract IWorkflowBuilderNext<TContext, TResult> Build(IWorkflowBuilder<TContext> builder);
+        public abstract IWorkflowBuilderNext<TContext, TResult> Build(IWorkflowBuilderInitial<TContext> builder);
 
         /// <summary>
         /// Runs the Workflow and provides a WorkflowResult

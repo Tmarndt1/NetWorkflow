@@ -44,16 +44,16 @@ namespace NetWorkflow
 
                     if (count == 1)
                     {
-                        return (TResult)executor.Invoke(body, new object[] { token });
+                        return (TResult?)executor.Invoke(body, new object[] { token });
                     }
                     else
                     {
-                        return (TResult)executor.Invoke(body, new object?[] { args, token });
+                        return (TResult?)executor.Invoke(body, new object?[] { args, token });
                     }
                 }
                 else if (body is IEnumerable<WorkflowStepAsync> asyncSteps)
                 {
-                    var tasks = asyncSteps.Select(x =>
+                    Task<TResult>?[] tasks = asyncSteps.Select(x =>
                     {
                         executor = x.GetType().GetMethod("RunAsync");
 
@@ -71,7 +71,7 @@ namespace NetWorkflow
 
                     Task.WaitAll(tasks);
 
-                    return tasks.Select(x => x.Result).ToArray();
+                    return tasks.Where(x => x != null).Select(x => x.Result).ToArray();
                 }
                 else
                 {

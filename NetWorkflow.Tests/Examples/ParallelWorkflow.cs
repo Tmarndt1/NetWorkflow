@@ -8,7 +8,8 @@ namespace NetWorkflow.Tests.Examples
         }
 
         public override IWorkflowBuilderNext<object, string[]> Build(IWorkflowBuilderInitial<object> builder) =>
-            builder.StartWith(ctx => new StepOne())
+            builder
+                .StartWith(ctx => new Step1())
                 .Parallel(ctx => new WorkflowStepAsync<Guid, string>[]
                 {
                     new Step2(1000),
@@ -21,7 +22,7 @@ namespace NetWorkflow.Tests.Examples
                 });
     }
 
-    public class StepOne : WorkflowStep<Guid>
+    public class Step1 : WorkflowStep<Guid>
     {
         public override Guid Run(CancellationToken token = default)
         {

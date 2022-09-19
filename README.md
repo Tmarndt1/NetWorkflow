@@ -2,6 +2,8 @@
 
 Fluent .NET Workflow Library
 
+main: ![Build Status](https://github.com/Tmarndt1/NetWorkflow/workflows/.NET/badge.svg?branch=main)
+
 ## Parallel Workflow Example
 
 ```csharp

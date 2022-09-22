@@ -2,6 +2,10 @@
 
 Fluent .NET Workflow Library
 
+## Give a Star! :star:
+
+If you like or are using this project please give it a star. Thanks!
+
 ## Parallel Workflow Example
 
 ```csharp

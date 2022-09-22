@@ -3,11 +3,22 @@ using System.Reflection;
 
 namespace NetWorkflow
 {
-    public abstract class WorkflowExecutor<TContext>
+    /// <summary>
+    /// Allows the execution step to pass a value from one step to another by returning the same arguments in the Run method.
+    /// </summary>
+    public class WorkflowExecutorNext : IWorkflowExecutor
     {
-        protected readonly LambdaExpression _expression;
+        public object? Run(object? args, CancellationToken token = default)
+        {
+            return args;
+        }
+    }
 
-        protected readonly TContext _context;
+    public class WorkflowExecutor<TContext, TResult> : IWorkflowExecutor
+    {
+        private readonly LambdaExpression _expression;
+
+        private readonly TContext _context;
 
         public WorkflowExecutor(LambdaExpression expression, TContext context)
         {
@@ -16,26 +27,7 @@ namespace NetWorkflow
             _context = context;
         }
 
-        public abstract object? Run(object? args, CancellationToken token = default);
-    }
-
-    public class WorkflowExecutorEmpty<TContext> : WorkflowExecutor<TContext>
-    {
-        public WorkflowExecutorEmpty(TContext context) : base(() => true, context)
-        {
-        }
-
-        public override object? Run(object? args, CancellationToken token = default)
-        {
-            return args;
-        }
-    }
-
-    public class WorkflowExecutor<TContext, TResult> : WorkflowExecutor<TContext>
-    {
-        public WorkflowExecutor(LambdaExpression expression, TContext context) : base(expression, context) { }
-
-        public override object? Run(object? args, CancellationToken token = default)
+        public object? Run(object? args, CancellationToken token = default)
         {
             MethodInfo? executor = null;
 
@@ -89,47 +81,46 @@ namespace NetWorkflow
         }
     }
 
-    public class WorkflowExecutorConditional<TContext, Tin> : WorkflowExecutor<TContext>
+    public class WorkflowExecutorConditional<TContext, Tin> : IWorkflowExecutor
     {
-        private List<Wrapper> _next = new List<Wrapper>();
+        private readonly List<Wrapper> _next = new List<Wrapper>();
 
-        public WorkflowExecutorConditional(Expression<Func<Tin, bool>> expression, TContext context) : base(expression, context)
+        public WorkflowExecutorConditional(Expression<Func<Tin, bool>> expression)
         {
             _next.Add(new Wrapper(expression));
         }
 
         public void Append(Expression<Func<Tin, bool>> expression)
         {
-            if (_next == null) _next = new List<Wrapper>();
-
             _next.Add(new Wrapper(expression));
         }
 
-        public void Append(WorkflowExecutor<TContext> executor)
+        public void Append(IWorkflowExecutor executor)
         {
             _next.Last().Executor = executor;
         }
 
-        public override object? Run(object? args, CancellationToken token = default)
+        public object? Run(object? args, CancellationToken token = default)
         {
             var enumerator = _next.GetEnumerator();
 
-            while (enumerator.MoveNext())
+            while (enumerator.MoveNext() && !token.IsCancellationRequested)
             {
                 if (((Func<Tin, bool>)enumerator.Current.Expression.Compile()).Invoke((Tin)args))
                 {
-                    return enumerator.Current.Executor.Run(args, token);
+                    return enumerator.Current.Executor?.Run(args, token);
                 }
             }
 
-            throw new Exception();
+            // If no condition was met then default to a WorkflowConditionResult
+            return new WorkflowConditionalResult();
         }
 
         private class Wrapper
         {
             public LambdaExpression Expression { get; set; }
 
-            public WorkflowExecutor<TContext>? Executor { get; set; }
+            public IWorkflowExecutor? Executor { get; set; }
 
             public Wrapper(LambdaExpression expression)
             {

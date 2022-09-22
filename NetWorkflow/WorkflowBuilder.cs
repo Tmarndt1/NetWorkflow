@@ -34,9 +34,9 @@ namespace NetWorkflow
     public class WorkflowBuilder<TContext, Tout> : WorkflowBuilder<TContext>, 
         IWorkflowBuilderNext<TContext, Tout>
     {
-        internal readonly WorkflowExecutor<TContext> _executor;
+        internal readonly IWorkflowExecutor _executor;
         
-        public WorkflowBuilder(WorkflowExecutor<TContext> executor, TContext context) : base(context)
+        public WorkflowBuilder(IWorkflowExecutor executor, TContext context) : base(context)
         {
             _executor = executor;
         }
@@ -80,7 +80,7 @@ namespace NetWorkflow
 
         public IWorkflowBuilderConditional<TContext, Tout> If(Expression<Func<Tout, bool>> func)
         {
-            _next = new WorkflowBuilderConditional<TContext, Tout>(new WorkflowExecutorConditional<TContext, Tout>(func, _context), _context);
+            _next = new WorkflowBuilderConditional<TContext, Tout>(new WorkflowExecutorConditional<TContext, Tout>(func), _context);
 
             return (IWorkflowBuilderConditional<TContext, Tout>)_next;
         }
@@ -88,7 +88,7 @@ namespace NetWorkflow
 
     public class WorkflowBuilder<TContext, Tin, Tout> : WorkflowBuilder<TContext, Tout>, IWorkflowBuilderNext<TContext, Tin, Tout>
     {
-        public WorkflowBuilder(WorkflowExecutor<TContext> executor, TContext context) : base(executor, context) { }
+        public WorkflowBuilder(IWorkflowExecutor executor, TContext context) : base(executor, context) { }
     }
 
     public class WorkflowBuilderConditional<TContext, Tin> : WorkflowBuilder<TContext>, IWorkflowBuilderConditional<TContext, Tin>, IWorkflowBuilderConditionalNext<TContext, Tin>
@@ -130,7 +130,7 @@ namespace NetWorkflow
 
         public IWorkflowBuilderNext<TContext, object> EndIf()
         {
-            _next = new WorkflowBuilder<TContext, object>(new WorkflowExecutorEmpty<TContext>(_context), _context);
+            _next = new WorkflowBuilder<TContext, object>(new WorkflowExecutorNext(), _context);
 
             return (IWorkflowBuilderNext<TContext, object>)_next;
         }

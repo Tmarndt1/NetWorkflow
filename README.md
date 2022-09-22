@@ -6,15 +6,34 @@ Fluent .NET Workflow Library
 
 If you like or are using this project please give it a star. Thanks!
 
+## Conditional Workflow Example
+
+```csharp
+
+public class ConditionalWorkflow : Workflow<object, int>
+{
+    public ConditionalWorkflow(object context) : base(context) { }
+
+    public override IWorkflowBuilder<object, int> Build(IWorkflowBuilder<object> builder) =>
+        builder
+            .StartWith(() => new FirstStep())
+            .If(x => x == "Success")
+                .Do(() => new ConditionalStep(1))
+            .ElseIf(x => x == "Failed")
+                .Do(() => new ConditionalStep(-1))
+            .EndIf()
+                .Then(() => new FinalStep());
+}
+
+```
+
 ## Parallel Workflow Example
 
 ```csharp
 
 public class ParallelWorkflow : Workflow<object, string[]>
 {
-    public ParallelWorkflow(object context) : base(context)
-    {
-    }
+    public ParallelWorkflow(object context) : base(context) { }
 
     public override IWorkflowBuilder<object, string[]> Build(IWorkflowBuilder<object> builder) =>
         builder

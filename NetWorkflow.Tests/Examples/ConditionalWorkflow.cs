@@ -9,40 +9,38 @@ namespace NetWorkflow.Tests.Examples
 
         public override IWorkflowBuilder<object, int> Build(IWorkflowBuilder<object> builder) =>
             builder
-                .StartWith(() => new Step1())
-                .If(x => false)
-                    .Do(() => new Step2(1))
-                .ElseIf(x => false)
-                    .Do(() => new Step2(2))
-                .Else()
-                    .Do(() => new Step2(3))
+                .StartWith(() => new FirstStep())
+                .If(x => x == "Success")
+                    .Do(() => new ConditionalStep(1))
+                .ElseIf(x => x == "Failed")
+                    .Do(() => new ConditionalStep(-1))
                 .EndIf()
-                    .Then(() => new Step3());
+                    .Then(() => new FinalStep());
 
 
-        private class Step1 : WorkflowStep<string>
+        private class FirstStep : WorkflowStep<string>
         {
             public override string Run(CancellationToken token = default)
             {
-                return "Step 1 ran";
+                return "Failed";
             }
         }
-        private class Step2 : WorkflowStep<string, int>
+        private class ConditionalStep : WorkflowStep<string, int>
         {
-            private readonly int _repeater;
+            private readonly int _result;
 
-            public Step2(int repeater)
+            public ConditionalStep(int result)
             {
-                _repeater = repeater;
+                _result = result;
             }
 
             public override int Run(string args, CancellationToken token = default)
             {
-                return _repeater;
+                return _result;
             }
         }
 
-        private class Step3 : WorkflowStep<object, int>
+        private class FinalStep : WorkflowStep<object, int>
         {
             public override int Run(object args, CancellationToken token = default)
             {

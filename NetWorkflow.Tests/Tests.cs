@@ -41,7 +41,7 @@ namespace NetWorkflow.Tests
             var result = workflow.Run();
 
             // Assert
-            Assert.Equal(3, result);
+            Assert.Equal(-1, result);
         }
     }
 }

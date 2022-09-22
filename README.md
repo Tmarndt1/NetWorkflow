@@ -25,6 +25,9 @@ public class ConditionalWorkflow : Workflow<object, int>
                 .Then(() => new FinalStep());
 }
 
+int result = new ConditionalWorkflow(new object())
+    .Run(new CancellationToken());
+
 ```
 
 ## Parallel Workflow Example

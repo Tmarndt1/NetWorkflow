@@ -1,6 +1,5 @@
 ﻿
 using System.Linq.Expressions;
-using System.Reflection;
 
 namespace NetWorkflow
 {
@@ -32,9 +31,10 @@ namespace NetWorkflow
         public virtual object? Run(object? args, CancellationToken token = default) => _next?.Run(token);
     }
 
-    public class WorkflowBuilder<TContext, Tout> : WorkflowBuilder<TContext>, IWorkflowBuilderNext<TContext, Tout>
+    public class WorkflowBuilder<TContext, Tout> : WorkflowBuilder<TContext>, 
+        IWorkflowBuilderNext<TContext, Tout>
     {
-        protected readonly WorkflowExecutor<TContext> _executor;
+        internal readonly WorkflowExecutor<TContext> _executor;
         
         public WorkflowBuilder(WorkflowExecutor<TContext> executor, TContext context) : base(context)
         {
@@ -77,11 +77,72 @@ namespace NetWorkflow
 
             return _next?.Run(results);
         }
+
+        public IWorkflowBuilderConditional<TContext, Tout> If(Expression<Func<Tout, bool>> func)
+        {
+            _next = new WorkflowBuilderConditional<TContext, Tout>(new WorkflowExecutorConditional<TContext, Tout>(func, _context), _context);
+
+            return (IWorkflowBuilderConditional<TContext, Tout>)_next;
+        }
     }
 
     public class WorkflowBuilder<TContext, Tin, Tout> : WorkflowBuilder<TContext, Tout>, IWorkflowBuilderNext<TContext, Tin, Tout>
     {
         public WorkflowBuilder(WorkflowExecutor<TContext> executor, TContext context) : base(executor, context) { }
+    }
+
+    public class WorkflowBuilderConditional<TContext, Tin> : WorkflowBuilder<TContext>, IWorkflowBuilderConditional<TContext, Tin>, IWorkflowBuilderConditionalNext<TContext, Tin>
+    {
+        private readonly WorkflowExecutorConditional<TContext, Tin> _executor;
+
+        public WorkflowBuilderConditional(WorkflowExecutorConditional<TContext, Tin> executor, TContext context) : base(context)
+        {
+            _executor = executor;
+        }
+
+        public IWorkflowBuilderConditionalNext<TContext, Tin> Do<TNext>(Expression<Func<WorkflowStep<Tin, TNext>>> func)
+        {
+            _executor.Append(new WorkflowExecutor<TContext, TNext>(func, _context));
+
+            return this;
+        }
+
+        public IWorkflowBuilderConditionalNext<TContext, Tin> Do<TNext>(Expression<Func<TContext, WorkflowStep<Tin, TNext>>> func)
+        {
+            _executor.Append(new WorkflowExecutor<TContext, TNext>(func, _context));
+
+            return this;
+        }
+
+        public IWorkflowBuilderConditional<TContext, Tin> ElseIf(Expression<Func<Tin, bool>> func)
+        {
+            _executor.Append(func);
+
+            return this;
+        }
+
+        public IWorkflowBuilderConditional<TContext, Tin> Else()
+        {
+            _executor.Append(args => true);
+
+            return this;
+        }
+
+        public IWorkflowBuilderNext<TContext, object> EndIf()
+        {
+            _next = new WorkflowBuilder<TContext, object>(new WorkflowExecutorEmpty<TContext>(_context), _context);
+
+            return (IWorkflowBuilderNext<TContext, object>)_next;
+        }
+
+        public override object? Run(object? args, CancellationToken token = default)
+        {
+            object? results = _executor.Run(args, token);
+
+            if (_next == null) return results;
+
+            return _next?.Run(results);
+        }
     }
 }
 

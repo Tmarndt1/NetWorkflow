@@ -2,7 +2,7 @@ using NetWorkflow.Tests.Examples;
 
 namespace NetWorkflow.Tests
 {
-    public class HelloWorld_Tests
+    public class Tests
     {
         [Fact]
         public void HelloWorld_Success()
@@ -27,8 +27,21 @@ namespace NetWorkflow.Tests
             var results = workflow.Run();
 
             // Assert
-            Assert.Equal($"{nameof(Step3)} ran", results?.First());
-            Assert.Equal($"{nameof(Step4)} ran", results?.ElementAt(1));
+            Assert.Equal("Step3 ran", results?.First());
+            Assert.Equal("Step4 ran", results?.ElementAt(1));
+        }
+
+        [Fact]
+        public void Conditional_Success()
+        {
+            // Arrange
+            var workflow = new ConditionalWorkflow(new object());
+
+            // Act
+            var result = workflow.Run();
+
+            // Assert
+            Assert.Equal(3, result);
         }
     }
 }

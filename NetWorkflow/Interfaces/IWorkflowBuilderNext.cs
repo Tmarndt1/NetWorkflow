@@ -12,6 +12,8 @@ namespace NetWorkflow
         public IWorkflowBuilderNext<TContext, TNext[]> Parallel<TNext>(Expression<Func<IEnumerable<WorkflowStepAsync<Tout, TNext>>>> func);
 
         public IWorkflowBuilderNext<TContext, TNext[]> Parallel<TNext>(Expression<Func<TContext, IEnumerable<WorkflowStepAsync<Tout, TNext>>>> func);
+
+        public IWorkflowBuilderConditional<TContext, Tout> If(Expression<Func<Tout, bool>> func);
     }
 
     public interface IWorkflowBuilderNext<TContext, Tin, Tout> : IWorkflowBuilderNext<TContext, Tout>

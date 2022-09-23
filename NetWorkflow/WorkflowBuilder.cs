@@ -80,7 +80,7 @@ namespace NetWorkflow
 
         public IWorkflowBuilderConditional<TContext, Tout> If(Expression<Func<Tout, bool>> func)
         {
-            _next = new WorkflowBuilderConditional<TContext, Tout>(new WorkflowExecutorConditional<TContext, Tout>(func), _context);
+            _next = new WorkflowBuilderConditional<TContext, Tout>(new WorkflowExecutorConditional<Tout>(func), _context);
 
             return (IWorkflowBuilderConditional<TContext, Tout>)_next;
         }
@@ -93,9 +93,9 @@ namespace NetWorkflow
 
     public class WorkflowBuilderConditional<TContext, Tin> : WorkflowBuilder<TContext>, IWorkflowBuilderConditional<TContext, Tin>, IWorkflowBuilderConditionalNext<TContext, Tin>
     {
-        private readonly WorkflowExecutorConditional<TContext, Tin> _executor;
+        private readonly WorkflowExecutorConditional<Tin> _executor;
 
-        public WorkflowBuilderConditional(WorkflowExecutorConditional<TContext, Tin> executor, TContext context) : base(context)
+        public WorkflowBuilderConditional(WorkflowExecutorConditional<Tin> executor, TContext context) : base(context)
         {
             _executor = executor;
         }

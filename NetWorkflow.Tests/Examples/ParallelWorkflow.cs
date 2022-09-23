@@ -45,7 +45,7 @@ namespace NetWorkflow.Tests.Examples
                     Thread.Sleep(_delay);
 
                     return $"{nameof(Step2)} ran";
-                });
+                }, token);
             }
         }
 
@@ -64,7 +64,7 @@ namespace NetWorkflow.Tests.Examples
                 return Task.Run(() =>
                 {
                     return $"{nameof(Step4)} ran";
-                });
+                }, token);
             }
         }
     }

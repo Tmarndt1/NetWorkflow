@@ -41,7 +41,21 @@ namespace NetWorkflow.Tests
             var result = workflow.Run();
 
             // Assert
-            Assert.Equal(-1, result);
+            Assert.Equal(-1, result); // Since first step returns "failed" the final step returns -1
+        }
+
+
+        [Fact]
+        public void ConditionalParallel_Success()
+        {
+            // Arrange
+            var workflow = new ConditionalParallelWorkflow(new object());
+
+            // Act
+            var result = workflow.Run();
+
+            // Assert
+            Assert.Equal(1, result); // This test should return a favorable result
         }
     }
 }

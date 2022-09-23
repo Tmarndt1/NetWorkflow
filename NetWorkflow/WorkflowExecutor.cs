@@ -39,9 +39,9 @@ namespace NetWorkflow
 
             if (body is WorkflowStep step)
             {
-                executor = step.GetType().GetMethod("Run");
+                executor = step.GetType().GetMethod(nameof(WorkflowStep<TResult>.Run));
 
-                if (executor == null) throw new InvalidOperationException("Method not found");
+                if (executor == null) throw new InvalidOperationException("Run method not found");
 
                 int count = executor.GetParameters().Length;
 
@@ -58,21 +58,21 @@ namespace NetWorkflow
             {
                 Task<TResult>?[] tasks = asyncSteps.Select(x =>
                 {
-                    executor = x.GetType().GetMethod("RunAsync");
+                    executor = x.GetType().GetMethod(nameof(WorkflowStepAsync<TResult>.RunAsync));
 
                     if (executor == null) throw new InvalidOperationException("Internal error");
 
                     if (executor.GetParameters().Length > 1)
                     {
-                        return ((Task<TResult>)executor.Invoke(x, new object?[] { args, token }));
+                        return (Task<TResult>)executor.Invoke(x, new object?[] { args, token });
                     }
                     else
                     {
-                        return ((Task<TResult>)executor.Invoke(x, new object[] { token }));
+                        return (Task<TResult>)executor.Invoke(x, new object[] { token });
                     }
                 }).ToArray();
 
-                Task.WaitAll(tasks);
+                Task.WaitAll(tasks, token);
 
                 return tasks.Where(x => x != null).Select(x => x.Result).ToArray();
             }
@@ -81,7 +81,7 @@ namespace NetWorkflow
         }
     }
 
-    public class WorkflowExecutorConditional<TContext, Tin> : IWorkflowExecutor
+    public class WorkflowExecutorConditional< Tin> : IWorkflowExecutor
     {
         private readonly List<Wrapper> _next = new List<Wrapper>();
 
@@ -116,7 +116,7 @@ namespace NetWorkflow
             return new WorkflowResult("No condition was met");
         }
 
-        private class Wrapper
+        private sealed class Wrapper
         {
             public LambdaExpression Expression { get; set; }
 

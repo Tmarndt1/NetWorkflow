@@ -11,7 +11,7 @@ namespace NetWorkflow.Tests
             var workflow = new HelloWorldWorkflow(1991);
 
             // Act
-            var age = workflow.Run();
+            int age = workflow.Run();
 
             // Assert
             Assert.Equal(1991, age);
@@ -24,7 +24,7 @@ namespace NetWorkflow.Tests
             var workflow = new ParallelWorkflow(new object());
 
             // Act
-            var results = workflow.Run();
+            string[]? results = workflow.Run();
 
             // Assert
             Assert.Equal("Step3 ran", results?.First());
@@ -38,7 +38,7 @@ namespace NetWorkflow.Tests
             var workflow = new ConditionalWorkflow(new object());
 
             // Act
-            var result = workflow.Run();
+            int result = workflow.Run();
 
             // Assert
             Assert.Equal(-1, result); // Since first step returns "failed" the final step returns -1
@@ -52,10 +52,33 @@ namespace NetWorkflow.Tests
             var workflow = new ConditionalParallelWorkflow(new object());
 
             // Act
-            var result = workflow.Run();
+            int result = workflow.Run();
 
             // Assert
             Assert.Equal(1, result); // This test should return a favorable result
+        }
+
+        [Fact]
+        public void ConditionalStopped_Success()
+        {
+            // Arrange
+            var workflow = new ConditionalStoppedWorkflow(new object());
+
+            object? result = null;
+
+            // Act
+            try
+            {
+                result = workflow.Run();
+            }
+            catch (Exception ex)
+            {
+                Assert.IsType<WorkflowStoppedException>(ex);
+            }
+
+            // Assert
+            Assert.Null(result); // Should be null if it passes
+            Assert.True(workflow.Stopped);
         }
     }
 }

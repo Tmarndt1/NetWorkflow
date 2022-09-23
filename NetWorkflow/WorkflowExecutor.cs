@@ -81,8 +81,10 @@ namespace NetWorkflow
         }
     }
 
-    public class WorkflowExecutorConditional< Tin> : IWorkflowExecutor
+    public class WorkflowExecutorConditional<Tin> : IWorkflowExecutor
     {
+        public bool Stopped { get; private set; }
+
         private readonly List<ExecutorWrapper> _next = new List<ExecutorWrapper>();
 
         public WorkflowExecutorConditional(Expression<Func<Tin, bool>> expression)
@@ -100,6 +102,11 @@ namespace NetWorkflow
             _next.Last().Executor = executor;
         }
 
+        public void SetStop()
+        {
+            _next.Last().ShouldStop = true;
+        }
+
         public object? Run(object? args, CancellationToken token = default)
         {
             var enumerator = _next.GetEnumerator();
@@ -108,6 +115,13 @@ namespace NetWorkflow
             {
                 if (((Func<Tin, bool>)enumerator.Current.Expression.Compile()).Invoke((Tin)args))
                 {
+                    if (enumerator.Current.ShouldStop)
+                    {
+                        Stopped = true;
+
+                        return new WorkflowStoppedResult(args);
+                    }
+
                     return enumerator.Current.Executor?.Run(args, token);
                 }
             }
@@ -121,6 +135,8 @@ namespace NetWorkflow
             public LambdaExpression Expression { get; set; }
 
             public IWorkflowExecutor? Executor { get; set; }
+
+            public bool ShouldStop { get; set; }
 
             public ExecutorWrapper(LambdaExpression expression)
             {

@@ -11,6 +11,11 @@
     {
         private readonly WorkflowBuilder<TContext> _next;
 
+        /// <summary>
+        /// Property that determines if the workflow has been stopped
+        /// </summary>
+        public bool Stopped { get; private set; }
+
         protected Workflow(TContext context)
         {
             _next = new WorkflowBuilder<TContext>(context);
@@ -30,9 +35,16 @@
         /// <returns>The TResult of the Workflow</returns>
         public TResult? Run(CancellationToken token = default)
         {
-            var results = _next.Run(null, token);
+            var result = _next.Run(null, token);
 
-            return (TResult?)results;
+            if (result is WorkflowStoppedResult stopped)
+            {
+                Stopped = true;
+
+                throw new WorkflowStoppedException(stopped);
+            }
+
+            return (TResult?)result;
         }
     }
 }

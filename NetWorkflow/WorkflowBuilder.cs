@@ -135,11 +135,18 @@ namespace NetWorkflow
             return (IWorkflowBuilderNext<TContext, object>)_next;
         }
 
+        public IWorkflowBuilderConditionalNext<TContext, Tin> Stop()
+        {
+            _executor.SetStop();
+
+            return this;
+        }
+
         public override object? Run(object? args, CancellationToken token = default)
         {
             object? results = _executor.Run(args, token);
 
-            if (_next == null) return results;
+            if (_executor.Stopped || _next == null) return results;
 
             return _next?.Run(results);
         }

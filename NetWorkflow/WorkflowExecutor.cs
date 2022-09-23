@@ -83,16 +83,16 @@ namespace NetWorkflow
 
     public class WorkflowExecutorConditional< Tin> : IWorkflowExecutor
     {
-        private readonly List<Wrapper> _next = new List<Wrapper>();
+        private readonly List<ExecutorWrapper> _next = new List<ExecutorWrapper>();
 
         public WorkflowExecutorConditional(Expression<Func<Tin, bool>> expression)
         {
-            _next.Add(new Wrapper(expression));
+            _next.Add(new ExecutorWrapper(expression));
         }
 
         public void Append(Expression<Func<Tin, bool>> expression)
         {
-            _next.Add(new Wrapper(expression));
+            _next.Add(new ExecutorWrapper(expression));
         }
 
         public void Append(IWorkflowExecutor executor)
@@ -116,13 +116,13 @@ namespace NetWorkflow
             return new WorkflowResult("No condition was met");
         }
 
-        private sealed class Wrapper
+        private sealed class ExecutorWrapper
         {
             public LambdaExpression Expression { get; set; }
 
             public IWorkflowExecutor? Executor { get; set; }
 
-            public Wrapper(LambdaExpression expression)
+            public ExecutorWrapper(LambdaExpression expression)
             {
                 Expression = expression;
             }

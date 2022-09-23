@@ -15,7 +15,7 @@
         {
             _next = new WorkflowBuilder<TContext>(context);
 
-            Build(_next); // TODO: Don't call this in the constructor as it may fail
+            Build(_next);
         }
 
         /// <summary>

@@ -123,7 +123,7 @@ namespace NetWorkflow
                 {
                     if (enumerator.Current.ExceptionFunc != null)
                     {
-                        enumerator.Current.ExceptionFunc.Compile().Invoke();
+                        throw enumerator.Current.ExceptionFunc.Compile().Invoke();
                     }
                     else if (enumerator.Current.ShouldStop)
                     {

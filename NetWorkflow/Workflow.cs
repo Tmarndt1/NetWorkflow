@@ -16,6 +16,8 @@
         /// </summary>
         public bool Stopped { get; private set; }
 
+        private Action? _stoppedCallback;
+
         protected Workflow(TContext context)
         {
             _next = new WorkflowBuilder<TContext>(context);
@@ -29,12 +31,18 @@
         /// <param name="builder">The IWorkflowBuilder to build the Workflow's steps</param>
         public abstract IWorkflowBuilder<TContext, TResult> Build(IWorkflowBuilder<TContext> builder);
 
+        public Workflow<TContext, TResult> OnStopped(Action callback)
+        {
+            _stoppedCallback = callback;
+
+            return this;
+        }
+
         /// <summary>
         /// Runs the Workflow and returns a final result if executed step has executed successfully
         /// </summary>
         /// <param name="token">The CancellationToken to cancel the workflow</param>
         /// <returns></returns>
-        /// <exception cref="WorkflowStoppedException">An exception thrown if the Workflow has been stopped</exception>
         public TResult? Run(CancellationToken token = default)
         {
             try
@@ -45,7 +53,9 @@
                 {
                     Stopped = true;
 
-                    throw new WorkflowStoppedException(stopped);
+                    if (_stoppedCallback != null) _stoppedCallback.Invoke();
+
+                    return default(TResult?);
                 }
 
                 return (TResult?)result;

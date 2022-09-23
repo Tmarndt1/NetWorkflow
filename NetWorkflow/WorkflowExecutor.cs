@@ -108,6 +108,11 @@ namespace NetWorkflow
             _next.Last().ShouldStop = true;
         }
 
+        public void SetExceptionToThrow(Expression<Func<Exception>> func)
+        {
+            _next.Last().ExceptionFunc = func;
+        }
+
         public object? Run(object? args, CancellationToken token = default)
         {
             var enumerator = _next.GetEnumerator();
@@ -116,7 +121,11 @@ namespace NetWorkflow
             {
                 if (((Func<Tin, bool>)enumerator.Current.Expression.Compile()).Invoke((Tin)args))
                 {
-                    if (enumerator.Current.ShouldStop)
+                    if (enumerator.Current.ExceptionFunc != null)
+                    {
+                        enumerator.Current.ExceptionFunc.Compile().Invoke();
+                    }
+                    else if (enumerator.Current.ShouldStop)
                     {
                         Stopped = true;
 
@@ -137,7 +146,9 @@ namespace NetWorkflow
 
             public IWorkflowExecutor? Executor { get; set; }
 
-            public bool ShouldStop { get; set; }
+            public Expression<Func<Exception>>? ExceptionFunc { get; set; }
+
+            public bool ShouldStop { get; set; } = false;
 
             public ExecutorWrapper(LambdaExpression expression)
             {

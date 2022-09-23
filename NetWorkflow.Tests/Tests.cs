@@ -62,23 +62,18 @@ namespace NetWorkflow.Tests
         public void ConditionalStopped_Success()
         {
             // Arrange
-            var workflow = new ConditionalStoppedWorkflow(new object());
+            bool called = false;
 
-            object? result = null;
+            var workflow = new ConditionalStoppedWorkflow(new object())
+                .OnStopped(() => called = true);
 
             // Act
-            try
-            {
-                result = workflow.Run();
-            }
-            catch (Exception ex)
-            {
-                Assert.IsType<WorkflowStoppedException>(ex);
-            }
+            object? result = workflow.Run();
 
             // Assert
             Assert.Null(result); // Should be null if it passes
             Assert.True(workflow.Stopped);
+            Assert.True(called);
         }
     }
 }

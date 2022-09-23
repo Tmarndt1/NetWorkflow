@@ -10,6 +10,8 @@ namespace NetWorkflow
         public IWorkflowBuilderConditionalNext<TContext, Tin> Do<TNext>(Expression<Func<TContext, IWorkflowStep<Tin, TNext>>> func);
 
         public IWorkflowBuilderConditionalNext<TContext, Tin> Stop();
+
+        public IWorkflowBuilderConditionalNext<TContext, Tin> Throw(Expression<Func<Exception>> func);
     }
 
     public interface IWorkflowBuilderConditional<TContext, Tin, Tout> : IWorkflowBuilderConditional<TContext, Tout>

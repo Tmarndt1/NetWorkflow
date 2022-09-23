@@ -143,6 +143,13 @@ namespace NetWorkflow
             return this;
         }
 
+        public IWorkflowBuilderConditionalNext<TContext, Tin> Throw(Expression<Func<Exception>> func)
+        {
+            _executor.SetExceptionToThrow(func);
+
+            return this;
+        }
+
         public override object? Run(object? args, CancellationToken token = default)
         {
             object? results = _executor.Run(args, token);

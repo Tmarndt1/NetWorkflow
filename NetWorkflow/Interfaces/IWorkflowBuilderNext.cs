@@ -1,17 +1,18 @@
 ﻿
+using NetWorkflow.Interfaces;
 using System.Linq.Expressions;
 
 namespace NetWorkflow
 {
     public interface IWorkflowBuilderNext<TContext, Tout> : IWorkflowBuilder<TContext, Tout>
     {
-        public IWorkflowBuilderNext<TContext, Tout, TNext> Then<TNext>(Expression<Func<WorkflowStep<Tout, TNext>>> func);
+        public IWorkflowBuilderNext<TContext, Tout, TNext> Then<TNext>(Expression<Func<IWorkflowStep<Tout, TNext>>> func);
 
-        public IWorkflowBuilderNext<TContext, Tout, TNext> Then<TNext>(Expression<Func<TContext, WorkflowStep<Tout, TNext>>> func);
+        public IWorkflowBuilderNext<TContext, Tout, TNext> Then<TNext>(Expression<Func<TContext, IWorkflowStep<Tout, TNext>>> func);
 
-        public IWorkflowBuilderNext<TContext, TNext[]> Parallel<TNext>(Expression<Func<IEnumerable<WorkflowStepAsync<Tout, TNext>>>> func);
+        public IWorkflowBuilderNext<TContext, TNext[]> Parallel<TNext>(Expression<Func<IEnumerable<IWorkflowStepAsync<Tout, TNext>>>> func);
 
-        public IWorkflowBuilderNext<TContext, TNext[]> Parallel<TNext>(Expression<Func<TContext, IEnumerable<WorkflowStepAsync<Tout, TNext>>>> func);
+        public IWorkflowBuilderNext<TContext, TNext[]> Parallel<TNext>(Expression<Func<TContext, IEnumerable<IWorkflowStepAsync<Tout, TNext>>>> func);
 
         public IWorkflowBuilderConditional<TContext, Tout> If(Expression<Func<Tout, bool>> func);
     }

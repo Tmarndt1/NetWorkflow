@@ -1,4 +1,6 @@
 ﻿
+using NetWorkflow.Interfaces;
+
 namespace NetWorkflow.Tests.Examples
 {
     public class ConditionalParallelWorkflow : Workflow<object, int>
@@ -10,7 +12,7 @@ namespace NetWorkflow.Tests.Examples
         public override IWorkflowBuilder<object, int> Build(IWorkflowBuilder<object> builder) =>
             builder
                 .StartWith(() => new FirstStep())
-                .Parallel(() => new WorkflowStepAsync<string, string>[]
+                .Parallel(() => new IWorkflowStepAsync<string, string>[]
                 {
                     new Step2(50),
                     new Step2(100),
@@ -24,7 +26,7 @@ namespace NetWorkflow.Tests.Examples
                     .Then(() => new FinalStep());
 
 
-        private class Step2 : WorkflowStepAsync<string, string>
+        private class Step2 : IWorkflowStepAsync<string, string>
         {
             private readonly int _delay;
 
@@ -33,7 +35,7 @@ namespace NetWorkflow.Tests.Examples
                 _delay = delay;
             }
 
-            public override Task<string> RunAsync(string args, CancellationToken token = default)
+            public Task<string> RunAsync(string args, CancellationToken token = default)
             {
                 return Task.Run(() =>
                 {
@@ -44,22 +46,22 @@ namespace NetWorkflow.Tests.Examples
             }
         }
 
-        private class FirstStep : WorkflowStep<string>
+        private class FirstStep : IWorkflowStep<string>
         {
-            public override string Run(CancellationToken token = default)
+            public string Run(CancellationToken token = default)
             {
                 return "Failed";
             }
         }
-        private class FlattenStep : WorkflowStep<string[], string>
+        private class FlattenStep : IWorkflowStep<string[], string>
         {
-            public override string Run(string[] args, CancellationToken token = default)
+            public string Run(string[] args, CancellationToken token = default)
             {
                 return string.Join(", ", args);
             }
         }
 
-        private class ConditionalStep : WorkflowStep<string, int>
+        private class ConditionalStep : IWorkflowStep<string, int>
         {
             private readonly int _result;
 
@@ -68,15 +70,15 @@ namespace NetWorkflow.Tests.Examples
                 _result = result;
             }
 
-            public override int Run(string args, CancellationToken token = default)
+            public int Run(string args, CancellationToken token = default)
             {
                 return _result;
             }
         }
 
-        private class FinalStep : WorkflowStep<object, int>
+        private class FinalStep : IWorkflowStep<object, int>
         {
-            public override int Run(object args, CancellationToken token = default)
+            public int Run(object args, CancellationToken token = default)
             {
                 return (int)args;
             }

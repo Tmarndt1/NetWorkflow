@@ -1,4 +1,5 @@
 ﻿
+using NetWorkflow.Interfaces;
 using System.Linq.Expressions;
 
 namespace NetWorkflow
@@ -14,14 +15,14 @@ namespace NetWorkflow
             _context = context;
         }
 
-        public IWorkflowBuilderNext<TContext, Tout> StartWith<Tout>(Expression<Func<WorkflowStep<Tout>>> func)
+        public IWorkflowBuilderNext<TContext, Tout> StartWith<Tout>(Expression<Func<IWorkflowStep<Tout>>> func)
         {
             _next = new WorkflowBuilder<TContext, Tout>(new WorkflowExecutor<TContext, Tout>(func, _context), _context);
 
             return (IWorkflowBuilderNext<TContext, Tout>)_next;
         }
 
-        public IWorkflowBuilderNext<TContext, Tout> StartWith<Tout>(Expression<Func<TContext, WorkflowStep<Tout>>> func)
+        public IWorkflowBuilderNext<TContext, Tout> StartWith<Tout>(Expression<Func<TContext, IWorkflowStep<Tout>>> func)
         {
             _next = new WorkflowBuilder<TContext, Tout>(new WorkflowExecutor<TContext, Tout>(func, _context), _context);
 
@@ -41,28 +42,28 @@ namespace NetWorkflow
             _executor = executor;
         }
 
-        public IWorkflowBuilderNext<TContext, TNext[]> Parallel<TNext>(Expression<Func<IEnumerable<WorkflowStepAsync<Tout, TNext>>>> func)
+        public IWorkflowBuilderNext<TContext, TNext[]> Parallel<TNext>(Expression<Func<IEnumerable<IWorkflowStepAsync<Tout, TNext>>>> func)
         {
             _next = new WorkflowBuilder<TContext, Tout, TNext[]>(new WorkflowExecutor<TContext, TNext>(func, _context), _context);
 
             return (IWorkflowBuilderNext<TContext, TNext[]>)_next;
         }
 
-        public IWorkflowBuilderNext<TContext, TNext[]> Parallel<TNext>(Expression<Func<TContext, IEnumerable<WorkflowStepAsync<Tout, TNext>>>> func)
+        public IWorkflowBuilderNext<TContext, TNext[]> Parallel<TNext>(Expression<Func<TContext, IEnumerable<IWorkflowStepAsync<Tout, TNext>>>> func)
         {
             _next = new WorkflowBuilder<TContext, Tout, TNext[]>(new WorkflowExecutor<TContext, TNext>(func, _context), _context);
 
             return (IWorkflowBuilderNext<TContext, TNext[]>)_next;
         }
 
-        public IWorkflowBuilderNext<TContext, Tout, TNext> Then<TNext>(Expression<Func<WorkflowStep<Tout, TNext>>> func)
+        public IWorkflowBuilderNext<TContext, Tout, TNext> Then<TNext>(Expression<Func<IWorkflowStep<Tout, TNext>>> func)
         {
             _next = new WorkflowBuilder<TContext, Tout, TNext>(new WorkflowExecutor<TContext, TNext>(func, _context), _context);
 
             return (IWorkflowBuilderNext<TContext, Tout, TNext>)_next;
         }
 
-        public IWorkflowBuilderNext<TContext, Tout, TNext> Then<TNext>(Expression<Func<TContext, WorkflowStep<Tout, TNext>>> func)
+        public IWorkflowBuilderNext<TContext, Tout, TNext> Then<TNext>(Expression<Func<TContext, IWorkflowStep<Tout, TNext>>> func)
         {
             _next = new WorkflowBuilder<TContext, Tout, TNext>(new WorkflowExecutor<TContext, TNext>(func, _context), _context);
 
@@ -100,14 +101,14 @@ namespace NetWorkflow
             _executor = executor;
         }
 
-        public IWorkflowBuilderConditionalNext<TContext, Tin> Do<TNext>(Expression<Func<WorkflowStep<Tin, TNext>>> func)
+        public IWorkflowBuilderConditionalNext<TContext, Tin> Do<TNext>(Expression<Func<IWorkflowStep<Tin, TNext>>> func)
         {
             _executor.Append(new WorkflowExecutor<TContext, TNext>(func, _context));
 
             return this;
         }
 
-        public IWorkflowBuilderConditionalNext<TContext, Tin> Do<TNext>(Expression<Func<TContext, WorkflowStep<Tin, TNext>>> func)
+        public IWorkflowBuilderConditionalNext<TContext, Tin> Do<TNext>(Expression<Func<TContext, IWorkflowStep<Tin, TNext>>> func)
         {
             _executor.Append(new WorkflowExecutor<TContext, TNext>(func, _context));
 

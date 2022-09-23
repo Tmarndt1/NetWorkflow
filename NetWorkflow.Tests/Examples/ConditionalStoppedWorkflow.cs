@@ -1,4 +1,6 @@
 ﻿
+using NetWorkflow.Interfaces;
+
 namespace NetWorkflow.Tests.Examples
 {
     public class ConditionalStoppedWorkflow : Workflow<object, object>
@@ -18,24 +20,24 @@ namespace NetWorkflow.Tests.Examples
                     .Then(() => new FinalStep());
 
 
-        private class FirstStep : WorkflowStep<bool>
+        private class FirstStep : IWorkflowStep<bool>
         {
-            public override bool Run(CancellationToken token = default)
+            public bool Run(CancellationToken token = default)
             {
                 return false;
             }
         }
-        private class ConditionalStep : WorkflowStep<bool, bool>
+        private class ConditionalStep : IWorkflowStep<bool, bool>
         {
-            public override bool Run(bool args, CancellationToken token = default)
+            public bool Run(bool args, CancellationToken token = default)
             {
                 return args;
             }
         }
 
-        private class FinalStep : WorkflowStep<object, object>
+        private class FinalStep : IWorkflowStep<object, object>
         {
-            public override object? Run(object args, CancellationToken token = default)
+            public object? Run(object args, CancellationToken token = default)
             {
                 return (bool)args ? new object() : null;
             }

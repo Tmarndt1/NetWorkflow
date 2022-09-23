@@ -1,4 +1,6 @@
-﻿namespace NetWorkflow.Tests.Examples
+﻿using NetWorkflow.Interfaces;
+
+namespace NetWorkflow.Tests.Examples
 {
     public class HelloWorldWorkflow : Workflow<int, int>
     {
@@ -12,15 +14,15 @@
                 .Then(ctx => new HelloWorld2(ctx));
     }
 
-    public class HelloWorld : WorkflowStep<string>
+    public class HelloWorld : IWorkflowStep<string>
     {
-        public override string Run(CancellationToken token = default)
+        public string Run(CancellationToken token = default)
         {
             return "Hello World";
         }
     }
 
-    public class HelloWorld2 : WorkflowStep<string, int>
+    public class HelloWorld2 : IWorkflowStep<string, int>
     {
         private readonly int _age;
 
@@ -29,7 +31,7 @@
             _age = age;
         }
 
-        public override int Run(string args, CancellationToken token = default)
+        public int Run(string args, CancellationToken token = default)
         {
             return _age;
         }

@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using NetWorkflow.Interfaces;
+using System.Linq.Expressions;
 using System.Reflection;
 
 namespace NetWorkflow
@@ -35,11 +36,11 @@ namespace NetWorkflow
 
             body = _expression.Parameters.Count == 1 ? _expression.Compile().DynamicInvoke(_context) : _expression.Compile().DynamicInvoke();
 
-            if (body == null) throw new InvalidOperationException("WorkflowStep cannot be null");
+            if (body == null) throw new InvalidOperationException("IWorkflowStep cannot be null");
 
-            if (body is WorkflowStep step)
+            if (body is IWorkflowStep step)
             {
-                executor = step.GetType().GetMethod(nameof(WorkflowStep<TResult>.Run));
+                executor = step.GetType().GetMethod(nameof(IWorkflowStep<TResult>.Run));
 
                 if (executor == null) throw new InvalidOperationException("Run method not found");
 
@@ -54,11 +55,11 @@ namespace NetWorkflow
                     return (TResult?)executor.Invoke(body, new object?[] { args, token });
                 }
             }
-            else if (body is IEnumerable<WorkflowStepAsync> asyncSteps)
+            else if (body is IEnumerable<IWorkflowStepAsync> asyncSteps)
             {
                 Task<TResult>?[] tasks = asyncSteps.Select(x =>
                 {
-                    executor = x.GetType().GetMethod(nameof(WorkflowStepAsync<TResult>.RunAsync));
+                    executor = x.GetType().GetMethod(nameof(IWorkflowStepAsync<TResult>.RunAsync));
 
                     if (executor == null) throw new InvalidOperationException("Internal error");
 

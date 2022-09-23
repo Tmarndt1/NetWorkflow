@@ -1,4 +1,6 @@
 ﻿
+using NetWorkflow.Interfaces;
+
 namespace NetWorkflow.Tests.Examples
 {
     public class ParallelWorkflow : Workflow<object, string[]>
@@ -10,26 +12,26 @@ namespace NetWorkflow.Tests.Examples
         public override IWorkflowBuilder<object, string[]> Build(IWorkflowBuilder<object> builder) =>
             builder
                 .StartWith(() => new Step1())
-                .Parallel(() => new WorkflowStepAsync<Guid, string>[]
+                .Parallel(() => new IWorkflowStepAsync<Guid, string>[]
                 {
                     new Step2(1000),
                     new Step2(2000)
                 })
-                .Parallel(() => new WorkflowStepAsync<string[], string>[]
+                .Parallel(() => new IWorkflowStepAsync<string[], string>[]
                 {
                     new Step3(),
                     new Step4()
                 });
 
-        private class Step1 : WorkflowStep<Guid>
+        private class Step1 : IWorkflowStep<Guid>
         {
-            public override Guid Run(CancellationToken token = default)
+            public Guid Run(CancellationToken token = default)
             {
                 return Guid.NewGuid();
             }
         }
 
-        private class Step2 : WorkflowStepAsync<Guid, string>
+        private class Step2 : IWorkflowStepAsync<Guid, string>
         {
             private readonly int _delay;
 
@@ -38,7 +40,7 @@ namespace NetWorkflow.Tests.Examples
                 _delay = delay;
             }
 
-            public override Task<string> RunAsync(Guid args, CancellationToken token = default)
+            public Task<string> RunAsync(Guid args, CancellationToken token = default)
             {
                 return Task.Run(() =>
                 {
@@ -49,17 +51,17 @@ namespace NetWorkflow.Tests.Examples
             }
         }
 
-        private class Step3 : WorkflowStepAsync<string[], string>
+        private class Step3 : IWorkflowStepAsync<string[], string>
         {
-            public override Task<string> RunAsync(string[] args, CancellationToken token = default)
+            public Task<string> RunAsync(string[] args, CancellationToken token = default)
             {
                 return Task.FromResult($"{nameof(Step3)} ran");
             }
         }
 
-        private class Step4 : WorkflowStepAsync<string[], string>
+        private class Step4 : IWorkflowStepAsync<string[], string>
         {
-            public override Task<string> RunAsync(string[] args, CancellationToken token = default)
+            public Task<string> RunAsync(string[] args, CancellationToken token = default)
             {
                 return Task.Run(() =>
                 {

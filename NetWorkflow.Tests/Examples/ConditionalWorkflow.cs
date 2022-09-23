@@ -1,4 +1,6 @@
 ﻿
+using NetWorkflow.Interfaces;
+
 namespace NetWorkflow.Tests.Examples
 {
     public class ConditionalWorkflow : Workflow<object, int>
@@ -18,14 +20,14 @@ namespace NetWorkflow.Tests.Examples
                     .Then(() => new FinalStep());
 
 
-        private class FirstStep : WorkflowStep<string>
+        private class FirstStep : IWorkflowStep<string>
         {
-            public override string Run(CancellationToken token = default)
+            public string Run(CancellationToken token = default)
             {
                 return "Failed";
             }
         }
-        private class ConditionalStep : WorkflowStep<string, int>
+        private class ConditionalStep : IWorkflowStep<string, int>
         {
             private readonly int _result;
 
@@ -34,15 +36,15 @@ namespace NetWorkflow.Tests.Examples
                 _result = result;
             }
 
-            public override int Run(string args, CancellationToken token = default)
+            public int Run(string args, CancellationToken token = default)
             {
                 return _result;
             }
         }
 
-        private class FinalStep : WorkflowStep<object, int>
+        private class FinalStep : IWorkflowStep<object, int>
         {
-            public override int Run(object args, CancellationToken token = default)
+            public int Run(object args, CancellationToken token = default)
             {
                 return (int)args;
             }

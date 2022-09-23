@@ -30,21 +30,32 @@
         public abstract IWorkflowBuilder<TContext, TResult> Build(IWorkflowBuilder<TContext> builder);
 
         /// <summary>
-        /// Runs the Workflow and provides a WorkflowResult
+        /// Runs the Workflow and returns a final result if executed step has executed successfully
         /// </summary>
-        /// <returns>The TResult of the Workflow</returns>
+        /// <param name="token">The CancellationToken to cancel the workflow</param>
+        /// <returns></returns>
+        /// <exception cref="WorkflowStoppedException">An exception thrown if the Workflow has been stopped</exception>
         public TResult? Run(CancellationToken token = default)
         {
-            var result = _next.Run(null, token);
+            try
+            {
+                var result = _next.Run(null, token);
 
-            if (result is WorkflowStoppedResult stopped)
+                if (result is WorkflowStoppedResult stopped)
+                {
+                    Stopped = true;
+
+                    throw new WorkflowStoppedException(stopped);
+                }
+
+                return (TResult?)result;
+            }
+            catch
             {
                 Stopped = true;
 
-                throw new WorkflowStoppedException(stopped);
+                throw;
             }
-
-            return (TResult?)result;
         }
     }
 }

@@ -38,6 +38,6 @@ namespace NetWorkflow
         /// Runs the Workflow and provides a WorkflowResult
         /// </summary>
         /// <returns>A WorkflowResult</returns>
-        public TResult? Run(CancellationToken token = default);
+        public WorkflowResult<TResult> Run(CancellationToken token = default);
     }
 }

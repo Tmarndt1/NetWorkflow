@@ -11,10 +11,14 @@ namespace NetWorkflow.Tests
             var workflow = new HelloWorldWorkflow(1991);
 
             // Act
-            int age = workflow.Run();
+            var result = workflow.Run();
 
             // Assert
-            Assert.Equal(1991, age);
+            Assert.NotNull(result);
+            Assert.True(result.IsCompleted);
+            Assert.False(result.IsCanceled);
+            Assert.False(result.IsFaulted);
+            Assert.Equal(1991, result.Data);
         }
 
         [Fact]
@@ -24,11 +28,15 @@ namespace NetWorkflow.Tests
             var workflow = new ParallelWorkflow(new object());
 
             // Act
-            string[]? results = workflow.Run();
+            var result = workflow.Run();
 
             // Assert
-            Assert.Equal("Step3 ran", results?.First());
-            Assert.Equal("Step4 ran", results?.ElementAt(1));
+            Assert.NotNull(result);
+            Assert.True(result.IsCompleted);
+            Assert.False(result.IsCanceled);
+            Assert.False(result.IsFaulted);
+            Assert.Equal("Step3 ran", result.Data?.First());
+            Assert.Equal("Step4 ran", result.Data?.ElementAt(1));
         }
 
         [Fact]
@@ -38,10 +46,14 @@ namespace NetWorkflow.Tests
             var workflow = new ConditionalWorkflow(new object());
 
             // Act
-            int result = workflow.Run();
+            var result = workflow.Run();
 
             // Assert
-            Assert.Equal(-1, result); // Since first step returns "failed" the final step returns -1
+            Assert.NotNull(result);
+            Assert.True(result.IsCompleted);
+            Assert.False(result.IsCanceled);
+            Assert.False(result.IsFaulted);
+            Assert.Equal(-1, result.Data); // Since first step returns "failed" the final step returns -1
         }
 
 
@@ -52,28 +64,46 @@ namespace NetWorkflow.Tests
             var workflow = new ConditionalParallelWorkflow(new object());
 
             // Act
-            int result = workflow.Run();
+            var result = workflow.Run();
 
             // Assert
-            Assert.Equal(1, result); // This test should return a favorable result
+            Assert.NotNull(result);
+            Assert.True(result.IsCompleted);
+            Assert.False(result.IsCanceled);
+            Assert.False(result.IsFaulted);
+            Assert.Equal(1, result.Data); // This test should return a favorable result
         }
 
         [Fact]
         public void ConditionalStopped_Success()
         {
             // Arrange
-            bool called = false;
-
-            var workflow = new ConditionalStoppedWorkflow(new object())
-                .OnStopped(() => called = true);
+            var workflow = new ConditionalStoppedWorkflow(new object());
 
             // Act
-            object? result = workflow.Run();
+            var result = workflow.Run();
 
             // Assert
-            Assert.Null(result); // Should be null if it passes
-            Assert.True(workflow.Stopped);
-            Assert.True(called);
+            Assert.Null(result.Data); // Should be null if it passes
+            Assert.True(result.IsCanceled);
+            Assert.False(result.IsCompleted);
+        }
+
+        [Fact]
+        public void ConditionalThrown_Success()
+        {
+            // Arrange
+            var workflow = new ConditionalThrownWorkflow(new object());
+
+            // Act
+            var result = workflow.Run();
+
+            // Assert
+            Assert.Null(result.Data); // Should be null if it passes
+            Assert.False(result.IsCanceled);
+            Assert.False(result.IsCompleted);
+            Assert.True(result.IsFaulted);
+            Assert.IsType<InvalidOperationException>(result.Exception);
         }
     }
 }

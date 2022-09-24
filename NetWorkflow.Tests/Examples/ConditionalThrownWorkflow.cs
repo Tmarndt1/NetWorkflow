@@ -1,11 +1,10 @@
-﻿
-using NetWorkflow.Interfaces;
+﻿using NetWorkflow.Interfaces;
 
 namespace NetWorkflow.Tests.Examples
 {
-    public class ConditionalStoppedWorkflow : Workflow<object, object>
+    public class ConditionalThrownWorkflow : Workflow<object, object>
     {
-        public ConditionalStoppedWorkflow(object context) : base(context)
+        public ConditionalThrownWorkflow(object context) : base(context)
         {
         }
 
@@ -13,7 +12,7 @@ namespace NetWorkflow.Tests.Examples
             builder
                 .StartWith(() => new FirstStep())
                 .If(x => x)
-                    .Do(() => new ConditionalStep())
+                    .Throw(() => new InvalidOperationException("Invalid operation"))
                 .ElseIf(x => !x)
                     .Stop()
                 .EndIf()
@@ -24,14 +23,7 @@ namespace NetWorkflow.Tests.Examples
         {
             public bool Run(CancellationToken token = default)
             {
-                return false;
-            }
-        }
-        private class ConditionalStep : IWorkflowStep<bool, bool>
-        {
-            public bool Run(bool args, CancellationToken token = default)
-            {
-                return args;
+                return true;
             }
         }
 

@@ -2,7 +2,6 @@
 {
     public abstract class Workflow : IWorkflow { }
 
-
     /// <summary>
     /// Defines a Workflow and runs the various steps in sequence
     /// </summary>
@@ -10,13 +9,6 @@
     public abstract class Workflow<TContext, TResult> : Workflow, IWorkflow<TContext, TResult>
     {
         private readonly WorkflowBuilder<TContext> _next;
-
-        /// <summary>
-        /// Property that determines if the workflow has been stopped
-        /// </summary>
-        public bool Stopped { get; private set; }
-
-        private Action? _stoppedCallback;
 
         protected Workflow(TContext context)
         {
@@ -31,40 +23,29 @@
         /// <param name="builder">The IWorkflowBuilder to build the Workflow's steps</param>
         public abstract IWorkflowBuilder<TContext, TResult> Build(IWorkflowBuilder<TContext> builder);
 
-        public Workflow<TContext, TResult> OnStopped(Action callback)
-        {
-            _stoppedCallback = callback;
-
-            return this;
-        }
-
         /// <summary>
         /// Runs the Workflow and returns a final result if executed step has executed successfully
         /// </summary>
         /// <param name="token">The CancellationToken to cancel the workflow</param>
-        /// <returns></returns>
-        public TResult? Run(CancellationToken token = default)
+        /// <returns>A generic WorkflowResult</returns>
+        public WorkflowResult<TResult> Run(CancellationToken token = default)
         {
+            DateTime timestamp = DateTime.Now;
+
             try
             {
-                var result = _next.Run(null, token);
+                object? result = _next.Run(null, token);
 
                 if (result is WorkflowStoppedResult stopped)
                 {
-                    Stopped = true;
-
-                    if (_stoppedCallback != null) _stoppedCallback.Invoke();
-
-                    return default(TResult?);
+                    return WorkflowResult<TResult>.Cancelled(DateTime.Now - timestamp);
                 }
 
-                return (TResult?)result;
+                return WorkflowResult<TResult>.Success((TResult?)result, DateTime.Now - timestamp);
             }
-            catch
+            catch (Exception ex)
             {
-                Stopped = true;
-
-                throw;
+                return WorkflowResult<TResult>.Faulted(ex, DateTime.Now - timestamp);
             }
         }
     }

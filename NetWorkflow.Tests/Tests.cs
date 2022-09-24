@@ -78,7 +78,7 @@ namespace NetWorkflow.Tests
         public void ConditionalStopped_Success()
         {
             // Arrange
-            var workflow = new ConditionalStoppedWorkflow(new object());
+            var workflow = new ConditionalStopWorkflow(new object());
 
             // Act
             var result = workflow.Run();
@@ -93,7 +93,7 @@ namespace NetWorkflow.Tests
         public void ConditionalThrown_Success()
         {
             // Arrange
-            var workflow = new ConditionalThrownWorkflow(new object());
+            var workflow = new ConditionalThrowWorkflow(new object());
 
             // Act
             var result = workflow.Run();

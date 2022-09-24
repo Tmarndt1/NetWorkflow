@@ -2,9 +2,9 @@
 
 namespace NetWorkflow.Tests.Examples
 {
-    public class ConditionalThrownWorkflow : Workflow<object, object>
+    public class ConditionalThrowWorkflow : Workflow<object, object>
     {
-        public ConditionalThrownWorkflow(object context) : base(context)
+        public ConditionalThrowWorkflow(object context) : base(context)
         {
         }
 

@@ -3,9 +3,9 @@ using NetWorkflow.Interfaces;
 
 namespace NetWorkflow.Tests.Examples
 {
-    public class ConditionalStoppedWorkflow : Workflow<object, object>
+    public class ConditionalStopWorkflow : Workflow<object, object>
     {
-        public ConditionalStoppedWorkflow(object context) : base(context)
+        public ConditionalStopWorkflow(object context) : base(context)
         {
         }
 

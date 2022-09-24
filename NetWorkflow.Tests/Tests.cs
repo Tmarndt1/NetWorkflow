@@ -75,7 +75,7 @@ namespace NetWorkflow.Tests
         }
 
         [Fact]
-        public void ConditionalStopped_Success()
+        public void ConditionalStop_Success()
         {
             // Arrange
             var workflow = new ConditionalStopWorkflow(new object());
@@ -90,7 +90,7 @@ namespace NetWorkflow.Tests
         }
 
         [Fact]
-        public void ConditionalThrown_Success()
+        public void ConditionalThrow_Success()
         {
             // Arrange
             var workflow = new ConditionalThrowWorkflow(new object());
@@ -104,6 +104,33 @@ namespace NetWorkflow.Tests
             Assert.False(result.IsCompleted);
             Assert.True(result.IsFaulted);
             Assert.IsType<InvalidOperationException>(result.Exception);
+        }
+
+        [Fact]
+        public void ConditionalThrow_WithOptions_Success()
+        {
+            // Arrange
+            var workflow = new ConditionalThrowWorkflow(new object(), new WorkflowOptions()
+            {
+                RethrowExceptions = true
+            });
+
+            bool hit = false;
+
+            // Act
+            try
+            {
+                var result = workflow.Run();
+
+                hit = true;
+            }
+            catch (Exception ex)
+            {
+                Assert.IsType<InvalidOperationException>(ex);
+            }
+
+            // Assert
+            Assert.False(hit);
         }
     }
 }

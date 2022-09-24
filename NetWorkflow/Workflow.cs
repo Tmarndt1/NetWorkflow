@@ -10,9 +10,20 @@
     {
         private readonly WorkflowBuilder<TContext> _next;
 
+        private readonly WorkflowOptions? _options;
+
         protected Workflow(TContext context)
         {
             _next = new WorkflowBuilder<TContext>(context);
+
+            Build(_next);
+        }
+
+        protected Workflow(TContext context, WorkflowOptions options)
+        {
+            _next = new WorkflowBuilder<TContext>(context);
+
+            _options = options;
 
             Build(_next);
         }
@@ -45,6 +56,8 @@
             }
             catch (Exception ex)
             {
+                if (_options?.RethrowExceptions == true) throw;
+
                 return WorkflowResult<TResult>.Faulted(ex, DateTime.Now - timestamp);
             }
         }

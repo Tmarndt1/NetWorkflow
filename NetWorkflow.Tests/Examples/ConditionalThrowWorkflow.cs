@@ -4,9 +4,9 @@ namespace NetWorkflow.Tests.Examples
 {
     public class ConditionalThrowWorkflow : Workflow<object, object>
     {
-        public ConditionalThrowWorkflow(object context) : base(context)
-        {
-        }
+        public ConditionalThrowWorkflow(object context) : base(context) { }
+
+        public ConditionalThrowWorkflow(object context, WorkflowOptions options) : base(context, options) { }
 
         public override IWorkflowBuilder<object, object> Build(IWorkflowBuilder<object> builder) =>
             builder

@@ -27,8 +27,10 @@ public class ConditionalWorkflow : Workflow<object, int>
                 .Then(() => new FinalStep());
 }
 
+var tokenSource = new CancellationTokenSource();
+
 int result = new ConditionalWorkflow(new object())
-    .Run(new CancellationToken());
+    .Run(tokenSource.Token);
 
 ```
 
@@ -55,8 +57,10 @@ public class ParallelWorkflow : Workflow<object, string[]>
             });
 }
 
+var tokenSource = new CancellationTokenSource();
+
 string[] results = new ParallelWorkflow(new object())
-    .Run(new CancellationToken());
+    .Run(tokenSource.Token);
 
 ```
 

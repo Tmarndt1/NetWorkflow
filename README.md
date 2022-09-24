@@ -2,6 +2,8 @@
 
 Fluent .NET Workflow Library
 
+main: ![Build Status](https://github.com/Tmarndt1/NetWorkflow/workflows/.NET/badge.svg?branch=main)
+
 ## Give a Star! :star:
 
 If you like or are using this project please give it a star. Thanks!

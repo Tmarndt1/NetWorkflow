@@ -11,7 +11,7 @@ namespace NetWorkflow.Tests.Examples
 
         public ParallelWorkflow(object context, CancellationTokenSource tokenSource) : base(context)
         {
-            Task.Delay(1500).ContinueWith(t =>
+            Task.Delay(75).ContinueWith(t =>
             {
                 tokenSource.Cancel();
             });
@@ -22,8 +22,8 @@ namespace NetWorkflow.Tests.Examples
                 .StartWith(() => new Step1())
                 .Parallel(() => new IWorkflowStepAsync<Guid, string>[]
                 {
-                    new Step2(1000),
-                    new Step2(2000)
+                    new Step2(50),
+                    new Step2(100)
                 })
                 .Parallel(() => new IWorkflowStepAsync<string[], string>[]
                 {

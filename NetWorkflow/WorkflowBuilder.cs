@@ -29,7 +29,7 @@ namespace NetWorkflow
             return (IWorkflowBuilderNext<TContext, Tout>)_next;
         }
 
-        public virtual object? Run(object? args, CancellationToken token = default) => _next?.Run(token);
+        public virtual object? Run(object? args, CancellationToken token = default) => _next?.Run(args, token);
     }
 
     public class WorkflowBuilder<TContext, Tout> : WorkflowBuilder<TContext>, 
@@ -72,11 +72,11 @@ namespace NetWorkflow
 
         public override object? Run(object? args, CancellationToken token = default)
         {
-            object? results = _executor.Run(args, token);
+            object? result = _executor.Run(args, token);
 
-            if (_next == null) return results;
+            if (_executor.Stopped || _next == null) return result;
 
-            return _next?.Run(results);
+            return _next?.Run(result, token);
         }
 
         public IWorkflowBuilderConditional<TContext, Tout> If(Expression<Func<Tout, bool>> func)
@@ -152,11 +152,11 @@ namespace NetWorkflow
 
         public override object? Run(object? args, CancellationToken token = default)
         {
-            object? results = _executor.Run(args, token);
+            object? result = _executor.Run(args, token);
 
-            if (_executor.Stopped || _next == null) return results;
+            if (_executor.Stopped || _next == null) return result;
 
-            return _next?.Run(results);
+            return _next?.Run(result, token);
         }
     }
 }

@@ -9,6 +9,8 @@ namespace NetWorkflow
     /// </summary>
     public class WorkflowExecutorNext : IWorkflowExecutor
     {
+        public bool Stopped { get; private set; }
+
         public object? Run(object? args, CancellationToken token = default)
         {
             return args;
@@ -17,6 +19,8 @@ namespace NetWorkflow
 
     public class WorkflowExecutor<TContext, TResult> : IWorkflowExecutor
     {
+        public bool Stopped { get; private set; }
+
         private readonly LambdaExpression _expression;
 
         private readonly TContext _context;
@@ -37,6 +41,13 @@ namespace NetWorkflow
             body = _expression.Parameters.Count == 1 ? _expression.Compile().DynamicInvoke(_context) : _expression.Compile().DynamicInvoke();
 
             if (body == null) throw new InvalidOperationException("IWorkflowStep cannot be null");
+
+            if (token.IsCancellationRequested)
+            {
+                Stopped = true;
+
+                return new WorkflowStoppedResult(args);
+            }
 
             if (body is IWorkflowStep step)
             {
@@ -73,7 +84,21 @@ namespace NetWorkflow
                     }
                 }).ToArray();
 
+                if (token.IsCancellationRequested)
+                {
+                    Stopped = true;
+
+                    return new WorkflowStoppedResult(args);
+                }
+
                 Task.WaitAll(tasks, token);
+
+                if (token.IsCancellationRequested)
+                {
+                    Stopped = true;
+
+                    return new WorkflowStoppedResult(args);
+                }
 
                 return tasks.Where(x => x != null).Select(x => x.Result).ToArray();
             }
@@ -117,19 +142,19 @@ namespace NetWorkflow
         {
             var enumerator = _next.GetEnumerator();
 
-            while (enumerator.MoveNext() && !token.IsCancellationRequested)
+            while (enumerator.MoveNext())
             {
                 if (((Func<Tin, bool>)enumerator.Current.Expression.Compile()).Invoke((Tin)args))
                 {
-                    if (enumerator.Current.ExceptionFunc != null)
-                    {
-                        throw enumerator.Current.ExceptionFunc.Compile().Invoke();
-                    }
-                    else if (enumerator.Current.ShouldStop)
+                    if (enumerator.Current.ShouldStop || token.IsCancellationRequested)
                     {
                         Stopped = true;
 
                         return new WorkflowStoppedResult(args);
+                    }
+                    else if (enumerator.Current.ExceptionFunc != null)
+                    {
+                        throw enumerator.Current.ExceptionFunc.Compile().Invoke();
                     }
 
                     return enumerator.Current.Executor?.Run(args, token);

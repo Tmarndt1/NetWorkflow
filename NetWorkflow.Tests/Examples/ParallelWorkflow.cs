@@ -9,6 +9,14 @@ namespace NetWorkflow.Tests.Examples
         {
         }
 
+        public ParallelWorkflow(object context, CancellationTokenSource tokenSource) : base(context)
+        {
+            Task.Delay(1500).ContinueWith(t =>
+            {
+                tokenSource.Cancel();
+            });
+        }
+
         public override IWorkflowBuilder<object, string[]> Build(IWorkflowBuilder<object> builder) =>
             builder
                 .StartWith(() => new Step1())

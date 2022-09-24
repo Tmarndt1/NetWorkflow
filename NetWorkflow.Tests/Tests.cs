@@ -40,6 +40,23 @@ namespace NetWorkflow.Tests
         }
 
         [Fact]
+        public void Parallel_Cancel_Success()
+        {
+            // Arrange
+            var tokenSource = new CancellationTokenSource();
+
+            var workflow = new ParallelWorkflow(new object(), tokenSource);
+
+            // Act
+            var result = workflow.Run(tokenSource.Token);
+
+            // Assert
+            Assert.False(result.IsCompleted);
+            Assert.False(result.IsFaulted);
+            Assert.True(result.IsCanceled);
+        }
+
+        [Fact]
         public void Conditional_Success()
         {
             // Arrange

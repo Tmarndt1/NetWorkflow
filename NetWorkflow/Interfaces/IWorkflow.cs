@@ -19,6 +19,8 @@ namespace NetWorkflow
         /// Runs the Workflow and provides a WorkflowResult
         /// </summary>
         public void Run(CancellationToken token = default);
+
+        public Task RunAsync(CancellationToken token = default);
     }
 
     /// <summary>
@@ -39,5 +41,7 @@ namespace NetWorkflow
         /// </summary>
         /// <returns>A WorkflowResult</returns>
         public WorkflowResult<TResult> Run(CancellationToken token = default);
+
+        public Task<WorkflowResult<TResult>> RunAsync(CancellationToken token = default);
     }
 }

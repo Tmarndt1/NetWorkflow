@@ -149,5 +149,20 @@ namespace NetWorkflow.Tests
             // Assert
             Assert.False(hit);
         }
+
+        [Fact]
+        public void Catch_Exception_InStep_Success()
+        {
+            // Arrange
+            var workflow = new ConditionalThrowWorkflow(new object(), true);
+
+            // Act
+            var result = workflow.Run();
+
+            // Assert
+            Assert.False(result.IsCompleted);
+            Assert.False(result.IsCanceled);
+            Assert.IsType<InvalidOperationException>(result.Exception);
+        }
     }
 }

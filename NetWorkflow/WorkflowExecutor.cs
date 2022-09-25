@@ -46,7 +46,7 @@ namespace NetWorkflow
             {
                 Stopped = true;
 
-                return new WorkflowStoppedResult(args);
+                return new WorkflowStopped(args);
             }
 
             if (body is IWorkflowStep step)
@@ -88,7 +88,7 @@ namespace NetWorkflow
                 {
                     Stopped = true;
 
-                    return new WorkflowStoppedResult(args);
+                    return new WorkflowStopped(args);
                 }
 
                 Task.WaitAll(tasks, token);
@@ -97,7 +97,7 @@ namespace NetWorkflow
                 {
                     Stopped = true;
 
-                    return new WorkflowStoppedResult(args);
+                    return new WorkflowStopped(args);
                 }
 
                 return tasks.Where(x => x != null).Select(x => x.Result).ToArray();
@@ -150,7 +150,7 @@ namespace NetWorkflow
                     {
                         Stopped = true;
 
-                        return new WorkflowStoppedResult(args);
+                        return new WorkflowStopped(args);
                     }
                     else if (enumerator.Current.ExceptionFunc != null)
                     {

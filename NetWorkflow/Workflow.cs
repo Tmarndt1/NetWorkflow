@@ -47,7 +47,7 @@
             {
                 object? result = _next.Run(null, token);
 
-                if (result is WorkflowStoppedResult stopped)
+                if (result is WorkflowStopped stopped)
                 {
                     return WorkflowResult<TData>.Cancelled(DateTime.Now - timestamp);
                 }
@@ -64,7 +64,7 @@
             {
                 if (_options?.RethrowExceptions == true) throw;
 
-                return WorkflowResult<TData>.Faulted(ex, DateTime.Now - timestamp);
+                return WorkflowResult<TData>.Faulted(ex.InnerException ?? ex, DateTime.Now - timestamp);
             }
         }
         /// <summary>

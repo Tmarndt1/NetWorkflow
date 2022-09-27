@@ -107,6 +107,23 @@ namespace NetWorkflow
         }
     }
 
+    public class WorkflowExecutorExpression<TResult> : IWorkflowExecutor
+    {
+        public bool Stopped { get; private set; }
+
+        private readonly LambdaExpression _expression;
+
+        public WorkflowExecutorExpression(LambdaExpression expression)
+        {
+            _expression = expression;
+        }
+
+        public object? Run(object? args, CancellationToken token = default)
+        {
+            return _expression.Compile().DynamicInvoke(args);
+        }
+    }
+
     public class WorkflowExecutorConditional<Tin> : IWorkflowExecutor
     {
         public bool Stopped { get; private set; }

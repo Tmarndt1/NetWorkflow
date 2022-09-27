@@ -12,18 +12,18 @@ namespace NetWorkflow.Tests.Examples
         public override IWorkflowBuilder<object, int> Build(IWorkflowBuilder<object> builder) =>
             builder
                 .StartWith(() => new FirstStep())
-                .Parallel(() => new IWorkflowStepAsync<string, string>[]
-                {
-                    new Step2(50),
-                    new Step2(100),
-                })
-                .Then(() => new FlattenStep())
-                .If(x => x.Contains(","))
-                    .Do(() => new ConditionalStep(1))
-                .ElseIf(x => x == "Failed")
-                    .Do(() => new ConditionalStep(-1))
-                .EndIf()
-                    .Then(() => new FinalStep());
+                    .Parallel(() => new IWorkflowStepAsync<string, string>[]
+                    {
+                        new Step2(50),
+                        new Step2(100),
+                    })
+                    .Then(() => new FlattenStep())
+                    .If(x => x.Contains(","))
+                        .Do(() => new ConditionalStep(1))
+                    .ElseIf(x => x == "Failed")
+                        .Do(() => new ConditionalStep(-1))
+                    .EndIf()
+                        .Then(() => new FinalStep());
 
 
         private class Step2 : IWorkflowStepAsync<string, string>

@@ -27,16 +27,16 @@ namespace NetWorkflow.Tests.Examples
         public override IWorkflowBuilder<object, string[]> Build(IWorkflowBuilder<object> builder) =>
             builder
                 .StartWith(() => new Step1())
-                .Parallel(() => new IWorkflowStepAsync<Guid, string>[]
-                {
-                    new Step2(50, _throw),
-                    new Step2(100, _throw)
-                })
-                .Parallel(() => new IWorkflowStepAsync<string[], string>[]
-                {
-                    new Step3(),
-                    new Step4()
-                });
+                    .Parallel(() => new IWorkflowStepAsync<Guid, string>[]
+                    {
+                        new Step2(50, _throw),
+                        new Step2(100, _throw)
+                    })
+                    .Parallel(() => new IWorkflowStepAsync<string[], string>[]
+                    {
+                        new Step3(),
+                        new Step4()
+                    });
 
         private class Step1 : IWorkflowStep<Guid>
         {

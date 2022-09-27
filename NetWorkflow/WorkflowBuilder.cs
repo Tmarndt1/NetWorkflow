@@ -85,6 +85,13 @@ namespace NetWorkflow
 
             return (IWorkflowBuilderConditional<TContext, Tout>)_next;
         }
+
+        public IWorkflowBuilderNext<TContext, TNext> Map<TNext>(Expression<Func<Tout, TNext>> func)
+        {
+            _next = new WorkflowBuilder<TContext, Tout, TNext>(new WorkflowExecutorExpression<TNext>(func), _context);
+
+            return (IWorkflowBuilderNext<TContext, Tout, TNext>)_next;
+        }
     }
 
     public class WorkflowBuilder<TContext, Tin, Tout> : WorkflowBuilder<TContext, Tout>, IWorkflowBuilderNext<TContext, Tin, Tout>

@@ -57,6 +57,22 @@ namespace NetWorkflow.Tests
         }
 
         [Fact]
+        public void Parallel_Throw_Within_Task_Success()
+        {
+            // Arrange
+            var workflow = new ParallelWorkflow(new object(), true);
+
+            // Act
+            var result = workflow.Run();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.False(result.IsCompleted);
+            Assert.False(result.IsCanceled);
+            Assert.True(result.IsFaulted);
+        }
+
+        [Fact]
         public void Conditional_Success()
         {
             // Arrange
@@ -129,7 +145,7 @@ namespace NetWorkflow.Tests
             // Arrange
             var workflow = new ConditionalThrowWorkflow(new object(), new WorkflowOptions()
             {
-                RethrowExceptions = true
+                Rethrow = true
             });
 
             bool hit = false;

@@ -12,6 +12,10 @@
 
         private readonly WorkflowOptions? _options;
 
+        /// <summary>
+        /// Workflow constructor that requires a context to optionally be passed and used within the various steps
+        /// </summary>
+        /// <param name="context">The context to optionally be passed and used throughout the various steps</param>
         protected Workflow(TContext context)
         {
             _next = new WorkflowBuilder<TContext>(context);
@@ -19,6 +23,11 @@
             Build(_next);
         }
 
+        /// <summary>
+        /// Workflow constructor that requires a context to optionally be passed and used within the various steps
+        /// </summary>
+        /// <param name="context">The context to optionally be passed and used throughout the various steps</param>
+        /// <param name="options">The WorkflowOptions to pass within a Workflow to provide tailored functionality</param>
         protected Workflow(TContext context, WorkflowOptions options)
         {
             _next = new WorkflowBuilder<TContext>(context);
@@ -56,13 +65,13 @@
             }
             catch (OperationCanceledException)
             {
-                if (_options?.RethrowExceptions == true) throw;
+                if (_options?.Rethrow == true) throw;
 
                 return WorkflowResult<TData>.Cancelled(DateTime.Now - timestamp);
             }
             catch (Exception ex)
             {
-                if (_options?.RethrowExceptions == true) throw;
+                if (_options?.Rethrow == true) throw;
 
                 return WorkflowResult<TData>.Faulted(ex.InnerException ?? ex, DateTime.Now - timestamp);
             }

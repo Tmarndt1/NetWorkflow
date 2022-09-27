@@ -5,8 +5,15 @@ namespace NetWorkflow.Tests.Examples
 {
     public class ParallelWorkflow : Workflow<object, string[]>
     {
+        private readonly bool _throw = false;
+
         public ParallelWorkflow(object context) : base(context)
         {
+        }
+
+        public ParallelWorkflow(object context, bool throwWithin) : base(context)
+        {
+            _throw = throwWithin;
         }
 
         public ParallelWorkflow(object context, CancellationTokenSource tokenSource) : base(context)
@@ -22,8 +29,8 @@ namespace NetWorkflow.Tests.Examples
                 .StartWith(() => new Step1())
                 .Parallel(() => new IWorkflowStepAsync<Guid, string>[]
                 {
-                    new Step2(50),
-                    new Step2(100)
+                    new Step2(50, _throw),
+                    new Step2(100, _throw)
                 })
                 .Parallel(() => new IWorkflowStepAsync<string[], string>[]
                 {
@@ -43,15 +50,26 @@ namespace NetWorkflow.Tests.Examples
         {
             private readonly int _delay;
 
+            private readonly bool _throw = false;
+
             public Step2(int delay)
             {
                 _delay = delay;
+            }
+
+            public Step2(int delay, bool throwWithin)
+            {
+                _delay = delay;
+
+                _throw = throwWithin;
             }
 
             public Task<string> RunAsync(Guid args, CancellationToken token = default)
             {
                 return Task.Run(() =>
                 {
+                    if (_throw) throw new InvalidOperationException("A test exception");
+                    
                     Thread.Sleep(_delay);
 
                     return $"{nameof(Step2)} ran";

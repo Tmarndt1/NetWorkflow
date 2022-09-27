@@ -18,10 +18,10 @@ namespace NetWorkflow.Tests.Examples
         public override IWorkflowBuilder<object, object> Build(IWorkflowBuilder<object> builder) =>
             builder
                 .StartWith(() => new FirstStep(_throwInStep))
-                .If(x => x)
-                    .Throw(() => new InvalidOperationException("Invalid operation"))
-                .ElseIf(x => !x)
-                    .Stop()
+                    .If(x => x)
+                        .Throw(() => new InvalidOperationException("Invalid operation"))
+                    .ElseIf(x => !x)
+                        .Stop()
                 .EndIf()
                     .Then(() => new FinalStep());
 

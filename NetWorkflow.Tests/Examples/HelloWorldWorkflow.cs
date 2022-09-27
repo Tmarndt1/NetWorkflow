@@ -11,7 +11,7 @@ namespace NetWorkflow.Tests.Examples
         public override IWorkflowBuilder<int, int> Build(IWorkflowBuilder<int> builder) =>
             builder
                 .StartWith(ctx => new HelloWorld())
-                .Then(ctx => new HelloWorld2(ctx));
+                    .Then(ctx => new HelloWorld2(ctx));
     }
 
     public class HelloWorld : IWorkflowStep<string>

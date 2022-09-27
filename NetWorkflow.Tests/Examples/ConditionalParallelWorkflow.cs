@@ -18,10 +18,10 @@ namespace NetWorkflow.Tests.Examples
                         new Step2(100),
                     })
                     .Then(() => new FlattenStep())
-                    .If(x => x.Contains(","))
-                        .Do(() => new ConditionalStep(1))
-                    .ElseIf(x => x == "Failed")
-                        .Do(() => new ConditionalStep(-1))
+                        .If(x => x.Contains(","))
+                            .Do(() => new ConditionalStep(1))
+                        .ElseIf(x => x == "Failed")
+                            .Do(() => new ConditionalStep(-1))
                     .EndIf()
                         .Then(() => new FinalStep());
 

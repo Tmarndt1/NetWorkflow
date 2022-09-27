@@ -12,10 +12,10 @@ namespace NetWorkflow.Tests.Examples
         public override IWorkflowBuilder<object, object> Build(IWorkflowBuilder<object> builder) =>
             builder
                 .StartWith(() => new FirstStep())
-                .If(x => x)
-                    .Do(() => new ConditionalStep())
-                .ElseIf(x => !x)
-                    .Stop()
+                    .If(x => x)
+                        .Do(() => new ConditionalStep())
+                    .ElseIf(x => !x)
+                        .Stop()
                 .EndIf()
                     .Then(() => new FinalStep());
 

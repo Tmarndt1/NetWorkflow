@@ -4,7 +4,19 @@
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Description>Fluent .NET Workflow Library that allows a user to explicitly define their workflow steps in a single location with compile time validation.</Description>
+    <PackageProjectUrl>https://github.com/Tmarndt1/NetWorkflow</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/Tmarndt1/NetWorkflow</RepositoryUrl>
+    <PackageTags>Fluent;NetWorkflow;Net;Workflow;</PackageTags>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Linq.Expressions" Version="4.3.0" />

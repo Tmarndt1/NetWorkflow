@@ -42,41 +42,43 @@
         }
     }
 
-    public sealed class WorkflowResult<TData> : WorkflowResult
+    public sealed class WorkflowResult<TOut> : WorkflowResult
     {
         /// <summary>
         /// The final resulting data of the Workflow
         /// </summary>
-        public TData? Data { get; private set; }
+        public TOut? Output { get; private set; }
 
         private WorkflowResult(string message) : base(message) { }
 
-        public static WorkflowResult<TData> Success(TData? data, TimeSpan duration)
+        public static WorkflowResult<TOut> Success(TOut? output, TimeSpan duration)
         {
-            return new WorkflowResult<TData>("The Workflow has completed successfully.")
+            return new WorkflowResult<TOut>("The Workflow has completed successfully.")
             {
-                Data = data,
+                Output = output,
                 Duration = duration,
-                IsCompleted = true,
+                IsCompleted = true
             };
         } 
 
-        public static WorkflowResult<TData> Faulted(Exception ex, TimeSpan duration)
+        public static WorkflowResult<TOut> Faulted(Exception ex, TimeSpan duration)
         {
-            return new WorkflowResult<TData>("The Workflow was stopped because an exception was thrown.")
+            return new WorkflowResult<TOut>("The Workflow was stopped because an exception was thrown.")
             {
                 Exception = ex,
                 Duration = duration
             };
         }
 
-        public static WorkflowResult<TData> Cancelled(TimeSpan duration)
+        public static WorkflowResult<TOut> Cancelled(TimeSpan duration)
         {
-            return new WorkflowResult<TData>("The Workflow was cancelled.")
+            return new WorkflowResult<TOut>("The Workflow was cancelled.")
             {
                 IsCanceled = true,
                 Duration = duration
             };
         }
+
+        public static implicit operator TOut(WorkflowResult<TOut> result) => result.Output;
     }
 }

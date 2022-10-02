@@ -18,7 +18,7 @@ namespace NetWorkflow.Tests
             Assert.True(result.IsCompleted);
             Assert.False(result.IsCanceled);
             Assert.False(result.IsFaulted);
-            Assert.Equal(1991, result.Data);
+            Assert.Equal(1991, result.Output);
         }
 
         [Fact]
@@ -35,8 +35,8 @@ namespace NetWorkflow.Tests
             Assert.True(result.IsCompleted);
             Assert.False(result.IsCanceled);
             Assert.False(result.IsFaulted);
-            Assert.Equal("Step3 ran", result.Data?.First());
-            Assert.Equal("Step4 ran", result.Data?.ElementAt(1));
+            Assert.Equal("Step3 ran", result.Output?.First());
+            Assert.Equal("Step4 ran", result.Output?.ElementAt(1));
         }
 
         [Fact]
@@ -86,7 +86,7 @@ namespace NetWorkflow.Tests
             Assert.True(result.IsCompleted);
             Assert.False(result.IsCanceled);
             Assert.False(result.IsFaulted);
-            Assert.Equal(-1, result.Data); // Since first step returns "failed" the final step returns -1
+            Assert.Equal(-1, result.Output); // Since first step returns "failed" the final step returns -1
         }
 
 
@@ -104,7 +104,7 @@ namespace NetWorkflow.Tests
             Assert.True(result.IsCompleted);
             Assert.False(result.IsCanceled);
             Assert.False(result.IsFaulted);
-            Assert.Equal(1, result.Data); // This test should return a favorable result
+            Assert.Equal(1, result.Output); // This test should return a favorable result
         }
 
         [Fact]
@@ -117,7 +117,7 @@ namespace NetWorkflow.Tests
             var result = workflow.Run();
 
             // Assert
-            Assert.Null(result.Data); // Should be null if it passes
+            Assert.Null(result.Output); // Should be null if it passes
             Assert.True(result.IsCanceled);
             Assert.False(result.IsCompleted);
         }
@@ -132,7 +132,7 @@ namespace NetWorkflow.Tests
             var result = workflow.Run();
 
             // Assert
-            Assert.Null(result.Data); // Should be null if it passes
+            Assert.Null(result.Output); // Should be null if it passes
             Assert.False(result.IsCanceled);
             Assert.False(result.IsCompleted);
             Assert.True(result.IsFaulted);

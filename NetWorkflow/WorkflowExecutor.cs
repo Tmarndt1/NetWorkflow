@@ -124,18 +124,18 @@ namespace NetWorkflow
         }
     }
 
-    public class WorkflowExecutorConditional<Tin> : IWorkflowExecutor
+    public class WorkflowExecutorConditional<TIn> : IWorkflowExecutor
     {
         public bool Stopped { get; private set; }
 
         private readonly List<ExecutorWrapper> _next = new List<ExecutorWrapper>();
 
-        public WorkflowExecutorConditional(Expression<Func<Tin, bool>> expression)
+        public WorkflowExecutorConditional(Expression<Func<TIn, bool>> expression)
         {
             _next.Add(new ExecutorWrapper(expression));
         }
 
-        public void Append(Expression<Func<Tin, bool>> expression)
+        public void Append(Expression<Func<TIn, bool>> expression)
         {
             _next.Add(new ExecutorWrapper(expression));
         }
@@ -161,7 +161,7 @@ namespace NetWorkflow
 
             while (enumerator.MoveNext())
             {
-                if (((Func<Tin, bool>)enumerator.Current.Expression.Compile()).Invoke((Tin)args))
+                if (((Func<TIn, bool>)enumerator.Current.Expression.Compile()).Invoke((TIn)args))
                 {
                     if (enumerator.Current.ShouldStop || token.IsCancellationRequested)
                     {

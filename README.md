@@ -45,12 +45,12 @@ public class ParallelWorkflow : Workflow<object, string[]>
     public override IWorkflowBuilder<object, string[]> Build(IWorkflowBuilder<object> builder) =>
         builder
             .StartWith(() => new Step1())
-            .Parallel(() => new WorkflowStepAsync<Guid, string>[]
+            .Parallel(() => new IWorkflowStepAsync<Guid, string>[]
             {
                 new Step2(1000),
                 new Step2(2000)
             })
-            .Parallel(() => new WorkflowStepAsync<string[], string>[]
+            .Parallel(() => new IWorkflowStepAsync<string[], string>[]
             {
                 new Step3(),
                 new Step4()

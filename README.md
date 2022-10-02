@@ -1,6 +1,6 @@
 # NetWorkflow
 
-Fluent .NET Workflow Library
+Fluent .NET Workflow Library that allows a user to explicitly define their workflow steps in a single location with compile time validation.
 
 main: ![Build Status](https://github.com/Tmarndt1/NetWorkflow/workflows/.NET/badge.svg?branch=main)
 

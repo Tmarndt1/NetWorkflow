@@ -19,6 +19,7 @@ namespace NetWorkflow.Tests
             Assert.False(result.IsCanceled);
             Assert.False(result.IsFaulted);
             Assert.Equal(1991, result.Output);
+            Assert.Equal(1991, (int)result);
         }
 
         [Fact]

@@ -1,30 +1,44 @@
 ﻿
-using NetWorkflow.Interfaces;
-
 namespace NetWorkflow.Tests.Examples
 {
     public class ConditionalWorkflow : Workflow<object, int>
     {
+        private readonly string _message = "Success";
+
         public ConditionalWorkflow(object context) : base(context)
         {
         }
 
+        public ConditionalWorkflow(object context, string message) : base(context)
+        {
+            _message = message;
+        }
+
         public override IWorkflowBuilder<object, int> Build(IWorkflowBuilder<object> builder) =>
             builder
-                .StartWith(() => new FirstStep())
+                .StartWith(() => new FirstStep(_message))
                     .If(x => x == "Success")
                         .Do(() => new ConditionalStep(1))
                     .ElseIf(x => x == "Failed")
                         .Do(() => new ConditionalStep(-1))
+                    .Else()
+                        .Throw(() => new InvalidOperationException("TEST"))
                 .EndIf()
                     .Then(() => new FinalStep());
 
 
         private class FirstStep : IWorkflowStep<string>
         {
+            private readonly string _message;
+
+            internal FirstStep(string message)
+            {
+                _message = message;
+            }
+
             public string Run(CancellationToken token = default)
             {
-                return "Failed";
+                return _message;
             }
         }
         private class ConditionalStep : IWorkflowStep<string, int>

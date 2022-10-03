@@ -1,5 +1,4 @@
-﻿using NetWorkflow.Interfaces;
-
+﻿
 namespace NetWorkflow.Tests.Examples
 {
     public class HelloWorldWorkflow : Workflow<int, int>

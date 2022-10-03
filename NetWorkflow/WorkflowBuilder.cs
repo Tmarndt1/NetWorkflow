@@ -1,6 +1,4 @@
-﻿
-using NetWorkflow.Interfaces;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 
 namespace NetWorkflow
 {
@@ -92,7 +90,9 @@ namespace NetWorkflow
         public WorkflowBuilder(IWorkflowExecutor executor, TContext context) : base(executor, context) { }
     }
 
-    public class WorkflowBuilderConditional<TContext, TIn> : WorkflowBuilder<TContext>, IWorkflowBuilderConditional<TContext, TIn>, IWorkflowBuilderConditionalNext<TContext, TIn>
+    public class WorkflowBuilderConditional<TContext, TIn> : 
+        WorkflowBuilder<TContext>, IWorkflowBuilderConditional<TContext, TIn>, IWorkflowBuilderConditionalNext<TContext, TIn>,
+        IWorkflowBuilderConditionalFinal<TContext, TIn>, IWorkflowBuilderConditionalFinalAggregate<TContext>
     {
         private readonly WorkflowExecutorConditional<TIn> _executor;
 
@@ -122,7 +122,7 @@ namespace NetWorkflow
             return this;
         }
 
-        public IWorkflowBuilderConditional<TContext, TIn> Else()
+        public IWorkflowBuilderConditionalFinal<TContext, TIn> Else()
         {
             _executor.Append(args => true);
 
@@ -157,6 +157,34 @@ namespace NetWorkflow
             if (_executor.Stopped || _next == null) return result;
 
             return _next?.Run(result, token);
+        }
+
+        IWorkflowBuilderConditionalFinalAggregate<TContext> IWorkflowBuilderConditionalFinal<TContext, TIn>.Do<TNext>(Expression<Func<IWorkflowStep<TIn, TNext>>> func)
+        {
+            _executor.Append(new WorkflowExecutor<TContext, TNext>(func, _context));
+
+            return this;
+        }
+
+        IWorkflowBuilderConditionalFinalAggregate<TContext> IWorkflowBuilderConditionalFinal<TContext, TIn>.Do<TNext>(Expression<Func<TContext, IWorkflowStep<TIn, TNext>>> func)
+        {
+            _executor.Append(new WorkflowExecutor<TContext, TNext>(func, _context));
+
+            return this;
+        }
+
+        IWorkflowBuilderConditionalFinalAggregate<TContext> IWorkflowBuilderConditionalFinal<TContext, TIn>.Stop()
+        {
+            _executor.SetStop();
+
+            return this;
+        }
+
+        IWorkflowBuilderConditionalFinalAggregate<TContext> IWorkflowBuilderConditionalFinal<TContext, TIn>.Throw(Expression<Func<Exception>> func)
+        {
+            _executor.SetExceptionToThrow(func);
+
+            return this;
         }
     }
 }

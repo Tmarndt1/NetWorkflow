@@ -20,7 +20,7 @@ namespace NetWorkflow
         /// Defines a catch all scenario in the Workflow to execute if previous conditions weren't met
         /// </summary>
         /// <returns>An instance of a WorkflowBuilder</returns>
-        public IWorkflowBuilderConditional<TContext, TIn> Else(); // TODO: Return different type so it has no way to infinitely chain
+        public IWorkflowBuilderConditionalFinal<TContext, TIn> Else();
 
         /// <summary>
         /// Ends the conditional statement within the Workflow and consolidates the result to use in the next WorkflowStep

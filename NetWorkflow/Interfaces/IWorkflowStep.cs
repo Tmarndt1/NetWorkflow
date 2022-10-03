@@ -1,4 +1,4 @@
-﻿namespace NetWorkflow.Interfaces
+﻿namespace NetWorkflow
 {
     /// <summary>
     /// Marker interface for the WorkflowStep

@@ -1,6 +1,4 @@
 ﻿
-using NetWorkflow.Interfaces;
-
 namespace NetWorkflow.Tests.Examples
 {
     public class ConditionalStopWorkflow : Workflow<object, object>

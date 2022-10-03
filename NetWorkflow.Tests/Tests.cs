@@ -87,7 +87,24 @@ namespace NetWorkflow.Tests
             Assert.True(result.IsCompleted);
             Assert.False(result.IsCanceled);
             Assert.False(result.IsFaulted);
-            Assert.Equal(-1, result.Output); // Since first step returns "failed" the final step returns -1
+            Assert.Equal(1, result.Output);
+        }
+
+        [Fact]
+        public void Conditional_Else_Success()
+        {
+            // Arrange
+            var workflow = new ConditionalWorkflow(new object(), "Unknown");
+
+            // Act
+            var result = workflow.Run();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.False(result.IsCompleted);
+            Assert.False(result.IsCanceled);
+            Assert.True(result.IsFaulted);
+            Assert.Equal(0, result.Output);
         }
 
 

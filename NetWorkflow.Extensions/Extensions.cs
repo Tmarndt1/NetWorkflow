@@ -10,7 +10,7 @@ namespace NetWorkflow.Extensions
         /// <typeparam name="TWorkflow">The type of workflow to register</typeparam>
         /// <param name="services">The IServiceCollection to register the Workflow to</param>
         public static IServiceCollection AddWorkflow<TWorkflow>(this IServiceCollection services)
-            where TWorkflow : class, IWorkflow, new()
+            where TWorkflow : class, IWorkflow
         {
             return services.AddTransient<TWorkflow>();
         }

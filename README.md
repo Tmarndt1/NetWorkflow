@@ -19,10 +19,10 @@ public class ConditionalWorkflow : Workflow<object, int>
     public override IWorkflowBuilder<object, int> Build(IWorkflowBuilder<object> builder) =>
         builder
             .StartWith(() => new FirstStep())
-            .If(x => x == "Success")
-                .Do(() => new ConditionalStep(1))
-            .ElseIf(x => x == "Failed")
-                .Do(() => new ConditionalStep(-1))
+                .If(x => x == "Success")
+                    .Do(() => new ConditionalStep(1))
+                .ElseIf(x => x == "Failed")
+                    .Do(() => new ConditionalStep(-1))
             .EndIf()
                 .Then(() => new FinalStep());
 }

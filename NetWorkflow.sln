@@ -5,7 +5,9 @@ VisualStudioVersion = 17.2.32602.215
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetWorkflow", "NetWorkflow\NetWorkflow.csproj", "{4F560600-BEEB-4E15-86F6-DDF975D09AFA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetWorkflow.Tests", "NetWorkflow.Tests\NetWorkflow.Tests.csproj", "{2D8F7306-C9C4-449D-8B91-2E7AFA3D5052}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetWorkflow.Tests", "NetWorkflow.Tests\NetWorkflow.Tests.csproj", "{2D8F7306-C9C4-449D-8B91-2E7AFA3D5052}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetWorkflow.Extensions", "NetWorkflow.Extensions\NetWorkflow.Extensions.csproj", "{28352C87-A16B-4F76-82AD-7F57A5FADBD8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{2D8F7306-C9C4-449D-8B91-2E7AFA3D5052}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2D8F7306-C9C4-449D-8B91-2E7AFA3D5052}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2D8F7306-C9C4-449D-8B91-2E7AFA3D5052}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28352C87-A16B-4F76-82AD-7F57A5FADBD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28352C87-A16B-4F76-82AD-7F57A5FADBD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28352C87-A16B-4F76-82AD-7F57A5FADBD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28352C87-A16B-4F76-82AD-7F57A5FADBD8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

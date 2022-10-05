@@ -33,7 +33,9 @@ namespace NetWorkflow
 
             object? body = null;
 
-            body = _expression.Parameters.Count == 1 ? _expression.Compile().DynamicInvoke() : _expression.Compile().DynamicInvoke();
+            if (_expression.Parameters.Count > 0) throw new InvalidOperationException("Parameter count within lambda cannot be greater than 0");
+
+            body = _expression.Compile().DynamicInvoke();
 
             if (body == null) throw new InvalidOperationException("IWorkflowStep cannot be null");
 

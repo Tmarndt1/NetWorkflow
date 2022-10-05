@@ -1,20 +1,20 @@
 ﻿
 namespace NetWorkflow.Tests.Examples
 {
-    public class ConditionalThrowWorkflow : Workflow<object, object>
+    public class ConditionalThrowWorkflow : Workflow<object>
     {
         private readonly bool _throwInStep = false;
 
-        public ConditionalThrowWorkflow(object context) : base(context) { }
+        public ConditionalThrowWorkflow() { }
 
-        public ConditionalThrowWorkflow(object context, WorkflowOptions options) : base(context, options) { }
+        public ConditionalThrowWorkflow(WorkflowOptions options) : base(options) { }
 
-        public ConditionalThrowWorkflow(object context, bool throwInStep) : base(context)
+        public ConditionalThrowWorkflow(bool throwInStep)
         {
             _throwInStep = throwInStep;
         }
 
-        public override IWorkflowBuilder<object, object> Build(IWorkflowBuilder<object> builder) =>
+        public override IWorkflowBuilder<object> Build(IWorkflowBuilder builder) =>
             builder
                 .StartWith(() => new FirstStep(_throwInStep))
                     .If(x => x)

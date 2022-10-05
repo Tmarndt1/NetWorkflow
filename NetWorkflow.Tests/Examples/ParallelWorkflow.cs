@@ -1,20 +1,16 @@
 ﻿
 namespace NetWorkflow.Tests.Examples
 {
-    public class ParallelWorkflow : Workflow<object, string[]>
+    public class ParallelWorkflow : Workflow<string[]>
     {
         private readonly bool _throw = false;
 
-        public ParallelWorkflow(object context) : base(context)
-        {
-        }
-
-        public ParallelWorkflow(object context, bool throwWithin) : base(context)
+        public ParallelWorkflow(bool throwWithin)
         {
             _throw = throwWithin;
         }
 
-        public ParallelWorkflow(object context, CancellationTokenSource tokenSource) : base(context)
+        public ParallelWorkflow(CancellationTokenSource tokenSource)
         {
             Task.Delay(75).ContinueWith(t =>
             {
@@ -22,7 +18,7 @@ namespace NetWorkflow.Tests.Examples
             });
         }
 
-        public override IWorkflowBuilder<object, string[]> Build(IWorkflowBuilder<object> builder) =>
+        public override IWorkflowBuilder<string[]> Build(IWorkflowBuilder builder) =>
             builder
                 .StartWith(() => new Step1())
                     .Parallel(() => new IWorkflowStepAsync<Guid, string>[]

@@ -2,70 +2,41 @@
 
 namespace NetWorkflow
 {
-    public class WorkflowBuilder<TContext> : IWorkflowBuilder<TContext>
+    public class WorkflowBuilder : IWorkflowBuilder
     {
-        protected readonly TContext _context;
+        protected WorkflowBuilder? _next;
 
-        protected WorkflowBuilder<TContext>? _next;
-
-        public WorkflowBuilder(TContext context)
+        public IWorkflowBuilderNext<TOut> StartWith<TOut>(Expression<Func<IWorkflowStep<TOut>>> func)
         {
-            _context = context;
-        }
+            _next = new WorkflowBuilder<TOut>(new WorkflowExecutor<TOut>(func));
 
-        public IWorkflowBuilderNext<TContext, TOut> StartWith<TOut>(Expression<Func<IWorkflowStep<TOut>>> func)
-        {
-            _next = new WorkflowBuilder<TContext, TOut>(new WorkflowExecutor<TContext, TOut>(func, _context), _context);
-
-            return (IWorkflowBuilderNext<TContext, TOut>)_next;
-        }
-
-        public IWorkflowBuilderNext<TContext, TOut> StartWith<TOut>(Expression<Func<TContext, IWorkflowStep<TOut>>> func)
-        {
-            _next = new WorkflowBuilder<TContext, TOut>(new WorkflowExecutor<TContext, TOut>(func, _context), _context);
-
-            return (IWorkflowBuilderNext<TContext, TOut>)_next;
+            return (IWorkflowBuilderNext<TOut>)_next;
         }
 
         public virtual object? Run(object? args, CancellationToken token = default) => _next?.Run(args, token);
     }
 
-    public class WorkflowBuilder<TContext, TOut> : WorkflowBuilder<TContext>, 
-        IWorkflowBuilderNext<TContext, TOut>
+    public class WorkflowBuilder<TOut> : WorkflowBuilder, IWorkflowBuilderNext<TOut>
     {
         internal readonly IWorkflowExecutor _executor;
         
-        public WorkflowBuilder(IWorkflowExecutor executor, TContext context) : base(context)
+        public WorkflowBuilder(IWorkflowExecutor executor)
         {
             _executor = executor;
         }
 
-        public IWorkflowBuilderNext<TContext, TNext[]> Parallel<TNext>(Expression<Func<IEnumerable<IWorkflowStepAsync<TOut, TNext>>>> func)
+        public IWorkflowBuilderNext<TNext[]> Parallel<TNext>(Expression<Func<IEnumerable<IWorkflowStepAsync<TOut, TNext>>>> func)
         {
-            _next = new WorkflowBuilder<TContext, TOut, TNext[]>(new WorkflowExecutor<TContext, TNext>(func, _context), _context);
+            _next = new WorkflowBuilder<TOut, TNext[]>(new WorkflowExecutor<TNext>(func));
 
-            return (IWorkflowBuilderNext<TContext, TNext[]>)_next;
+            return (IWorkflowBuilderNext<TNext[]>)_next;
         }
 
-        public IWorkflowBuilderNext<TContext, TNext[]> Parallel<TNext>(Expression<Func<TContext, IEnumerable<IWorkflowStepAsync<TOut, TNext>>>> func)
+        public IWorkflowBuilderNext<TOut, TNext> Then<TNext>(Expression<Func<IWorkflowStep<TOut, TNext>>> func)
         {
-            _next = new WorkflowBuilder<TContext, TOut, TNext[]>(new WorkflowExecutor<TContext, TNext>(func, _context), _context);
+            _next = new WorkflowBuilder<TOut, TNext>(new WorkflowExecutor<TNext>(func));
 
-            return (IWorkflowBuilderNext<TContext, TNext[]>)_next;
-        }
-
-        public IWorkflowBuilderNext<TContext, TOut, TNext> Then<TNext>(Expression<Func<IWorkflowStep<TOut, TNext>>> func)
-        {
-            _next = new WorkflowBuilder<TContext, TOut, TNext>(new WorkflowExecutor<TContext, TNext>(func, _context), _context);
-
-            return (IWorkflowBuilderNext<TContext, TOut, TNext>)_next;
-        }
-
-        public IWorkflowBuilderNext<TContext, TOut, TNext> Then<TNext>(Expression<Func<TContext, IWorkflowStep<TOut, TNext>>> func)
-        {
-            _next = new WorkflowBuilder<TContext, TOut, TNext>(new WorkflowExecutor<TContext, TNext>(func, _context), _context);
-
-            return (IWorkflowBuilderNext<TContext, TOut, TNext>)_next;
+            return (IWorkflowBuilderNext<TOut, TNext>)_next;
         }
 
         public override object? Run(object? args, CancellationToken token = default)
@@ -77,73 +48,66 @@ namespace NetWorkflow
             return _next?.Run(result, token);
         }
 
-        public IWorkflowBuilderConditional<TContext, TOut> If(Expression<Func<TOut, bool>> func)
+        public IWorkflowBuilderConditional<TOut> If(Expression<Func<TOut, bool>> func)
         {
-            _next = new WorkflowBuilderConditional<TContext, TOut>(new WorkflowExecutorConditional<TOut>(func), _context);
+            _next = new WorkflowBuilderConditional<TOut>(new WorkflowExecutorConditional<TOut>(func));
 
-            return (IWorkflowBuilderConditional<TContext, TOut>)_next;
+            return (IWorkflowBuilderConditional<TOut>)_next;
         }
     }
 
-    public class WorkflowBuilder<TContext, TIn, TOut> : WorkflowBuilder<TContext, TOut>, IWorkflowBuilderNext<TContext, TIn, TOut>
+    public class WorkflowBuilder<TIn, TOut> : WorkflowBuilder<TOut>, IWorkflowBuilderNext<TIn, TOut>
     {
-        public WorkflowBuilder(IWorkflowExecutor executor, TContext context) : base(executor, context) { }
+        public WorkflowBuilder(IWorkflowExecutor executor) : base(executor) { }
     }
 
-    public class WorkflowBuilderConditional<TContext, TIn> : 
-        WorkflowBuilder<TContext>, IWorkflowBuilderConditional<TContext, TIn>, IWorkflowBuilderConditionalNext<TContext, TIn>,
-        IWorkflowBuilderConditionalFinal<TContext, TIn>, IWorkflowBuilderConditionalFinalAggregate<TContext>
+    public class WorkflowBuilderConditional<TIn> : 
+        WorkflowBuilder, IWorkflowBuilderConditional<TIn>, IWorkflowBuilderConditionalNext<TIn>,
+        IWorkflowBuilderConditionalFinal<TIn>, IWorkflowBuilderConditionalFinalAggregate
     {
         private readonly WorkflowExecutorConditional<TIn> _executor;
 
-        public WorkflowBuilderConditional(WorkflowExecutorConditional<TIn> executor, TContext context) : base(context)
+        public WorkflowBuilderConditional(WorkflowExecutorConditional<TIn> executor)
         {
             _executor = executor;
         }
 
-        public IWorkflowBuilderConditionalNext<TContext, TIn> Do<TNext>(Expression<Func<IWorkflowStep<TIn, TNext>>> func)
+        public IWorkflowBuilderConditionalNext<TIn> Do<TNext>(Expression<Func<IWorkflowStep<TIn, TNext>>> func)
         {
-            _executor.Append(new WorkflowExecutor<TContext, TNext>(func, _context));
+            _executor.Append(new WorkflowExecutor<TNext>(func));
 
             return this;
         }
 
-        public IWorkflowBuilderConditionalNext<TContext, TIn> Do<TNext>(Expression<Func<TContext, IWorkflowStep<TIn, TNext>>> func)
-        {
-            _executor.Append(new WorkflowExecutor<TContext, TNext>(func, _context));
-
-            return this;
-        }
-
-        public IWorkflowBuilderConditional<TContext, TIn> ElseIf(Expression<Func<TIn, bool>> func)
+        public IWorkflowBuilderConditional<TIn> ElseIf(Expression<Func<TIn, bool>> func)
         {
             _executor.Append(func);
 
             return this;
         }
 
-        public IWorkflowBuilderConditionalFinal<TContext, TIn> Else()
+        public IWorkflowBuilderConditionalFinal<TIn> Else()
         {
             _executor.Append(args => true);
 
             return this;
         }
 
-        public IWorkflowBuilderNext<TContext, object> EndIf()
+        public IWorkflowBuilderNext<object> EndIf()
         {
-            _next = new WorkflowBuilder<TContext, object>(new WorkflowExecutorNext(), _context);
+            _next = new WorkflowBuilder<object>(new WorkflowExecutorNext());
 
-            return (IWorkflowBuilderNext<TContext, object>)_next;
+            return (IWorkflowBuilderNext<object>)_next;
         }
 
-        public IWorkflowBuilderConditionalNext<TContext, TIn> Stop()
+        public IWorkflowBuilderConditionalNext<TIn> Stop()
         {
             _executor.SetStop();
 
             return this;
         }
 
-        public IWorkflowBuilderConditionalNext<TContext, TIn> Throw(Expression<Func<Exception>> func)
+        public IWorkflowBuilderConditionalNext<TIn> Throw(Expression<Func<Exception>> func)
         {
             _executor.SetExceptionToThrow(func);
 
@@ -159,28 +123,21 @@ namespace NetWorkflow
             return _next?.Run(result, token);
         }
 
-        IWorkflowBuilderConditionalFinalAggregate<TContext> IWorkflowBuilderConditionalFinal<TContext, TIn>.Do<TNext>(Expression<Func<IWorkflowStep<TIn, TNext>>> func)
+        IWorkflowBuilderConditionalFinalAggregate IWorkflowBuilderConditionalFinal<TIn>.Do<TNext>(Expression<Func<IWorkflowStep<TIn, TNext>>> func)
         {
-            _executor.Append(new WorkflowExecutor<TContext, TNext>(func, _context));
+            _executor.Append(new WorkflowExecutor<TNext>(func));
 
             return this;
         }
 
-        IWorkflowBuilderConditionalFinalAggregate<TContext> IWorkflowBuilderConditionalFinal<TContext, TIn>.Do<TNext>(Expression<Func<TContext, IWorkflowStep<TIn, TNext>>> func)
-        {
-            _executor.Append(new WorkflowExecutor<TContext, TNext>(func, _context));
-
-            return this;
-        }
-
-        IWorkflowBuilderConditionalFinalAggregate<TContext> IWorkflowBuilderConditionalFinal<TContext, TIn>.Stop()
+        IWorkflowBuilderConditionalFinalAggregate IWorkflowBuilderConditionalFinal<TIn>.Stop()
         {
             _executor.SetStop();
 
             return this;
         }
 
-        IWorkflowBuilderConditionalFinalAggregate<TContext> IWorkflowBuilderConditionalFinal<TContext, TIn>.Throw(Expression<Func<Exception>> func)
+        IWorkflowBuilderConditionalFinalAggregate IWorkflowBuilderConditionalFinal<TIn>.Throw(Expression<Func<Exception>> func)
         {
             _executor.SetExceptionToThrow(func);
 

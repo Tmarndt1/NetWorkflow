@@ -1,13 +1,9 @@
 ﻿
 namespace NetWorkflow.Tests.Examples
 {
-    public class ConditionalParallelWorkflow : Workflow<object, int>
+    public class ConditionalParallelWorkflow : Workflow<int>
     {
-        public ConditionalParallelWorkflow(object context) : base(context)
-        {
-        }
-
-        public override IWorkflowBuilder<object, int> Build(IWorkflowBuilder<object> builder) =>
+        public override IWorkflowBuilder<int> Build(IWorkflowBuilder builder) =>
             builder
                 .StartWith(() => new FirstStep())
                     .Parallel(() => new IWorkflowStepAsync<string, string>[]

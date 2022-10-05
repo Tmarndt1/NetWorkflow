@@ -16,19 +16,15 @@ namespace NetWorkflow
         }
     }
 
-    public class WorkflowExecutor<TContext, TResult> : IWorkflowExecutor
+    public class WorkflowExecutor<TResult> : IWorkflowExecutor
     {
         public bool Stopped { get; private set; }
 
         private readonly LambdaExpression _expression;
 
-        private readonly TContext _context;
-
-        public WorkflowExecutor(LambdaExpression expression, TContext context)
+        public WorkflowExecutor(LambdaExpression expression)
         {
             _expression = expression;
-
-            _context = context;
         }
 
         public object? Run(object? args, CancellationToken token = default)
@@ -37,7 +33,7 @@ namespace NetWorkflow
 
             object? body = null;
 
-            body = _expression.Parameters.Count == 1 ? _expression.Compile().DynamicInvoke(_context) : _expression.Compile().DynamicInvoke();
+            body = _expression.Parameters.Count == 1 ? _expression.Compile().DynamicInvoke() : _expression.Compile().DynamicInvoke();
 
             if (body == null) throw new InvalidOperationException("IWorkflowStep cannot be null");
 

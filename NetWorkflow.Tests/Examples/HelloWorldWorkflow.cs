@@ -1,16 +1,19 @@
 ﻿
 namespace NetWorkflow.Tests.Examples
 {
-    public class HelloWorldWorkflow : Workflow<int, int>
+    public class HelloWorldWorkflow : Workflow<int>
     {
-        public HelloWorldWorkflow(int context) : base(context)
+        private readonly int _age;
+
+        public HelloWorldWorkflow(int age)
         {
+            _age = age;
         }
 
-        public override IWorkflowBuilder<int, int> Build(IWorkflowBuilder<int> builder) =>
+        public override IWorkflowBuilder<int> Build(IWorkflowBuilder builder) =>
             builder
-                .StartWith(ctx => new HelloWorld())
-                    .Then(ctx => new HelloWorld2(ctx));
+                .StartWith(() => new HelloWorld())
+                    .Then(() => new HelloWorld2(_age));
     }
 
     public class HelloWorld : IWorkflowStep<string>

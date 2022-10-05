@@ -12,11 +12,9 @@ If you like or are using this project please give it a star. Thanks!
 
 ```csharp
 
-public class ConditionalWorkflow : Workflow<object, int>
+public class ConditionalWorkflow : Workflow<int>
 {
-    public ConditionalWorkflow(object context) : base(context) { }
-
-    public override IWorkflowBuilder<object, int> Build(IWorkflowBuilder<object> builder) =>
+    public override IWorkflowBuilder<int> Build(IWorkflowBuilder builder) =>
         builder
             .StartWith(() => new FirstStep())
                 .If(x => x == "Success")
@@ -38,11 +36,11 @@ int result = new ConditionalWorkflow(new object())
 
 ```csharp
 
-public class ParallelWorkflow : Workflow<object, string[]>
+public class ParallelWorkflow : Workflow<string[]>
 {
-    public ParallelWorkflow(object context) : base(context) { }
+    public ParallelWorkflow(object context) { }
 
-    public override IWorkflowBuilder<object, string[]> Build(IWorkflowBuilder<object> builder) =>
+    public override IWorkflowBuilder<string[]> Build(IWorkflowBuilder builder) =>
         builder
             .StartWith(() => new Step1())
             .Parallel(() => new IWorkflowStepAsync<Guid, string>[]

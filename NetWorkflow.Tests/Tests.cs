@@ -1,3 +1,5 @@
+using Microsoft.Extensions.DependencyInjection;
+using NetWorkflow.Extensions;
 using NetWorkflow.Tests.Examples;
 
 namespace NetWorkflow.Tests
@@ -26,7 +28,7 @@ namespace NetWorkflow.Tests
         public void Parallel_Success()
         {
             // Arrange
-            var workflow = new ParallelWorkflow(new object());
+            var workflow = new ParallelWorkflow(false);
 
             // Act
             var result = workflow.Run();
@@ -46,7 +48,7 @@ namespace NetWorkflow.Tests
             // Arrange
             var tokenSource = new CancellationTokenSource();
 
-            var workflow = new ParallelWorkflow(new object(), tokenSource);
+            var workflow = new ParallelWorkflow(tokenSource);
 
             // Act
             var result = workflow.Run(tokenSource.Token);
@@ -61,7 +63,7 @@ namespace NetWorkflow.Tests
         public void Parallel_Throw_Within_Task_Success()
         {
             // Arrange
-            var workflow = new ParallelWorkflow(new object(), true);
+            var workflow = new ParallelWorkflow(true);
 
             // Act
             var result = workflow.Run();
@@ -77,7 +79,7 @@ namespace NetWorkflow.Tests
         public void Conditional_Success()
         {
             // Arrange
-            var workflow = new ConditionalWorkflow(new object());
+            var workflow = new ConditionalWorkflow();
 
             // Act
             var result = workflow.Run();
@@ -94,7 +96,7 @@ namespace NetWorkflow.Tests
         public void Conditional_Else_Success()
         {
             // Arrange
-            var workflow = new ConditionalWorkflow(new object(), "Unknown");
+            var workflow = new ConditionalWorkflow("Unknown");
 
             // Act
             var result = workflow.Run();
@@ -112,7 +114,7 @@ namespace NetWorkflow.Tests
         public void ConditionalParallel_Success()
         {
             // Arrange
-            var workflow = new ConditionalParallelWorkflow(new object());
+            var workflow = new ConditionalParallelWorkflow();
 
             // Act
             var result = workflow.Run();
@@ -129,7 +131,7 @@ namespace NetWorkflow.Tests
         public void ConditionalStop_Success()
         {
             // Arrange
-            var workflow = new ConditionalStopWorkflow(new object());
+            var workflow = new ConditionalStopWorkflow();
 
             // Act
             var result = workflow.Run();
@@ -144,7 +146,7 @@ namespace NetWorkflow.Tests
         public void ConditionalThrow_Success()
         {
             // Arrange
-            var workflow = new ConditionalThrowWorkflow(new object());
+            var workflow = new ConditionalThrowWorkflow();
 
             // Act
             var result = workflow.Run();
@@ -161,7 +163,7 @@ namespace NetWorkflow.Tests
         public void ConditionalThrow_WithOptions_Success()
         {
             // Arrange
-            var workflow = new ConditionalThrowWorkflow(new object(), new WorkflowOptions()
+            var workflow = new ConditionalThrowWorkflow(new WorkflowOptions()
             {
                 Rethrow = true
             });
@@ -188,7 +190,7 @@ namespace NetWorkflow.Tests
         public void Catch_Exception_InStep_Success()
         {
             // Arrange
-            var workflow = new ConditionalThrowWorkflow(new object(), true);
+            var workflow = new ConditionalThrowWorkflow(true);
 
             // Act
             var result = workflow.Run();
@@ -197,6 +199,27 @@ namespace NetWorkflow.Tests
             Assert.False(result.IsCompleted);
             Assert.False(result.IsCanceled);
             Assert.IsType<InvalidOperationException>(result.Exception);
+        }
+
+        [Fact]
+        public void AddWorkflow_Extensions_Success()
+        {
+            // Arrange
+            var workflow = new ServiceCollection()
+                .AddWorkflow(() => new HelloWorldWorkflow(1991))
+                .BuildServiceProvider()
+                .GetRequiredService<HelloWorldWorkflow>();
+
+            // Act
+            var result = workflow.Run();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.True(result.IsCompleted);
+            Assert.False(result.IsCanceled);
+            Assert.False(result.IsFaulted);
+            Assert.Equal(1991, result.Output);
+            Assert.Equal(1991, (int)result);
         }
     }
 }

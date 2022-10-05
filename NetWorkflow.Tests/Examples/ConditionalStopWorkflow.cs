@@ -1,13 +1,9 @@
 ﻿
 namespace NetWorkflow.Tests.Examples
 {
-    public class ConditionalStopWorkflow : Workflow<object, object>
+    public class ConditionalStopWorkflow : Workflow<object>
     {
-        public ConditionalStopWorkflow(object context) : base(context)
-        {
-        }
-
-        public override IWorkflowBuilder<object, object> Build(IWorkflowBuilder<object> builder) =>
+        public override IWorkflowBuilder<object> Build(IWorkflowBuilder builder) =>
             builder
                 .StartWith(() => new FirstStep())
                     .If(x => x)

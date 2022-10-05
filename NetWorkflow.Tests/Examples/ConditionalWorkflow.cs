@@ -1,20 +1,18 @@
 ﻿
 namespace NetWorkflow.Tests.Examples
 {
-    public class ConditionalWorkflow : Workflow<object, int>
+    public class ConditionalWorkflow : Workflow<int>
     {
         private readonly string _message = "Success";
 
-        public ConditionalWorkflow(object context) : base(context)
-        {
-        }
+        public ConditionalWorkflow() { }
 
-        public ConditionalWorkflow(object context, string message) : base(context)
+        public ConditionalWorkflow(string message)
         {
             _message = message;
         }
 
-        public override IWorkflowBuilder<object, int> Build(IWorkflowBuilder<object> builder) =>
+        public override IWorkflowBuilder<int> Build(IWorkflowBuilder builder) =>
             builder
                 .StartWith(() => new FirstStep(_message))
                     .If(x => x == "Success")

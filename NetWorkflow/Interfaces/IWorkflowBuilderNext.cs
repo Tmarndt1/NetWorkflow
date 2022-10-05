@@ -21,7 +21,7 @@ namespace NetWorkflow
         /// <summary>
         /// Defines what asynchronous WorkflowSteps to execute next within the Workflow. Each WorkflowStep will execute on their own thread.
         /// </summary>
-        /// <typeparam name="TNext">The WorkflowStep's output type</typeparam>
+        /// <typeparam name="TNext">The WorkflowStep's output type.</typeparam>
         /// <param name="func">A function that returns an enumeration of WorkflowSteps.</param>
         /// <returns>An instance of a WorkflowBuilder.</returns>
         /// <remarks>
@@ -30,7 +30,7 @@ namespace NetWorkflow
         public IWorkflowBuilderNext<TNext[]> Parallel<TNext>(Expression<Func<IEnumerable<IWorkflowStepAsync<TIn, TNext>>>> func);
 
         /// <summary>
-        /// Defines the first conditional to execute following the last WorkflowStep
+        /// Defines the first conditional to execute following the last WorkflowStep.
         /// </summary>
         /// <param name="func">A function that requires the result of the previous Workflow and returns a boolean result.</param>
         /// <returns>An instance of a WorkflowBuilder.</returns>

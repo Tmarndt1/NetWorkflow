@@ -71,8 +71,8 @@
         /// <summary>
         /// Builds and runs the Workflow asynchronously and returns a final result if each step has executed successfully
         /// </summary>
-        /// <param name="token">The CancellationToken to cancel the workflow</param>
-        /// <returns>A Task with a generic WorkflowResult</returns>
+        /// <param name="token">The CancellationToken to cancel the workflow.</param>
+        /// <returns>A Task with a generic WorkflowResult.</returns>
         public Task<WorkflowResult<TOut>> RunAsync(CancellationToken token = default)
         {
             return Task.Run(() => Run(token), token);

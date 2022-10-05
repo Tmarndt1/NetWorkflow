@@ -35,7 +35,7 @@
         /// <summary>
         /// Constructor that requires a message
         /// </summary>
-        /// <param name="message">The required user friendly message</param>
+        /// <param name="message">The required user friendly message.</param>
         internal WorkflowResult(string message)
         {
             Message = message;

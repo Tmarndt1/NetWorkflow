@@ -9,17 +9,22 @@ namespace NetWorkflow.Tests.Examples
                     .If(x => x == "Success")
                         .Do(() => new ConditionalStep(1))
                     .Else()
-                        .Retry(3)
+                        .Retry(2) // Retry 2 times
                 .EndIf()
                     .Then(() => new FinalStep());
 
-        private class FirstStep : IWorkflowStep<string>
+        public class FirstStep : IWorkflowStep<string>
         {
+            public static int RanCount;
+
             public string Run(CancellationToken token = default)
             {
+                RanCount++;
+
                 return "Failed";
             }
         }
+
         private class ConditionalStep : IWorkflowStep<string, int>
         {
             private readonly int _result;

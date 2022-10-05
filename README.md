@@ -21,6 +21,8 @@ public class ConditionalWorkflow : Workflow<int>
                     .Do(() => new ConditionalStep(1))
                 .ElseIf(x => x == "Failed")
                     .Do(() => new ConditionalStep(-1))
+                .Else()
+                    .Retry(3)
             .EndIf()
                 .Then(() => new FinalStep());
 }

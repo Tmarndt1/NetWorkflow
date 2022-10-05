@@ -28,5 +28,12 @@ namespace NetWorkflow
         /// <param name="func">A function that returns an exception.</param>
         /// <returns>An instance of a WorkflowBuilder.</returns>
         public IWorkflowBuilderConditionalFinalAggregate Throw(Expression<Func<Exception>> func);
+
+        /// <summary>
+        /// Defines the Workflow to retry the base WorkflowStep.
+        /// </summary>
+        /// <param name="maxRetries">Max number of retries before breaking.</param>
+        /// <returns>An instance of a WorkflowBuilder.</returns>
+        public IWorkflowBuilderConditionalFinalAggregate Retry(int maxRetries);
     }
 }

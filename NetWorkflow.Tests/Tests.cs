@@ -221,5 +221,20 @@ namespace NetWorkflow.Tests
             Assert.Equal(1991, result.Output);
             Assert.Equal(1991, (int)result);
         }
+
+        [Fact]
+        public void Retry_WorkflowStep_Success()
+        {
+            // Arrange
+            var workflow = new RetryWorkflow();
+
+            // Act
+            var result = workflow.Run();
+
+            // Assert
+            Assert.False(result.IsCompleted);
+            Assert.False(result.IsCanceled);
+            Assert.IsType<WorkflowMaxRetryException>(result.Exception);
+        }
     }
 }

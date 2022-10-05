@@ -152,6 +152,17 @@ namespace NetWorkflow
             _next.Last().ExceptionFunc = func;
         }
 
+        public void SetRetry(int maxRetries, Action onRetry)
+        {
+            ExecutorWrapper wrapper = _next.Last();
+
+            wrapper.Retry = true;
+
+            wrapper.RetryCount = maxRetries;
+
+            wrapper.OnRetry = onRetry;
+        }
+
         public object? Run(object? args, CancellationToken token = default)
         {
             var enumerator = _next.GetEnumerator();
@@ -170,6 +181,16 @@ namespace NetWorkflow
                     {
                         throw enumerator.Current.ExceptionFunc.Compile().Invoke();
                     }
+                    else if (enumerator.Current.Retry)
+                    {
+                        if (enumerator.Current.RetryCount == 0) throw new WorkflowMaxRetryException();
+
+                        --enumerator.Current.RetryCount;
+
+                        if (enumerator.Current.OnRetry == null) throw new InvalidOperationException("Internal error with null OnRetry callback");
+
+                        enumerator.Current.OnRetry();
+                    }
 
                     return enumerator.Current.Executor?.Run(args, token);
                 }
@@ -186,6 +207,12 @@ namespace NetWorkflow
             public IWorkflowExecutor? Executor { get; set; }
 
             public Expression<Func<Exception>>? ExceptionFunc { get; set; }
+
+            public bool Retry { get; set; }
+
+            public int RetryCount { get; set; }
+
+            public Action? OnRetry { get; set; }
 
             public bool ShouldStop { get; set; } = false;
 

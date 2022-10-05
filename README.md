@@ -18,9 +18,9 @@ public class ConditionalWorkflow : Workflow<int>
         builder
             .StartWith(() => new FirstStep())
                 .If(x => x == "Success")
-                    .Do(() => new ConditionalStep(1))
+                    .Do(() => new ConditionalStep())
                 .ElseIf(x => x == "Failed")
-                    .Do(() => new ConditionalStep(-1))
+                    .Do(() => new ConditionalStep())
                 .Else()
                     .Retry(3)
             .EndIf()
@@ -47,13 +47,13 @@ public class ParallelWorkflow : Workflow<string[]>
             .StartWith(() => new Step1())
             .Parallel(() => new IWorkflowStepAsync<Guid, string>[]
             {
-                new Step2(1000),
-                new Step2(2000)
+                new AsyncStep1(),
+                new AsyncStep2()
             })
             .Parallel(() => new IWorkflowStepAsync<string[], string>[]
             {
-                new Step3(),
-                new Step4()
+                new AsyncStep3(),
+                new AsyncStep4()
             });
 }
 

@@ -19,8 +19,8 @@ namespace NetWorkflow
     /// <summary>
     /// Extended generic IWorkflowBuilder interface that defines the base methods on a WorkflowBuilder.
     /// </summary>
-    /// <typeparam name="TResult">The end result of the Workflow.</typeparam>
-    public interface IWorkflowBuilder<TResult>
+    /// <typeparam name="TOut">The end result of the Workflow.</typeparam>
+    public interface IWorkflowBuilder<TOut>
     {
 
     }

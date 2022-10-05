@@ -22,14 +22,14 @@ namespace NetWorkflow
         /// Builds and runs the Workflow and provides a WorkflowResult.
         /// </summary>
         /// <param name="token">The CancellationToken to cancel the Workflow.</param>
-        /// <returns>A WorkflowResult with TResult data.</returns>
+        /// <returns>A WorkflowResult with TOut data.</returns>
         public WorkflowResult<TOut> Run(CancellationToken token = default);
 
         /// <summary>
         /// Builds and runs the Workflow asynchronously and provides a WorkflowResult.
         /// </summary>
         /// <param name="token">The CancellationToken to cancel the Workflow.</param>
-        /// <returns>A a task with a WorkflowResult with TResult data.</returns>
+        /// <returns>A a task with a WorkflowResult with TOut data.</returns>
         public Task<WorkflowResult<TOut>> RunAsync(CancellationToken token = default);
     }
 }

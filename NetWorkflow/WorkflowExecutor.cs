@@ -16,7 +16,7 @@ namespace NetWorkflow
         }
     }
 
-    public class WorkflowExecutor<TResult> : IWorkflowExecutor
+    public class WorkflowExecutor<TOut> : IWorkflowExecutor
     {
         public bool Stopped { get; private set; }
 
@@ -46,7 +46,7 @@ namespace NetWorkflow
 
             if (body is IWorkflowStep step)
             {
-                executor = step.GetType().GetMethod(nameof(IWorkflowStep<TResult>.Run));
+                executor = step.GetType().GetMethod(nameof(IWorkflowStep<TOut>.Run));
 
                 if (executor == null) throw new InvalidOperationException("Run method not found");
 
@@ -54,28 +54,28 @@ namespace NetWorkflow
 
                 if (count == 1)
                 {
-                    return (TResult?)executor.Invoke(body, new object[] { token });
+                    return (TOut?)executor.Invoke(body, new object[] { token });
                 }
                 else
                 {
-                    return (TResult?)executor.Invoke(body, new object?[] { args, token });
+                    return (TOut?)executor.Invoke(body, new object?[] { args, token });
                 }
             }
             else if (body is IEnumerable<IWorkflowStepAsync> asyncSteps)
             {
-                Task<TResult>?[] tasks = asyncSteps.Select(x =>
+                Task<TOut>?[] tasks = asyncSteps.Select(x =>
                 {
-                    executor = x.GetType().GetMethod(nameof(IWorkflowStepAsync<TResult>.RunAsync));
+                    executor = x.GetType().GetMethod(nameof(IWorkflowStepAsync<TOut>.RunAsync));
 
                     if (executor == null) throw new InvalidOperationException("Internal error");
 
                     if (executor.GetParameters().Length > 1)
                     {
-                        return (Task<TResult>)executor.Invoke(x, new object?[] { args, token });
+                        return (Task<TOut>)executor.Invoke(x, new object?[] { args, token });
                     }
                     else
                     {
-                        return (Task<TResult>)executor.Invoke(x, new object[] { token });
+                        return (Task<TOut>)executor.Invoke(x, new object[] { token });
                     }
                 }).ToArray();
 
@@ -102,7 +102,7 @@ namespace NetWorkflow
         }
     }
 
-    public class WorkflowExecutorExpression<TResult> : IWorkflowExecutor
+    public class WorkflowExecutorExpression<TOut> : IWorkflowExecutor
     {
         public bool Stopped { get; private set; }
 

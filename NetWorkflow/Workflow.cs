@@ -46,14 +46,9 @@
 
             try
             {
-                object? result = _next.Run(default, token);
+                TOut? result = (TOut?)_next.Run(default, token);
 
-                if (result is WorkflowStopped stopped)
-                {
-                    return WorkflowResult<TOut>.Cancelled(DateTime.Now - timestamp);
-                }
-
-                return WorkflowResult<TOut>.Success((TOut?)result, DateTime.Now - timestamp);
+                return WorkflowResult<TOut>.Success(result, DateTime.Now - timestamp);
             }
             catch (OperationCanceledException)
             {

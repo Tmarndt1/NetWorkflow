@@ -43,7 +43,7 @@ namespace NetWorkflow
 
         public override object? Run(object? args, CancellationToken token = default)
         {
-            Result = _executor.Run((TIn)args, token);
+            Result = _executor.Run((TIn?)args, token);
 
             if (_nextBuilder == null) return Result;
 
@@ -130,7 +130,7 @@ namespace NetWorkflow
         {
             _token = token;
 
-            Result = _executor.Run((TIn)args, token);
+            Result = _executor.Run((TIn?)args, token);
 
             if (_nextBuilder == null) return Result;
 
@@ -139,28 +139,28 @@ namespace NetWorkflow
 
         IWorkflowBuilderConditionalFinalAggregate IWorkflowBuilderConditionalFinal<TIn>.Do<TNext>(Expression<Func<IWorkflowStep<TIn, TNext>>> func)
         {
-            _executor.Append(new WorkflowStepExecutor<TIn, object>(func));
+            Do(func);
 
             return this;
         }
 
         IWorkflowBuilderConditionalFinalAggregate IWorkflowBuilderConditionalFinal<TIn>.Stop()
         {
-            _executor.SetStop();
+            Stop();
 
             return this;
         }
 
         IWorkflowBuilderConditionalFinalAggregate IWorkflowBuilderConditionalFinal<TIn>.Throw(Expression<Func<Exception>> func)
         {
-            _executor.SetExceptionToThrow(func);
+            Throw(func);
 
             return this;
         }
 
         IWorkflowBuilderConditionalFinalAggregate IWorkflowBuilderConditionalFinal<TIn>.Retry(int maxRetries)
         {
-            _executor.SetRetry(maxRetries, () => _lastBuilder.Run(_lastBuilder.Result, _token));
+            Retry(maxRetries);
 
             return this;
         }

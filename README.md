@@ -29,6 +29,7 @@ public class ConditionalWorkflow : Workflow<int>
 
 var tokenSource = new CancellationTokenSource();
 
+// Implicit cast to an int
 int result = new ConditionalWorkflow()
     .Run(tokenSource.Token);
 
@@ -59,6 +60,7 @@ public class ParallelWorkflow : Workflow<string[]>
 
 var tokenSource = new CancellationTokenSource();
 
+// Implicit cast to a string array
 string[] results = new ParallelWorkflow()
     .Run(tokenSource.Token);
 

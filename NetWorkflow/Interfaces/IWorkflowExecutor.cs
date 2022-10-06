@@ -1,9 +1,9 @@
 ﻿namespace NetWorkflow
 {
-    public interface IWorkflowExecutor
-    {
-        public bool Stopped { get; }
+    public interface IWorkflowExecutor { }
 
-        internal object? Run(object? args, CancellationToken token = default);
+    public interface IWorkflowExecutor<TIn, TOut> : IWorkflowExecutor   
+    {
+        public TOut? Run(TIn? args, CancellationToken token = default);
     }
 }

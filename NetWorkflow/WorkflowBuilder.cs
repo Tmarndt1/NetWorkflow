@@ -10,7 +10,7 @@ namespace NetWorkflow
 
         public IWorkflowBuilderNext<TOut> StartWith<TOut>(Expression<Func<IWorkflowStep<TOut>>> func)
         {
-            _nextBuilder = new WorkflowBuilder<TOut>(new WorkflowExecutor<TOut>(func));
+            _nextBuilder = new WorkflowBuilder<object, TOut>(new WorkflowStepExecutor<object, TOut>(func));
 
             return (IWorkflowBuilderNext<TOut>)_nextBuilder;
         }
@@ -18,34 +18,34 @@ namespace NetWorkflow
         public virtual object? Run(object? args, CancellationToken token = default) => _nextBuilder?.Run(args, token);
     }
 
-    public class WorkflowBuilder<TOut> : WorkflowBuilder, IWorkflowBuilderNext<TOut>
+    public class WorkflowBuilder<TIn, TOut> : WorkflowBuilder, IWorkflowBuilderNext<TOut>, IWorkflowBuilderNext<TIn, TOut>
     {
-        internal readonly IWorkflowExecutor _executor;
+        internal readonly IWorkflowExecutor<TIn, TOut> _executor;
         
-        public WorkflowBuilder(IWorkflowExecutor executor)
+        public WorkflowBuilder(IWorkflowExecutor<TIn, TOut> executor)
         {
             _executor = executor;
         }
 
         public IWorkflowBuilderNext<TNext[]> Parallel<TNext>(Expression<Func<IEnumerable<IWorkflowStepAsync<TOut, TNext>>>> func)
         {
-            _nextBuilder = new WorkflowBuilder<TOut, TNext[]>(new WorkflowExecutor<TNext>(func));
+            _nextBuilder = new WorkflowBuilder<TOut, TNext[]>(new WorkflowParallelExecutor<TOut, TNext>(func));
 
             return (IWorkflowBuilderNext<TNext[]>)_nextBuilder;
         }
 
         public IWorkflowBuilderNext<TOut, TNext> Then<TNext>(Expression<Func<IWorkflowStep<TOut, TNext>>> func)
         {
-            _nextBuilder = new WorkflowBuilder<TOut, TNext>(new WorkflowExecutor<TNext>(func));
+            _nextBuilder = new WorkflowBuilder<TOut, TNext>(new WorkflowStepExecutor<TOut, TNext>(func));
 
             return (IWorkflowBuilderNext<TOut, TNext>)_nextBuilder;
         }
 
         public override object? Run(object? args, CancellationToken token = default)
         {
-            Result = _executor.Run(args, token);
+            Result = _executor.Run((TIn)args, token);
 
-            if (_executor.Stopped || _nextBuilder == null) return Result;
+            if (_nextBuilder == null) return Result;
 
             return _nextBuilder?.Run(Result, token);
         }
@@ -56,11 +56,6 @@ namespace NetWorkflow
 
             return (IWorkflowBuilderConditional<TOut>)_nextBuilder;
         }
-    }
-
-    public class WorkflowBuilder<TIn, TOut> : WorkflowBuilder<TOut>, IWorkflowBuilderNext<TIn, TOut>
-    {
-        public WorkflowBuilder(IWorkflowExecutor executor) : base(executor) { }
     }
 
     public class WorkflowBuilderConditional<TIn> : WorkflowBuilder, 
@@ -84,7 +79,7 @@ namespace NetWorkflow
 
         public IWorkflowBuilderConditionalNext<TIn> Do<TNext>(Expression<Func<IWorkflowStep<TIn, TNext>>> func)
         {
-            _executor.Append(new WorkflowExecutor<TNext>(func));
+            _executor.Append(new WorkflowStepExecutor<TIn, object>(func));
 
             return this;
         }
@@ -105,7 +100,7 @@ namespace NetWorkflow
 
         public IWorkflowBuilderNext<object> EndIf()
         {
-            _nextBuilder = new WorkflowBuilder<object>(new WorkflowExecutorNext());
+            _nextBuilder = new WorkflowBuilder<object, object>(new WorkflowPassiveExecutor<object>());
 
             return (IWorkflowBuilderNext<object>)_nextBuilder;
         }
@@ -135,16 +130,16 @@ namespace NetWorkflow
         {
             _token = token;
 
-            Result = _executor.Run(args, token);
+            Result = _executor.Run((TIn)args, token);
 
-            if (_executor.Stopped || _nextBuilder == null) return Result;
+            if (_nextBuilder == null) return Result;
 
             return _nextBuilder?.Run(Result, token);
         }
 
         IWorkflowBuilderConditionalFinalAggregate IWorkflowBuilderConditionalFinal<TIn>.Do<TNext>(Expression<Func<IWorkflowStep<TIn, TNext>>> func)
         {
-            _executor.Append(new WorkflowExecutor<TNext>(func));
+            _executor.Append(new WorkflowStepExecutor<TIn, object>(func));
 
             return this;
         }

@@ -29,7 +29,7 @@ public class ConditionalWorkflow : Workflow<int>
 
 var tokenSource = new CancellationTokenSource();
 
-int result = new ConditionalWorkflow(new object())
+int result = new ConditionalWorkflow()
     .Run(tokenSource.Token);
 
 ```
@@ -59,7 +59,7 @@ public class ParallelWorkflow : Workflow<string[]>
 
 var tokenSource = new CancellationTokenSource();
 
-string[] results = new ParallelWorkflow(new object())
+string[] results = new ParallelWorkflow()
     .Run(tokenSource.Token);
 
 ```

@@ -61,6 +61,12 @@
 
                 return WorkflowResult<TOut>.Cancelled(DateTime.Now - timestamp);
             }
+            catch (WorkflowStoppedException)
+            {
+                if (_options?.Rethrow == true) throw;
+
+                return WorkflowResult<TOut>.Cancelled(DateTime.Now - timestamp);
+            }
             catch (Exception ex)
             {
                 if (_options?.Rethrow == true) throw;

@@ -1,19 +1,19 @@
 ﻿
 namespace NetWorkflow.Tests.Examples
 {
-    public class HelloWorldWorkflow : Workflow<int>
+    public class HelloWorldWorkflow : Workflow<bool>
     {
-        private readonly int _age;
+        private readonly bool _success;
 
-        public HelloWorldWorkflow(int age)
+        public HelloWorldWorkflow(bool success)
         {
-            _age = age;
+            _success = success;
         }
 
-        public override IWorkflowBuilder<int> Build(IWorkflowBuilder builder) =>
+        public override IWorkflowBuilder<bool> Build(IWorkflowBuilder builder) =>
             builder
                 .StartWith(() => new HelloWorld())
-                    .Then(() => new HelloWorld2(_age));
+                    .Then(() => new HelloWorld2(_success));
     }
 
     public class HelloWorld : IWorkflowStep<string>
@@ -24,18 +24,18 @@ namespace NetWorkflow.Tests.Examples
         }
     }
 
-    public class HelloWorld2 : IWorkflowStep<string, int>
+    public class HelloWorld2 : IWorkflowStep<string, bool>
     {
-        private readonly int _age;
+        private readonly bool _success;
 
-        public HelloWorld2(int age)
+        public HelloWorld2(bool success)
         {
-            _age = age;
+            _success = success;
         }
 
-        public int Run(string args, CancellationToken token = default)
+        public bool Run(string args, CancellationToken token = default)
         {
-            return _age;
+            return _success;
         }
     }
 }

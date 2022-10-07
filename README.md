@@ -27,11 +27,8 @@ public class ConditionalWorkflow : Workflow<int>
                 .Then(() => new FinalStep());
 }
 
-var tokenSource = new CancellationTokenSource();
-
 // Implicit cast to an int
-int result = new ConditionalWorkflow()
-    .Run(tokenSource.Token);
+int result = new ConditionalWorkflow().Run();
 
 ```
 
@@ -58,11 +55,9 @@ public class ParallelWorkflow : Workflow<string[]>
             });
 }
 
-var tokenSource = new CancellationTokenSource();
-
 // Implicit cast to a string array
 string[] results = new ParallelWorkflow()
-    .Run(tokenSource.Token);
+    .Run(new CancellationTokenSource().Token);
 
 ```
 

@@ -3,39 +3,27 @@ namespace NetWorkflow.Tests.Examples
 {
     public class HelloWorldWorkflow : Workflow<bool>
     {
-        private readonly bool _success;
-
-        public HelloWorldWorkflow(bool success)
-        {
-            _success = success;
-        }
+        private const string _helloWorld = "HelloWorld";
 
         public override IWorkflowBuilder<bool> Build(IWorkflowBuilder builder) =>
             builder
                 .StartWith(() => new HelloWorld())
-                    .Then(() => new HelloWorld2(_success));
-    }
+                    .Then(() => new HelloWorld2());
 
-    public class HelloWorld : IWorkflowStep<string>
-    {
-        public string Run(CancellationToken token = default)
+        private class HelloWorld : IWorkflowStep<string>
         {
-            return "Hello World";
-        }
-    }
-
-    public class HelloWorld2 : IWorkflowStep<string, bool>
-    {
-        private readonly bool _success;
-
-        public HelloWorld2(bool success)
-        {
-            _success = success;
+            public string Run(CancellationToken token = default)
+            {
+                return _helloWorld;
+            }
         }
 
-        public bool Run(string args, CancellationToken token = default)
+        private class HelloWorld2 : IWorkflowStep<string, bool>
         {
-            return _success;
+            public bool Run(string args, CancellationToken token = default)
+            {
+                return args == _helloWorld;
+            }
         }
     }
 }

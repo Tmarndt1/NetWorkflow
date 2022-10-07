@@ -10,7 +10,7 @@ namespace NetWorkflow.Tests
         public void HelloWorld_Success()
         {
             // Arrange
-            var workflow = new HelloWorldWorkflow(1991);
+            var workflow = new HelloWorldWorkflow();
 
             // Act
             var result = workflow.Run();
@@ -20,8 +20,7 @@ namespace NetWorkflow.Tests
             Assert.True(result.IsCompleted);
             Assert.False(result.IsCanceled);
             Assert.False(result.IsFaulted);
-            Assert.Equal(1991, result.Output);
-            Assert.Equal(1991, (int)result);
+            Assert.True(result);
         }
 
         [Fact]
@@ -206,7 +205,7 @@ namespace NetWorkflow.Tests
         {
             // Arrange
             var workflow = new ServiceCollection()
-                .AddWorkflow(() => new HelloWorldWorkflow(1991))
+                .AddWorkflow(() => new HelloWorldWorkflow())
                 .BuildServiceProvider()
                 .GetRequiredService<HelloWorldWorkflow>();
 
@@ -218,8 +217,7 @@ namespace NetWorkflow.Tests
             Assert.True(result.IsCompleted);
             Assert.False(result.IsCanceled);
             Assert.False(result.IsFaulted);
-            Assert.Equal(1991, result.Output);
-            Assert.Equal(1991, (int)result);
+            Assert.True(result);
         }
 
         [Fact]

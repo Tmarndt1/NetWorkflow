@@ -8,7 +8,7 @@ namespace NetWorkflow.Tests.Examples
         public override IWorkflowBuilder<bool> Build(IWorkflowBuilder builder) =>
             builder
                 .StartWith(() => new HelloWorld())
-                    .Then(() => new HelloWorld2());
+                    .Then(() => new GoodByeWorld());
 
         private class HelloWorld : IWorkflowStep<string>
         {
@@ -18,7 +18,7 @@ namespace NetWorkflow.Tests.Examples
             }
         }
 
-        private class HelloWorld2 : IWorkflowStep<string, bool>
+        private class GoodByeWorld : IWorkflowStep<string, bool>
         {
             public bool Run(string args, CancellationToken token = default)
             {

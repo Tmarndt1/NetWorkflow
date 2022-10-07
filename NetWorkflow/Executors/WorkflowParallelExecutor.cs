@@ -12,11 +12,11 @@ namespace NetWorkflow
             _expression = expression;
         }
 
-        public TOut[]? Run(TIn? args, CancellationToken token = default)
+        public TOut[] Run(TIn args, CancellationToken token = default)
         {
-            MethodInfo? executor = null;
+            MethodInfo executor = null;
 
-            object? body = null;
+            object body = null;
 
             if (_expression.Parameters.Count > 0) throw new InvalidOperationException("Parameter count within lambda cannot be greater than 0");
 
@@ -31,7 +31,7 @@ namespace NetWorkflow
 
             if (body is IEnumerable<IWorkflowStepAsync> asyncSteps)
             {
-                Task<TOut>?[] tasks = asyncSteps.Select(x =>
+                Task<TOut>[] tasks = asyncSteps.Select(x =>
                 {
                     executor = x.GetType().GetMethod(nameof(IWorkflowStepAsync<TOut>.RunAsync));
 
@@ -39,7 +39,7 @@ namespace NetWorkflow
 
                     if (executor.GetParameters().Length > 1)
                     {
-                        return (Task<TOut>)executor.Invoke(x, new object?[] { args, token });
+                        return (Task<TOut>)executor.Invoke(x, new object[] { args, token });
                     }
                     else
                     {

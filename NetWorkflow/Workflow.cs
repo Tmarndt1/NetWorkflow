@@ -46,7 +46,7 @@
 
             try
             {
-                TOut? result = (TOut?)_next.Run(default, token);
+                TOut result = (TOut)_next.Run(default, token);
 
                 return WorkflowResult<TOut>.Success(result, DateTime.Now - timestamp);
             }

@@ -42,7 +42,7 @@ namespace NetWorkflow
             wrapper.OnRetry = onRetry;
         }
 
-        public object? Run(TIn? args, CancellationToken token = default)
+        public object Run(TIn args, CancellationToken token = default)
         {
             var enumerator = _next.GetEnumerator();
 
@@ -81,15 +81,15 @@ namespace NetWorkflow
         {
             public LambdaExpression Expression { get; set; }
 
-            public IWorkflowExecutor<TIn, object>? Executor { get; set; }
+            public IWorkflowExecutor<TIn, object> Executor { get; set; }
 
-            public Expression<Func<Exception>>? ExceptionFunc { get; set; }
+            public Expression<Func<Exception>> ExceptionFunc { get; set; }
 
             public bool Retry { get; set; }
 
             public int RetryCount { get; set; }
 
-            public Action? OnRetry { get; set; }
+            public Action OnRetry { get; set; }
 
             public bool ShouldStop { get; set; } = false;
 

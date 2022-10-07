@@ -13,11 +13,11 @@ namespace NetWorkflow
             _expression = expression;
         }
 
-        public TOut? Run(TIn? args, CancellationToken token = default)
+        public TOut Run(TIn args, CancellationToken token = default)
         {
-            MethodInfo? executor = null;
+            MethodInfo executor = null;
 
-            object? body = null;
+            object body = null;
 
             if (_expression.Parameters.Count > 0) throw new InvalidOperationException("Parameter count within lambda cannot be greater than 0");
 
@@ -40,11 +40,11 @@ namespace NetWorkflow
 
                 if (count == 1)
                 {
-                    return (TOut?)executor.Invoke(body, new object[] { token });
+                    return (TOut)executor.Invoke(body, new object[] { token });
                 }
                 else
                 {
-                    return (TOut?)executor.Invoke(body, new object?[] { args, token });
+                    return (TOut)executor.Invoke(body, new object[] { args, token });
                 }
             }
 

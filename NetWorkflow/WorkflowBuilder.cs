@@ -6,7 +6,7 @@ namespace NetWorkflow
     {
         protected WorkflowBuilder? _nextBuilder;
 
-        public object? Result { get; protected set; }
+        public object Result { get; protected set; }
 
         public IWorkflowBuilderNext<TOut> StartWith<TOut>(Expression<Func<IWorkflowStep<TOut>>> func)
         {
@@ -15,7 +15,7 @@ namespace NetWorkflow
             return (IWorkflowBuilderNext<TOut>)_nextBuilder;
         }
 
-        public virtual object? Run(object? args, CancellationToken token = default) => _nextBuilder?.Run(args, token);
+        public virtual object Run(object args, CancellationToken token = default) => _nextBuilder?.Run(args, token);
     }
 
     public class WorkflowBuilder<TIn, TOut> : WorkflowBuilder, IWorkflowBuilderNext<TOut>, IWorkflowBuilderNext<TIn, TOut>
@@ -41,9 +41,9 @@ namespace NetWorkflow
             return (IWorkflowBuilderNext<TOut, TNext>)_nextBuilder;
         }
 
-        public override object? Run(object? args, CancellationToken token = default)
+        public override object Run(object args, CancellationToken token = default)
         {
-            Result = _executor.Run((TIn?)args, token);
+            Result = _executor.Run((TIn)args, token);
 
             if (_nextBuilder == null) return Result;
 
@@ -126,11 +126,11 @@ namespace NetWorkflow
             return this;
         }
 
-        public override object? Run(object? args, CancellationToken token = default)
+        public override object Run(object args, CancellationToken token = default)
         {
             _token = token;
 
-            Result = _executor.Run((TIn?)args, token);
+            Result = _executor.Run((TIn)args, token);
 
             if (_nextBuilder == null) return Result;
 

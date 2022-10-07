@@ -25,7 +25,7 @@
         /// <summary>
         /// The catched exception if thrown within the steps
         /// </summary>
-        public Exception? Exception { get; protected set; }
+        public Exception Exception { get; protected set; }
 
         /// <summary>
         /// The duration from when the Workflow was initially ran until the WorkflowResult is retuend
@@ -47,11 +47,11 @@
         /// <summary>
         /// The final resulting data of the Workflow
         /// </summary>
-        public TOut? Output { get; private set; }
+        public TOut Output { get; private set; }
 
         private WorkflowResult(string message) : base(message) { }
 
-        public static WorkflowResult<TOut> Success(TOut? output, TimeSpan duration)
+        public static WorkflowResult<TOut> Success(TOut output, TimeSpan duration)
         {
             return new WorkflowResult<TOut>("The Workflow has completed successfully.")
             {

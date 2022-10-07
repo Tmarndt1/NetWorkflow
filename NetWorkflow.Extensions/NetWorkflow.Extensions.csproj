@@ -1,9 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+	<Authors>Travis Arndt</Authors>
     <TargetFramework>net6.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <Nullable>disable</Nullable>
     <Description>NetWorklow.Extensions contains functionality to extend the base NetWorkflow library.</Description>
     <PackageProjectUrl>https://github.com/Tmarndt1/NetWorkflow</PackageProjectUrl>
     <RepositoryUrl>https://github.com/Tmarndt1/NetWorkflow</RepositoryUrl>

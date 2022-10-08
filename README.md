@@ -63,8 +63,6 @@ int result = new ConditionalWorkflow().Run();
 
 public class ParallelWorkflow : Workflow<string[]>
 {
-    public ParallelWorkflow(object context) { }
-
     public override IWorkflowBuilder<string[]> Build(IWorkflowBuilder builder) =>
         builder
             .StartWith(() => new Step1())
@@ -83,7 +81,7 @@ public class ParallelWorkflow : Workflow<string[]>
     // Example Async WorkflowStep
     private class AsyncStep1 : IWorkflowStepAsync<Guid, string[]>
     {
-        public Task<string[]> RunAsync(string args, CancellationToken token = default)
+        public Task<string[]> RunAsync(Guid args, CancellationToken token = default)
         {
             return Task.Delay(500, token).ContinueWith(t => new string[] 
             {

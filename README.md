@@ -19,7 +19,7 @@ public class HelloWorldWorkflow : Workflow<bool>
     public override IWorkflowBuilder<bool> Build(IWorkflowBuilder builder) =>
         builder
             .StartWith(() => new HelloWorld())
-                .Then(() => new GoodByeWorld());
+                .Then(() => new GoodbyeWorld());
 
     private class HelloWorld : IWorkflowStep<string>
     {
@@ -29,7 +29,7 @@ public class HelloWorldWorkflow : Workflow<bool>
         }
     }
 
-    private class GoodByeWorld : IWorkflowStep<string, bool>
+    private class GoodbyeWorld : IWorkflowStep<string, bool>
     {
         public bool Run(string args, CancellationToken token = default)
         {

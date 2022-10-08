@@ -1,6 +1,6 @@
 # NetWorkflow
 
-Fluent .NET Workflow Library that allows a user to explicitly define their WorkflowSteps in a single location with compile time validation through passing arguments between WorkflowSteps.
+NetWorkflow is a light weight C# .NET Workflow library that leverages the fluent syntax and allows a user to explicitly define their WorkflowSteps in a single location with compile time validation with the arguments passed between steps.
 
 main: ![Build Status](https://github.com/Tmarndt1/NetWorkflow/workflows/.NET/badge.svg?branch=main)
 

@@ -60,11 +60,9 @@ namespace NetWorkflow.Tests.Examples
 
             public Task<string> RunAsync(Guid args, CancellationToken token = default)
             {
-                return Task.Run(() =>
+                return Task.Delay(_delay, token).ContinueWith(t =>
                 {
                     if (_throw) throw new InvalidOperationException("A test exception");
-                    
-                    Thread.Sleep(_delay);
 
                     return $"{nameof(Step2)} ran";
                 }, token);

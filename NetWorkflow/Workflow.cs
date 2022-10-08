@@ -1,13 +1,13 @@
 ﻿namespace NetWorkflow
 {
     /// <summary>
-    /// Defines a Workflow and runs the various steps in sequence.
+    /// Defines a Workflow and runs the various WorkflowSteps in sequence that are established within the Build method.
     /// </summary>
     public abstract class Workflow<TOut> : IWorkflow<TOut>
     {
         private readonly WorkflowBuilder _next;
 
-        private readonly WorkflowOptions? _options;
+        private readonly WorkflowOptions _options;
 
         /// <summary>
         /// Workflow constructor.
@@ -18,7 +18,7 @@
         }
 
         /// <summary>
-        /// Workflow constructor that requires a context to optionally be passed and used within the various steps.
+        /// Overloaded Workflow constructor that requires WorkflowOptions for enhanced usablility.
         /// </summary>
         /// <param name="options">The WorkflowOptions to pass within a Workflow to provide tailored functionality.</param>
         protected Workflow(WorkflowOptions options) : this()
@@ -27,7 +27,8 @@
         }
 
         /// <summary>
-        /// Abstract method that injects a IWorkflowBuilder to build the steps of the Workflow.
+        /// Abstract method that injects a IWorkflowBuilder to build the steps of the Workflow. 
+        /// The Workflow is lazily built when the Run method is invoked.
         /// </summary>
         /// <param name="builder">The IWorkflowBuilder to build the Workflow's steps.</param>
         public abstract IWorkflowBuilder<TOut> Build(IWorkflowBuilder builder);

@@ -21,6 +21,7 @@ namespace NetWorkflow.Tests.Examples
                 return false;
             }
         }
+
         private class ConditionalStep : IWorkflowStep<bool, bool>
         {
             public bool Run(bool args, CancellationToken token = default)

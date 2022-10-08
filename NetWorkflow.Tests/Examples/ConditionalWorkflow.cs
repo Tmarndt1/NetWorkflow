@@ -39,6 +39,7 @@ namespace NetWorkflow.Tests.Examples
                 return _message;
             }
         }
+
         private class ConditionalStep : IWorkflowStep<string, int>
         {
             private readonly int _result;

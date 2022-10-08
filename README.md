@@ -14,9 +14,16 @@ If you like or are using this project please give it a star. Thanks!
 
 public class ConditionalWorkflow : Workflow<int>
 {
+    private readonly string _message;
+
+    public ConditionalWorkflow(string message)
+    {
+        _message = message;
+    }
+
     public override IWorkflowBuilder<int> Build(IWorkflowBuilder builder) =>
         builder
-            .StartWith(() => new FirstStep())
+            .StartWith(() => new FirstStep(_message))
                 .If(x => x == "Success")
                     .Do(() => new ConditionalStep())
                 .ElseIf(x => x == "Failed")
@@ -25,6 +32,24 @@ public class ConditionalWorkflow : Workflow<int>
                     .Retry(3) // Retry 3 times
             .EndIf()
                 .Then(() => new FinalStep());
+
+    // Example WorkflowStep
+    private class FirstStep : IWorkflowStep<string>
+    {
+        private readonly string _message;
+
+        internal FirstStep(string message)
+        {
+            _message = message;
+        }
+
+        public string Run(CancellationToken token = default)
+        {
+            return _message;
+        }
+    }
+
+    // Other WorkflowSteps are omitted to simplify example!
 }
 
 // Implicit cast to an int
@@ -53,6 +78,22 @@ public class ParallelWorkflow : Workflow<string[]>
                 new AsyncStep3(),
                 new AsyncStep4()
             });
+
+
+    // Example Async WorkflowStep
+    private class AsyncStep1 : IWorkflowStepAsync<Guid, string[]>
+    {
+        public Task<string[]> RunAsync(string args, CancellationToken token = default)
+        {
+            return Task.Delay(500, token).ContinueWith(t => new string[] 
+            {
+                "Hello",
+                "World"
+            }, token);
+        }
+    }
+
+    // Other WorkflowSteps are omitted to simplify example!
 }
 
 // Implicit cast to a string array

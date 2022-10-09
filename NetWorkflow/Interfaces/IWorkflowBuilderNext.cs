@@ -19,6 +19,14 @@ namespace NetWorkflow
         public IWorkflowBuilderNext<TIn, TNext> Then<TNext>(Expression<Func<IWorkflowStep<TIn, TNext>>> func);
 
         /// <summary>
+        /// Defines what asynchronous WorkflowStep to execute next within the Workflow.
+        /// </summary>
+        /// <typeparam name="TNext">The WorkflowStep's output type.</typeparam>
+        /// <param name="func">A function that returns a asynchronous WorkflowStep.</param>
+        /// <returns>An instance of a WorkflowBuilder.</returns>
+        public IWorkflowBuilderNext<TIn, TNext> ThenAsync<TNext>(Expression<Func<IWorkflowStepAsync<TIn, TNext>>> func);
+
+        /// <summary>
         /// Defines what asynchronous WorkflowSteps to execute next within the Workflow. Each WorkflowStep will execute on their own thread.
         /// </summary>
         /// <typeparam name="TNext">The WorkflowStep's output type.</typeparam>

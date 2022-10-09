@@ -1,7 +1,7 @@
 ﻿
 namespace NetWorkflow.Tests.Examples
 {
-    public class ParallelWorkflow : Workflow<string[]>
+    public class ParallelWorkflow : Workflow<bool>
     {
         private readonly bool _throw = false;
 
@@ -18,7 +18,7 @@ namespace NetWorkflow.Tests.Examples
             });
         }
 
-        public override IWorkflowBuilder<string[]> Build(IWorkflowBuilder builder) =>
+        public override IWorkflowBuilder<bool> Build(IWorkflowBuilder builder) =>
             builder
                 .StartWith(() => new Step1())
                     .Parallel(() => new IWorkflowStepAsync<Guid, string>[]
@@ -26,11 +26,8 @@ namespace NetWorkflow.Tests.Examples
                         new Step2(50, _throw),
                         new Step2(100, _throw)
                     })
-                    .Parallel(() => new IWorkflowStepAsync<string[], string>[]
-                    {
-                        new Step3(),
-                        new Step4()
-                    });
+                    .ThenAsync(() => new Step3())
+                    .ThenAsync(() => new Step4());
 
         private class Step1 : IWorkflowStep<Guid>
         {
@@ -73,18 +70,17 @@ namespace NetWorkflow.Tests.Examples
         {
             public Task<string> RunAsync(string[] args, CancellationToken token = default)
             {
+                if (args.Length < 1) return Task.FromResult(string.Empty);
+
                 return Task.FromResult($"{nameof(Step3)} ran");
             }
         }
 
-        private class Step4 : IWorkflowStepAsync<string[], string>
+        private class Step4 : IWorkflowStepAsync<string, bool>
         {
-            public Task<string> RunAsync(string[] args, CancellationToken token = default)
+            public Task<bool> RunAsync(string args, CancellationToken token = default)
             {
-                return Task.Run(() =>
-                {
-                    return $"{nameof(Step4)} ran";
-                }, token);
+                return Task.FromResult(args == $"{nameof(Step3)} ran");
             }
         }
     }

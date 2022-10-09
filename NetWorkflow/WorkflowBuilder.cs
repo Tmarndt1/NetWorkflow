@@ -41,13 +41,11 @@ namespace NetWorkflow
             return (IWorkflowBuilderNext<TOut, TNext>)_nextBuilder;
         }
 
-        public override object Run(object args, CancellationToken token = default)
+        public IWorkflowBuilderNext<TOut, TNext> ThenAsync<TNext>(Expression<Func<IWorkflowStepAsync<TOut, TNext>>> func)
         {
-            Result = _executor.Run((TIn)args, token);
+            _nextBuilder = new WorkflowBuilder<TOut, TNext>(new WorkflowStepAsyncExecutor<TOut, TNext>(func));
 
-            if (_nextBuilder == null) return Result;
-
-            return _nextBuilder?.Run(Result, token);
+            return (IWorkflowBuilderNext<TOut, TNext>)_nextBuilder;
         }
 
         public IWorkflowBuilderConditional<TOut> If(Expression<Func<TOut, bool>> func)
@@ -55,6 +53,15 @@ namespace NetWorkflow
             _nextBuilder = new WorkflowBuilderConditional<TOut>(new WorkflowExecutorConditional<TOut>(func), this);
 
             return (IWorkflowBuilderConditional<TOut>)_nextBuilder;
+        }
+
+        public override object Run(object args, CancellationToken token = default)
+        {
+            Result = _executor.Run((TIn)args, token);
+
+            if (_nextBuilder == null) return Result;
+
+            return _nextBuilder?.Run(Result, token);
         }
     }
 

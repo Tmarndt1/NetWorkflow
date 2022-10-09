@@ -17,7 +17,7 @@ namespace NetWorkflow.Tests.Examples
                         .ElseIf(x => x == "Failed")
                             .Do(() => new ConditionalStep(-1))
                     .EndIf()
-                        .Then(() => new FinalStep());
+                        .ThenAsync(() => new FinalStepAsync());
 
 
         private class Step2 : IWorkflowStepAsync<string, string>
@@ -70,11 +70,11 @@ namespace NetWorkflow.Tests.Examples
             }
         }
 
-        private class FinalStep : IWorkflowStep<object, int>
+        private class FinalStepAsync : IWorkflowStepAsync<object, int>
         {
-            public int Run(object args, CancellationToken token = default)
+            public Task<int> RunAsync(object args, CancellationToken token = default)
             {
-                return (int)args;
+                return Task.FromResult((int)args);
             }
         }
     }

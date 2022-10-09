@@ -37,8 +37,7 @@ namespace NetWorkflow.Tests
             Assert.True(result.IsCompleted);
             Assert.False(result.IsCanceled);
             Assert.False(result.IsFaulted);
-            Assert.Equal("Step3 ran", result.Output?.First());
-            Assert.Equal("Step4 ran", result.Output?.ElementAt(1));
+            Assert.True(result);
         }
 
         [Fact]

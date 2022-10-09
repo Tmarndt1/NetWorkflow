@@ -1,14 +1,13 @@
-﻿using System;
-using System.Linq.Expressions;
+﻿using System.Linq.Expressions;
 using System.Reflection;
 
 namespace NetWorkflow
 {
-    public class WorkflowStepExecutor<TIn, TOut> : IWorkflowExecutor<TIn, TOut>
+    public class WorkflowStepAsyncExecutor<TIn, TOut> : IWorkflowExecutor<TIn, TOut>
     {
         private readonly LambdaExpression _expression;
 
-        public WorkflowStepExecutor(LambdaExpression expression)
+        public WorkflowStepAsyncExecutor(LambdaExpression expression)
         {
             _expression = expression;
         }
@@ -30,22 +29,17 @@ namespace NetWorkflow
                 throw new WorkflowStoppedException();
             }
 
-            if (body is IWorkflowStep step)
+            if (body is IWorkflowStepAsync<TIn, TOut> stepAsync)
             {
-                executingMethod = step.GetType().GetMethod(nameof(IWorkflowStep<TOut>.Run));
+                executingMethod = stepAsync.GetType().GetMethod(nameof(IWorkflowStepAsync<TOut>.RunAsync));
 
-                if (executingMethod == null) throw new InvalidOperationException("Workflow executing method not found");
+                if (executingMethod == null) throw new InvalidOperationException("WorkflowStep executing method not found");
 
-                int count = executingMethod.GetParameters().Length;
+                Task<TOut> task = (Task<TOut>)executingMethod.Invoke(body, new object[] { args, token });
 
-                if (count == 1)
-                {
-                    return (TOut)executingMethod.Invoke(body, new object[] { token });
-                }
-                else
-                {
-                    return (TOut)executingMethod.Invoke(body, new object[] { args, token });
-                }
+                Task.WaitAll(task);
+
+                return task.Result;
             }
 
             throw new InvalidOperationException("Internal error");

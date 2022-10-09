@@ -31,11 +31,13 @@ namespace NetWorkflow
             _next.Last().ExceptionFunc = func;
         }
 
-        public void SetRetry(int maxRetries, Action onRetry)
+        public void SetRetry(TimeSpan delay, int maxRetries, Action onRetry)
         {
             ExecutorWrapper wrapper = _next.Last();
 
             wrapper.Retry = true;
+
+            wrapper.Delay = delay;
 
             wrapper.RetryCount = maxRetries;
 
@@ -66,6 +68,8 @@ namespace NetWorkflow
 
                         if (enumerator.Current.OnRetry == null) throw new InvalidOperationException("Internal error with null OnRetry callback");
 
+                        Thread.Sleep(enumerator.Current.Delay);
+
                         enumerator.Current.OnRetry();
                     }
 
@@ -84,6 +88,8 @@ namespace NetWorkflow
             public IWorkflowExecutor<TIn, object> Executor { get; set; }
 
             public Expression<Func<Exception>> ExceptionFunc { get; set; }
+
+            public TimeSpan Delay { get; set; }
 
             public bool Retry { get; set; }
 

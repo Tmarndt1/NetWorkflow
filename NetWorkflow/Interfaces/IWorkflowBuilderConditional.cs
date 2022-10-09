@@ -30,11 +30,13 @@ namespace NetWorkflow
         public IWorkflowBuilderConditionalNext<TIn> Throw(Expression<Func<Exception>> func);
 
         /// <summary>
-        /// Defines the Workflow to retry the base WorkflowStep.
+        /// Defines the Workflow to retry the previous WorkflowStep. 
+        /// Optional max retries count can be passed in with the default value being 1.
         /// </summary>
+        /// <param name="delay">The amount of time to delay before retrying.</param>
         /// <param name="maxRetries">Max number of retries before breaking.</param>
         /// <returns>An instance of a WorkflowBuilder.</returns>
-        public IWorkflowBuilderConditionalNext<TIn> Retry(int maxRetries);
+        public IWorkflowBuilderConditionalNext<TIn> Retry(TimeSpan delay, int maxRetries = 1);
     }
 
     public interface IWorkflowBuilderConditional<TIn, TOut> : IWorkflowBuilderConditional<TOut>

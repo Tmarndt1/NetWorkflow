@@ -229,7 +229,7 @@ namespace NetWorkflow.Tests
             var result = workflow.Run();
 
             // Assert
-            Assert.Equal(3, RetryWorkflow.FirstStep.RanCount);
+            Assert.Equal(2, RetryWorkflow.FirstStep.RanCount);
             Assert.False(result.IsCompleted);
             Assert.False(result.IsCanceled);
             Assert.IsType<WorkflowMaxRetryException>(result.Exception);

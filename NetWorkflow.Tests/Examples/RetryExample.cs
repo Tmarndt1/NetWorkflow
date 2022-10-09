@@ -9,7 +9,7 @@ namespace NetWorkflow.Tests.Examples
                     .If(x => x == "Success")
                         .Do(() => new ConditionalStep(1))
                     .Else()
-                        .Retry(2) // Retry 2 times
+                        .Retry(TimeSpan.FromMilliseconds(10))
                 .EndIf()
                     .Then(() => new FinalStep());
 

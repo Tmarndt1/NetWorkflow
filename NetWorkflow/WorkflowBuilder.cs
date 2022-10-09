@@ -126,9 +126,9 @@ namespace NetWorkflow
             return this;
         }
 
-        public IWorkflowBuilderConditionalNext<TIn> Retry(int maxRetries)
+        public IWorkflowBuilderConditionalNext<TIn> Retry(TimeSpan delay, int maxRetries = 1)
         {
-            _executor.SetRetry(maxRetries, () => _lastBuilder.Run(_lastBuilder.Result, _token));
+            _executor.SetRetry(delay, maxRetries, () => _lastBuilder.Run(_lastBuilder.Result, _token));
 
             return this;
         }
@@ -165,9 +165,9 @@ namespace NetWorkflow
             return this;
         }
 
-        IWorkflowBuilderConditionalFinalAggregate IWorkflowBuilderConditionalFinal<TIn>.Retry(int maxRetries)
+        IWorkflowBuilderConditionalFinalAggregate IWorkflowBuilderConditionalFinal<TIn>.Retry(TimeSpan delay, int maxRetries)
         {
-            Retry(maxRetries);
+            Retry(delay, maxRetries);
 
             return this;
         }

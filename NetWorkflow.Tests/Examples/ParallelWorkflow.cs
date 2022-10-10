@@ -27,7 +27,7 @@ namespace NetWorkflow.Tests.Examples
                         new Step2(50, _throw),
                     })
                     .ThenAsync(() => new Step3())
-                    .ThenAsync(() => new Step4());
+                        .ThenAsync(() => new Step4());
 
         private class Step1 : IWorkflowStep<Guid>
         {

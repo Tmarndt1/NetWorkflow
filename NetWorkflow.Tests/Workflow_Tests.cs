@@ -4,7 +4,7 @@ using NetWorkflow.Tests.Examples;
 
 namespace NetWorkflow.Tests
 {
-    public class Tests
+    public class Workflow_Tests
     {
         [Fact]
         public void HelloWorld_Success()

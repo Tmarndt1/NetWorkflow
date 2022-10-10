@@ -29,7 +29,7 @@ namespace NetWorkflow
 
             _executingMethod = typeof(TWorkflow).GetMethod("Run");
 
-            _executingMethod = typeof(TWorkflow).GetMethod("RunAsync");
+            _executingMethodAsync = typeof(TWorkflow).GetMethod("RunAsync");
 
             return this;
         }

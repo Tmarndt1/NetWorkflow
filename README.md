@@ -65,6 +65,7 @@ public class ConditionalWorkflow : Workflow<int>
             .EndIf()
                 .Then(() => new FinalStep());
 
+
     // Example WorkflowStep
     private class FirstStep : IWorkflowStep<string>
     {
@@ -98,16 +99,13 @@ public class ParallelWorkflow : Workflow<string[]>
     public override IWorkflowBuilder<string[]> Build(IWorkflowBuilder builder) =>
         builder
             .StartWith(() => new Step1())
-            .Parallel(() => new IWorkflowStepAsync<Guid, string>[]
-            {
-                new AsyncStep1(),
-                new AsyncStep2()
-            })
-            .Parallel(() => new IWorkflowStepAsync<string[], string>[]
-            {
-                new AsyncStep3(),
-                new AsyncStep4()
-            });
+                .Parallel(() => new IWorkflowStepAsync<Guid, string>[]
+                {
+                    new AsyncStep1(),
+                    new AsyncStep2()
+                })
+                .ThenAsync(() => new AsyncStep3())
+                    .ThenAsync(() => AsyncStep4());
 
 
     // Example Async WorkflowStep

@@ -33,7 +33,8 @@ namespace NetWorkflow
         /// <param name="func">A function that returns an enumeration of WorkflowSteps.</param>
         /// <returns>An instance of a WorkflowBuilder.</returns>
         /// <remarks>
-        /// For compile time validation, each WorkflowStep must return the same type
+        /// For compile time validation, each WorkflowStep must return the same type. The follwing WorkflowStep requires input type of TNext[].
+        /// The TNext[] will be ordered in the same as the AsyncSteps passed into the func parameter. 
         /// </remarks>
         public IWorkflowBuilderNext<TNext[]> Parallel<TNext>(Expression<Func<IEnumerable<IWorkflowStepAsync<TIn, TNext>>>> func);
 

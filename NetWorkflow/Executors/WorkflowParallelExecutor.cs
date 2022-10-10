@@ -54,7 +54,7 @@ namespace NetWorkflow
 
                 Task.WaitAll(tasks, token);
 
-                return tasks.Where(x => x != null).Select(x => x.Result).ToArray();
+                return tasks.Select(x => x.Result).ToArray();
             }
 
             throw new InvalidOperationException("Internal error");

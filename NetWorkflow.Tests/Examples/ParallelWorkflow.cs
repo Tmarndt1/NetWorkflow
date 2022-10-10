@@ -23,8 +23,8 @@ namespace NetWorkflow.Tests.Examples
                 .StartWith(() => new Step1())
                     .Parallel(() => new IWorkflowStepAsync<Guid, string>[]
                     {
+                        new Step2(100, _throw),
                         new Step2(50, _throw),
-                        new Step2(100, _throw)
                     })
                     .ThenAsync(() => new Step3())
                     .ThenAsync(() => new Step4());
@@ -61,7 +61,7 @@ namespace NetWorkflow.Tests.Examples
                 {
                     if (_throw) throw new InvalidOperationException("A test exception");
 
-                    return $"{nameof(Step2)} ran";
+                    return $"{nameof(Step2)} ran with delay {_delay}";
                 }, token);
             }
         }

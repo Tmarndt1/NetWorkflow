@@ -54,6 +54,11 @@ namespace NetWorkflow
         {
             _tokenSource = new CancellationTokenSource();
 
+            if (_workflowFactory == null)
+            {
+                throw new InvalidOperationException($"A {nameof(WorkflowScheduler<TWorkflow>)} requires a Workflow Factory function provided in the {nameof(WorkflowScheduler<TWorkflow>.Use)} method");
+            }
+
             // A user should specify a WorkflowScheduler to execute a specific frequency or time.
             if (!_options._frequencySet && !_options._atTimeSet)
             {

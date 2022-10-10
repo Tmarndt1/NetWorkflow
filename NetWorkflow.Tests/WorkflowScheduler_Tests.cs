@@ -1,9 +1,66 @@
-﻿using NetWorkflow.Tests.Examples;
+﻿using Microsoft.Extensions.DependencyInjection;
+using NetWorkflow.Extensions;
+using NetWorkflow.Tests.Examples;
 
 namespace NetWorkflow.Tests
 {
     public class WorkflowScheduler_Tests
     {
+        [Fact]
+        public void No_Options_Success()
+        {
+            // Arrange
+            var scheduler = new WorkflowScheduler<HelloWorldWorkflow>()
+                .Use(() => new HelloWorldWorkflow());
+
+            bool hit = false;
+
+            // Act
+            try
+            {
+                scheduler.StartAsync();
+
+                hit = true;
+            }
+            catch (Exception ex)
+            {
+                // Assert
+                Assert.IsType<InvalidOperationException>(ex);
+            }
+
+            // Assert
+            Assert.False(hit);
+        }
+
+        [Fact]
+        public void No_Factory_Success()
+        {
+            // Arrange
+            var scheduler = new WorkflowScheduler<HelloWorldWorkflow>()
+                .Configure(options =>
+                {
+                    options.Frequency = TimeSpan.FromMilliseconds(200);
+                });
+
+            bool hit = false;
+
+            // Act
+            try
+            {
+                scheduler.StartAsync();
+
+                hit = true;
+            }
+            catch (Exception ex)
+            {
+                // Assert
+                Assert.IsType<InvalidOperationException>(ex);
+            }
+
+            // Assert
+            Assert.False(hit);
+        }
+
         [Fact]
         public void Frequency_Success()
         {
@@ -68,6 +125,20 @@ namespace NetWorkflow.Tests
             }
 
             Assert.Equal(2, count);
+        }
+
+        [Fact]
+        public void AddWorkflowScheduler_Extensions_Success()
+        {
+            // Arrange
+            // Act
+            var workflowScheduler = new ServiceCollection()
+                .AddWorkflowScheduler(() => new WorkflowScheduler<HelloWorldWorkflow>())
+                .BuildServiceProvider()
+                .GetRequiredService<WorkflowScheduler<HelloWorldWorkflow>>();
+
+            // Assert
+            Assert.NotNull(workflowScheduler);
         }
     }
 }

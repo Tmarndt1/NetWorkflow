@@ -117,14 +117,14 @@ namespace NetWorkflow.Tests
             // Assert
             while (true)
             {
-                Thread.Sleep(TimeSpan.FromMilliseconds(200));
+                Thread.Sleep(1000); // Must sleep for a second 
 
                 scheduler.Stop();
 
                 break;
             }
 
-            Assert.Equal(2, count);
+            Assert.Equal(2, count); // Count should be two because both WorkflowStep's increment
         }
 
         [Fact]

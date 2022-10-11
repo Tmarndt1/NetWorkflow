@@ -99,7 +99,6 @@ namespace NetWorkflow
                                 _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
                             }
 
-                            // Sleep 3 seconds after so the next check isn't within 3 seconds 
                             await Task.Delay(1000);
                         }
                     }

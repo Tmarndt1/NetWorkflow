@@ -128,6 +128,40 @@ namespace NetWorkflow.Tests
         }
 
         [Fact]
+        public void AtTime_No_Fire_Success()
+        {
+            // Arrange
+            int count = 0;
+
+            TimeSpan timeSpan = new TimeSpan(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second - 1);
+
+            var scheduler = new WorkflowScheduler<HelloWorldWorkflow>()
+                .Use(() => new HelloWorldWorkflow((stepName) =>
+                {
+                    count++;
+                }))
+                .Configure(options =>
+                {
+                    options.AtTime = timeSpan;
+                });
+
+            // Act
+            scheduler.StartAsync();
+
+            // Assert
+            while (true)
+            {
+                Thread.Sleep(200);
+
+                scheduler.Stop();
+
+                break;
+            }
+
+            Assert.Equal(0, count);
+        }
+
+        [Fact]
         public void AddWorkflowScheduler_Extensions_Success()
         {
             // Arrange

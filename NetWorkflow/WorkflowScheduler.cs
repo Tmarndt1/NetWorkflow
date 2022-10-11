@@ -88,7 +88,7 @@ namespace NetWorkflow
                 {
                     while (!_tokenSource.IsCancellationRequested)
                     {
-                        if (_options.AtTime - DateTime.Now.TimeOfDay < TimeSpan.FromSeconds(1))
+                        if (_options.AtTime > DateTime.Now.TimeOfDay)
                         {
                             if (_options.ExecuteAsync)
                             {

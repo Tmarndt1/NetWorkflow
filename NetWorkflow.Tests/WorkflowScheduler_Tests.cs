@@ -100,8 +100,6 @@ namespace NetWorkflow.Tests
             // Arrange
             int count = 0;
 
-            TimeSpan timeSpan = new TimeSpan(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second + 1);
-
             var scheduler = new WorkflowScheduler<HelloWorldWorkflow>()
                 .Use(() => new HelloWorldWorkflow((stepName) =>
                 {
@@ -109,7 +107,7 @@ namespace NetWorkflow.Tests
                 }))
                 .Configure(options =>
                 {
-                    options.AtTime = timeSpan;
+                    options.AtTime = WorkflowTime.AtMinute(DateTime.Now.Minute);
                 });
 
             // Act
@@ -134,8 +132,6 @@ namespace NetWorkflow.Tests
             // Arrange
             int count = 0;
 
-            TimeSpan timeSpan = new TimeSpan(DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second - 1);
-
             var scheduler = new WorkflowScheduler<HelloWorldWorkflow>()
                 .Use(() => new HelloWorldWorkflow((stepName) =>
                 {
@@ -143,7 +139,7 @@ namespace NetWorkflow.Tests
                 }))
                 .Configure(options =>
                 {
-                    options.AtTime = timeSpan;
+                    options.AtTime = WorkflowTime.AtHour(DateTime.Now.Hour, DateTime.Now.Minute - 1);
                 });
 
             // Act

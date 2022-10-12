@@ -6,28 +6,7 @@ namespace NetWorkflow.Scheduler
     /// </summary>
     public class WorkflowSchedulerOptions
     {
-        private bool _repeat = true;
-
-        internal bool _repeatSet = false;
-
         private const string _changeExceptionMessage = "Cannot change the WorkflowSchedulerOptions after they have been set.";
-
-        /// <summary>
-        /// Determines if the WorkflowScheduler should repeat the Workflow invocation on the designated frequency.
-        /// </summary>
-        /// <remarks>Default value is true.</remarks>
-        public bool Repeat
-        {
-            get => _repeat;
-            set
-            {
-                if (_repeatSet) throw new InvalidOperationException(_changeExceptionMessage);
-
-                _repeatSet = true;
-
-                _repeat = value;
-            }
-        }
 
         internal bool _frequencySet = false;
 
@@ -55,13 +34,15 @@ namespace NetWorkflow.Scheduler
 
         internal bool _atTimeSet = false;
 
-        private TimeSpan _atTime = TimeSpan.Zero;
+        private WorkflowTime _atTime;
 
         /// <summary>
         /// The specific time when a Workflow should be invoked.
         /// </summary>
-        /// <remarks>Default value is TimeSpan.Zero.</remarks>
-        public TimeSpan AtTime
+        /// <remarks>
+        /// A specific day/hour/minute, hour/minute, or minute mark can be determined to run the Workflow.
+        /// </remarks>
+        public WorkflowTime AtTime
         {
             get => _atTime;
             set

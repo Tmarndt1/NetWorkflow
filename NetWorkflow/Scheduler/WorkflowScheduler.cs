@@ -86,21 +86,76 @@ namespace NetWorkflow.Scheduler
                 }
                 else if (_options._atTimeSet)
                 {
-                    while (!_tokenSource.IsCancellationRequested)
+                    if (_options.AtTime.Day != -1)
                     {
-                        if (DateTime.Now.TimeOfDay == _options.AtTime)
+                        while (!_tokenSource.IsCancellationRequested)
                         {
-                            if (_options.ExecuteAsync)
-                            {
-                                _executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
-                            }
-                            else
-                            {
-                                _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
-                            }
+                            DateTime date = DateTime.Now;
 
-                            await Task.Delay(1000);
+                            if (date.Day == _options.AtTime.Day && date.Hour == _options.AtTime.Hour && date.Minute == _options.AtTime.Minute)
+                            {
+                                if (_options.ExecuteAsync)
+                                {
+                                    await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
+                                }
+                                else
+                                {
+                                    _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
+                                }
+
+                                if (!_options.AtTime.Repeat) break;
+
+                                await Task.Delay(60000); // Delay 1 minute
+                            }
                         }
+                    }
+                    else if (_options.AtTime.Hour != -1)
+                    {
+                        while (!_tokenSource.IsCancellationRequested)
+                        {
+                            DateTime date = DateTime.Now;
+
+                            if (date.Hour == _options.AtTime.Hour && date.Minute == _options.AtTime.Minute)
+                            {
+                                if (_options.ExecuteAsync)
+                                {
+                                    await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
+                                }
+                                else
+                                {
+                                    _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
+                                }
+
+                                if (!_options.AtTime.Repeat) break;
+
+                                await Task.Delay(60000); // Delay 1 minute
+                            }
+                        }
+                    }
+                    else if (_options.AtTime.Minute != -1)
+                    {
+                        while (!_tokenSource.IsCancellationRequested)
+                        {
+                            if (DateTime.Now.Minute == _options.AtTime.Minute)
+                            {
+                                if (_options.ExecuteAsync)
+                                {
+                                    await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
+                                }
+                                else
+                                {
+                                    _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
+                                }
+
+                                if (!_options.AtTime.Repeat) break;
+
+                                await Task.Delay(60000); // Delay 1 minute
+                            }
+                        }
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("A WorkflowTime must specificy to run at the Day, Hour, or Minute mark");
                     }
                 }
 

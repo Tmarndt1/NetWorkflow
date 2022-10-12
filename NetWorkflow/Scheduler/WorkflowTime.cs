@@ -79,7 +79,7 @@ namespace NetWorkflow.Scheduler
         /// <param name="hour">The hour of the day the Workflow should be executed.</param>
         /// <param name="minute">The minute of the hour the Workflow should be executed.</param>
         /// <returns>A new instance of WorkflowTime.</returns>
-        public static WorkflowTime AtDay(int day, int hour, int minute)
+        public static WorkflowTime AtDayMark(int day, int hour, int minute)
         {
             return new WorkflowTime(day, hour, minute);
         }
@@ -95,7 +95,7 @@ namespace NetWorkflow.Scheduler
         /// <remarks>
         /// The WorkflowScheduler will kick off a new Workflow at the day/hour/minute mark of each month indefinitely.
         /// </remarks>
-        public static WorkflowTime AtDayIndefinitely(int day, int hour, int minute)
+        public static WorkflowTime AtDayMarkIndefinitely(int day, int hour, int minute)
         {
             return new WorkflowTime(day, hour, minute)
             {
@@ -110,7 +110,7 @@ namespace NetWorkflow.Scheduler
         /// <param name="hour">The hour of the day the Workflow should be executed.</param>
         /// <param name="minute">The minute of the hour the Workflow should be executed.</param>
         /// <returns>A new instance of WorkflowTime.</returns>
-        public static WorkflowTime AtHour(int hour, int minute)
+        public static WorkflowTime AtHourMark(int hour, int minute)
         {
             return new WorkflowTime(hour, minute);
         }
@@ -125,7 +125,7 @@ namespace NetWorkflow.Scheduler
         /// <remarks>
         /// The WorkflowScheduler will kick off a new Workflow at the hour/minute mark of each day indefinitely.
         /// </remarks>
-        public static WorkflowTime AtHourIndefinitely(int hour, int minute)
+        public static WorkflowTime AtHourMarkIndefinitely(int hour, int minute)
         {
             return new WorkflowTime(hour, minute)
             {
@@ -138,7 +138,7 @@ namespace NetWorkflow.Scheduler
         /// </summary>
         /// <param name="minute">The minute of the hour the Workflow should be executed.</param>
         /// <returns>A new instance of WorkflowTime.</returns>
-        public static WorkflowTime AtMinute(int minute)
+        public static WorkflowTime AtMinuteMark(int minute)
         {
             return new WorkflowTime(minute);
         }
@@ -151,7 +151,7 @@ namespace NetWorkflow.Scheduler
         /// <remarks>
         /// The WorkflowScheduler will kick off a new Workflow at the minute mark of each hour indefinitely.
         /// </remarks>
-        public static WorkflowTime AtMinuteIndefinitely(int minute)
+        public static WorkflowTime AtMinuteMarkIndefinitely(int minute)
         {
             return new WorkflowTime(minute)
             {

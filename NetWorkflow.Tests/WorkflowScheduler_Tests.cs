@@ -107,7 +107,7 @@ namespace NetWorkflow.Tests
                 }))
                 .Configure(options =>
                 {
-                    options.AtTime = WorkflowTime.AtMinute(DateTime.Now.Minute);
+                    options.AtTime = WorkflowTime.AtMinuteMarkIndefinitely(DateTime.Now.Minute);
                 });
 
             // Act
@@ -139,7 +139,7 @@ namespace NetWorkflow.Tests
                 }))
                 .Configure(options =>
                 {
-                    options.AtTime = WorkflowTime.AtHour(DateTime.Now.Hour, DateTime.Now.Minute - 1);
+                    options.AtTime = WorkflowTime.AtHourMark(DateTime.Now.Hour, DateTime.Now.Minute - 1);
                 });
 
             // Act

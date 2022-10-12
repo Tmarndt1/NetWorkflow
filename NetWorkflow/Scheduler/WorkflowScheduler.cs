@@ -107,7 +107,7 @@ namespace NetWorkflow.Scheduler
                                     _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
                                 }
 
-                                if (!_options.AtTime.Repeat) break;
+                                if (!_options.AtTime.Indefinitely) break;
 
                                 await Task.Delay(60000); // Delay 1 minute
                             }
@@ -130,7 +130,7 @@ namespace NetWorkflow.Scheduler
                                     _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
                                 }
 
-                                if (!_options.AtTime.Repeat) break;
+                                if (!_options.AtTime.Indefinitely) break;
 
                                 await Task.Delay(60000); // Delay 1 minute
                             }
@@ -151,7 +151,7 @@ namespace NetWorkflow.Scheduler
                                     _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
                                 }
 
-                                if (!_options.AtTime.Repeat) break;
+                                if (!_options.AtTime.Indefinitely) break;
 
                                 await Task.Delay(60000); // Delay 1 minute
                             }

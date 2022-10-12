@@ -69,7 +69,7 @@ namespace NetWorkflow.Scheduler
         /// <summary>
         /// Designates the WorkTime to repeat indefinitely.
         /// </summary>
-        public bool Repeat { get; private set; }
+        internal bool Indefinitely { get; private set; }
 
         /// <summary>
         /// Designates a WorkflowScheduler should execute a Workflow on the given
@@ -79,58 +79,20 @@ namespace NetWorkflow.Scheduler
         /// <param name="hour">The hour of the day the Workflow should be executed.</param>
         /// <param name="minute">The minute of the hour the Workflow should be executed.</param>
         /// <returns>A new instance of WorkflowTime.</returns>
-        public static WorkflowTime AtDayMark(int day, int hour, int minute)
+        public static WorkflowTime AtDay(int day, int hour, int minute)
         {
             return new WorkflowTime(day, hour, minute);
         }
 
-        /// <summary>
-        /// Designates a WorkflowScheduler should execute a Workflow on the given
-        /// month, at the given hour, and at the given minute indefinitely.
-        /// </summary>
-        /// <param name="day">The day of the month the Workflow should be executed.</param>
-        /// <param name="hour">The hour of the day the Workflow should be executed.</param>
-        /// <param name="minute">The minute of the hour the Workflow should be executed.</param>
-        /// <returns>A new instance of WorkflowTime.</returns>
-        /// <remarks>
-        /// The WorkflowScheduler will kick off a new Workflow at the day/hour/minute mark of each month indefinitely.
-        /// </remarks>
-        public static WorkflowTime AtDayMarkIndefinitely(int day, int hour, int minute)
-        {
-            return new WorkflowTime(day, hour, minute)
-            {
-                Repeat = true
-            };
-        }
-
-        /// <summary>
         /// Designates a WorkflowScheduler should execute a Workflow at the given
         /// hour and at the given minute. 
         /// </summary>
         /// <param name="hour">The hour of the day the Workflow should be executed.</param>
         /// <param name="minute">The minute of the hour the Workflow should be executed.</param>
         /// <returns>A new instance of WorkflowTime.</returns>
-        public static WorkflowTime AtHourMark(int hour, int minute)
+        public static WorkflowTime AtHour(int hour, int minute)
         {
             return new WorkflowTime(hour, minute);
-        }
-
-        /// <summary>
-        /// Designates a WorkflowScheduler should execute a Workflow at the given
-        /// hour and at the given minute indefinitely. 
-        /// </summary>
-        /// <param name="hour">The hour of the day the Workflow should be executed.</param>
-        /// <param name="minute">The minute of the hour the Workflow should be executed.</param>
-        /// <returns>A new instance of WorkflowTime.</returns>
-        /// <remarks>
-        /// The WorkflowScheduler will kick off a new Workflow at the hour/minute mark of each day indefinitely.
-        /// </remarks>
-        public static WorkflowTime AtHourMarkIndefinitely(int hour, int minute)
-        {
-            return new WorkflowTime(hour, minute)
-            {
-                Repeat = true
-            };
         }
 
         /// <summary>
@@ -138,25 +100,20 @@ namespace NetWorkflow.Scheduler
         /// </summary>
         /// <param name="minute">The minute of the hour the Workflow should be executed.</param>
         /// <returns>A new instance of WorkflowTime.</returns>
-        public static WorkflowTime AtMinuteMark(int minute)
+        public static WorkflowTime AtMinute(int minute)
         {
             return new WorkflowTime(minute);
         }
 
         /// <summary>
-        /// Designates a WorkflowScheduler should execute a Workflow at the given minute indefinitely.
+        /// Sets the WorkflowTime to run indefinitely
         /// </summary>
-        /// <param name="minute">The minute of the hour the Workflow should be executed.</param>
-        /// <returns>A new instance of WorkflowTime.</returns>
-        /// <remarks>
-        /// The WorkflowScheduler will kick off a new Workflow at the minute mark of each hour indefinitely.
-        /// </remarks>
-        public static WorkflowTime AtMinuteMarkIndefinitely(int minute)
+        /// <returns>The same instance of the WorkflowTime</returns>
+        public WorkflowTime Repeat()
         {
-            return new WorkflowTime(minute)
-            {
-                Repeat = true
-            };
+            Indefinitely = true;
+
+            return this;
         }
 
         private WorkflowTime(int day, int hour, int minute) : this(hour, minute)

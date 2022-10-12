@@ -159,7 +159,7 @@ await scheduler.StartAsync();
 
 ```csharp
 
-using NetWorkflow.Scheduler
+using NetWorkflow.Scheduler;
 
 var scheduler = new WorkflowScheduler<HelloWorldWorkflow>()
     .Use(() => new HelloWorldWorkflow()) // Will call the factory method on when scheduled

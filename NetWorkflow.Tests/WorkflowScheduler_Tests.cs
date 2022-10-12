@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using NetWorkflow.Extensions;
+using NetWorkflow.Scheduler;
 using NetWorkflow.Tests.Examples;
 
 namespace NetWorkflow.Tests

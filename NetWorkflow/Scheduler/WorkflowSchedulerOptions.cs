@@ -1,5 +1,5 @@
 ﻿
-namespace NetWorkflow
+namespace NetWorkflow.Scheduler
 {
     /// <summary>
     /// The options to use within a WorkflowScheduler.

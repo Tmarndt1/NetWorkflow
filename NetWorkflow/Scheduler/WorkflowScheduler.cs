@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Timers;
 
-namespace NetWorkflow
+namespace NetWorkflow.Scheduler
 {
     public class WorkflowScheduler<TWorkflow>
         where TWorkflow : IWorkflow

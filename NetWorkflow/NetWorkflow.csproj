@@ -16,6 +16,9 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <None Remove="Scheduler\" />
+    </ItemGroup>
+    <ItemGroup>
 	    <None Include="../LICENSE">
 		    <Pack>True</Pack>
 		    <PackagePath>\</PackagePath>
@@ -31,4 +34,7 @@
         <PackageReference Include="System.Linq.Expressions" Version="4.3.0" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Scheduler\" />
+    </ItemGroup>
 </Project>

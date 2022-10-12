@@ -165,7 +165,7 @@ var scheduler = new WorkflowScheduler<HelloWorldWorkflow>()
     .Use(() => new HelloWorldWorkflow()) // Will call the factory method on when scheduled
     .Configure(options =>
     {
-        // Schedules the Workflow to be kicked off at midnight everyday.
+        // Schedules the Workflow to be kicked off at midnight everyday
         // Hour 12, Minute 0.
         options.AtTime = WorkflowTime.AtHour(12, 0).Repeat();
     });

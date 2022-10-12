@@ -63,33 +63,51 @@ namespace NetWorkflow.Scheduler
         }
 
         /// <summary>
-        /// Constructor that designates a WorkflowScheduler should execute a Workflow on the given
+        /// Designates a WorkflowScheduler should execute a Workflow on the given
         /// month, at the given hour, and at the given minute. 
         /// </summary>
         /// <param name="day">The day of the month the Workflow should be executed.</param>
         /// <param name="hour">The hour of the day the Workflow should be executed.</param>
         /// <param name="minute">The minute of the hour the Workflow should be executed.</param>
-        public WorkflowTime(short day, short hour, short minute) : this(hour, minute)
+        /// <returns>A new instance of WorkflowTime.</returns>
+        public static WorkflowTime DayMarkAt(short day, short hour, short minute)
         {
-            Day = day;
+            return new WorkflowTime(day, hour, minute);
         }
 
         /// <summary>
-        /// Constructor that designates a WorkflowScheduler should execute a Workflow at the given
+        /// Designates a WorkflowScheduler should execute a Workflow at the given
         /// hour and at the given minute. 
         /// </summary>
         /// <param name="hour">The hour of the day the Workflow should be executed.</param>
         /// <param name="minute">The minute of the hour the Workflow should be executed.</param>
-        public WorkflowTime(short hour, short minute) : this(minute)
+        /// <returns>A new instance of WorkflowTime.</returns>
+        public static WorkflowTime HourMarkAt(short hour, short minute)
+        {
+            return new WorkflowTime(hour, minute);
+        }
+
+        /// <summary>
+        /// Designates a WorkflowScheduler should execute a Workflow at the given minute.
+        /// </summary>
+        /// <param name="minute">The minute of the hour the Workflow should be executed.</param>
+        /// <returns>A new instance of WorkflowTime.</returns>
+        public static WorkflowTime MinuteMarkAt(short minute)
+        {
+            return new WorkflowTime(minute);
+        }
+
+        private WorkflowTime(short day, short hour, short minute) : this(hour, minute)
+        {
+            Day = day;
+        }
+
+        private WorkflowTime(short hour, short minute) : this(minute)
         {
             Hour = hour;
         }
 
-        /// <summary>
-        /// Constructor that designates a WorkflowScheduler should execute a Workflow at the given minute.
-        /// </summary>
-        /// <param name="minute">The minute of the hour the Workflow should be executed.</param>
-        public WorkflowTime(short minute)
+        private WorkflowTime(short minute)
         {
             Minute = minute;
         }

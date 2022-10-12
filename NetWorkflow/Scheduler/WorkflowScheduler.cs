@@ -71,11 +71,11 @@ namespace NetWorkflow.Scheduler
                 {
                     while (!_tokenSource.IsCancellationRequested)
                     {
-                        await Task.Delay(_options.Frequency).ContinueWith(t =>
+                        await Task.Delay(_options.Frequency).ContinueWith(async t =>
                         {
                             if (_options.ExecuteAsync)
                             {
-                                _executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
+                                await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
                             }
                             else
                             {
@@ -86,6 +86,10 @@ namespace NetWorkflow.Scheduler
                 }
                 else if (_options._atTimeSet)
                 {
+                    // Note: Similer code being executed below. If separated out into a reusable async function that 
+                    // would make so another state machine would be created and have to be awaited. Therefore to reduce the memory allocation
+                    // the code to execute the Workflow was written within each WorkflowTime check.
+
                     if (_options.AtTime.Day != -1)
                     {
                         while (!_tokenSource.IsCancellationRequested)

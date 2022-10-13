@@ -139,7 +139,7 @@ namespace NetWorkflow.Tests
                 }))
                 .Configure(options =>
                 {
-                    options.AtTime = WorkflowTime.AtHour(DateTime.Now.Hour, DateTime.Now.Minute - 1).Repeat();
+                    options.AtTime = WorkflowTime.AtHour(1, DateTime.Now.Minute - 1).Repeat();
                 });
 
             // Act

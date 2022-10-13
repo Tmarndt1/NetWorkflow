@@ -147,7 +147,7 @@ var scheduler = new WorkflowScheduler<HelloWorldWorkflow>()
     .Configure(options =>
     {
         // Schedules the Workflow to be kicked off every 30 seconds
-        options.Frequency = TimeSpan.FromSeconds(30);
+        options.ExecuteAt = WorkflowTime.AtFrequency(TimeSpan.FromSeconds(30));
     });
 
 
@@ -166,8 +166,7 @@ var scheduler = new WorkflowScheduler<HelloWorldWorkflow>()
     .Configure(options =>
     {
         // Schedules the Workflow to be kicked off at midnight everyday
-        // Hour 1, Minute 0 in Military Time
-        options.AtTime = WorkflowTime.AtHour(1, 0).Repeat();
+        options.ExecuteAt = WorkflowTime.AtHour(24).Repeat();
     });
 
 

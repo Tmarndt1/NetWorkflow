@@ -40,7 +40,7 @@ namespace NetWorkflow.Tests
             var scheduler = new WorkflowScheduler<HelloWorldWorkflow>()
                 .Configure(options =>
                 {
-                    options.Frequency = TimeSpan.FromMilliseconds(200);
+                    options.ExecuteAt = WorkflowTime.AtFrequency(TimeSpan.FromMilliseconds(200));
                 });
 
             bool hit = false;
@@ -75,7 +75,7 @@ namespace NetWorkflow.Tests
                 }))
                 .Configure(options =>
                 {
-                    options.Frequency = TimeSpan.FromMilliseconds(200);
+                    options.ExecuteAt = WorkflowTime.AtFrequency(TimeSpan.FromMilliseconds(200));
                 });
 
             // Act
@@ -107,7 +107,7 @@ namespace NetWorkflow.Tests
                 }))
                 .Configure(options =>
                 {
-                    options.AtTime = WorkflowTime.AtMinute(DateTime.Now.Minute).Repeat();
+                    options.ExecuteAt = WorkflowTime.AtMinute(DateTime.Now.Minute).Repeat();
                 });
 
             // Act
@@ -139,7 +139,7 @@ namespace NetWorkflow.Tests
                 }))
                 .Configure(options =>
                 {
-                    options.AtTime = WorkflowTime.AtHour(1, DateTime.Now.Minute - 1).Repeat();
+                    options.ExecuteAt = WorkflowTime.AtHour(1, DateTime.Now.Minute - 1).Repeat();
                 });
 
             // Act

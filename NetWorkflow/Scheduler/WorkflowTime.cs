@@ -10,7 +10,89 @@ namespace NetWorkflow.Scheduler
     /// Hours are in military time so they span from 1 to 24.
     /// Minutes span from 0 to 59.
     /// </remarks>
-    public class WorkflowTime
+    public abstract class WorkflowTime
+    {
+        /// <summary>
+        /// Designates the WorkflowScheduler to execute the Workflow at the given frequency
+        /// </summary>
+        /// <param name="frequency">The frequency to execute the Workflow</param>
+        /// <returns>An instance of WorkflowFrequency</returns>
+        public static WorkflowFrequency AtFrequency(TimeSpan frequency)
+        {
+            return new WorkflowFrequency(frequency);
+        }
+
+        /// <summary>
+        /// Designates a WorkflowScheduler should execute a Workflow on the given day, hour, and minute.
+        /// </summary>
+        /// <param name="day">The day of the month the Workflow should be executed.</param>
+        /// <param name="hour">The hour of the day the Workflow should be executed.</param>
+        /// <param name="minute">The minute of the hour the Workflow should be executed.</param>
+        /// <returns>A new instance of WorkflowTime.</returns>
+        public static WorkflowDateTime AtDay(int day, int hour, int minute)
+        {
+            return new WorkflowDateTime(day, hour, minute);
+        }
+
+        /// <summary>
+        /// Designates a WorkflowScheduler should execute a Workflow on the given day, hour, and minute 0.
+        /// </summary>
+        /// <param name="day">The day of the month the Workflow should be executed.</param>
+        /// <param name="hour">The hour of the day the Workflow should be executed.</param>
+        /// <returns>A new instance of WorkflowTime.</returns>
+        /// <remarks>
+        /// Will execute at the beginning of the provided day and hour.
+        /// </remarks>
+        public static WorkflowDateTime AtDay(int day, int hour)
+        {
+            return new WorkflowDateTime(day, hour, 0);
+        }
+
+        /// <summary>
+        /// Designates a WorkflowScheduler should execute a Workflow on the given day, hour 0, and minute 0.
+        /// </summary>
+        /// <param name="day">The day of the month the Workflow should be executed.</param>
+        /// <returns>A new instance of WorkflowTime.</returns>
+        /// <remarks>
+        /// Will execute at midnight on the given day.
+        /// </remarks>
+        public static WorkflowDateTime AtDay(int day)
+        {
+            return new WorkflowDateTime(day, 1, 0);
+        }
+
+        /// Designates a WorkflowScheduler should execute a Workflow at the given
+        /// hour and at the given minute. 
+        /// </summary>
+        /// <param name="hour">The hour of the day the Workflow should be executed.</param>
+        /// <param name="minute">The minute of the hour the Workflow should be executed.</param>
+        /// <returns>A new instance of WorkflowTime.</returns>
+        public static WorkflowDateTime AtHour(int hour, int minute)
+        {
+            return new WorkflowDateTime(hour, minute);
+        }
+
+        /// Designates a WorkflowScheduler should execute a Workflow at the given hour and minute 0.
+        /// </summary>
+        /// <param name="hour">The hour of the day the Workflow should be executed.</param>
+        /// <returns>A new instance of WorkflowTime.</returns>
+        public static WorkflowDateTime AtHour(int hour)
+        {
+            return new WorkflowDateTime(hour, 0);
+        }
+
+        /// <summary>
+        /// Designates a WorkflowScheduler should execute a Workflow at the given minute.
+        /// </summary>
+        /// <param name="minute">The minute of the hour the Workflow should be executed.</param>
+        /// <returns>A new instance of WorkflowTime.</returns>
+        public static WorkflowDateTime AtMinute(int minute)
+        {
+            return new WorkflowDateTime(minute);
+        }
+    }
+
+    public class WorkflowDateTime : WorkflowTime
     {
         private int _day = -1;
 
@@ -69,66 +151,45 @@ namespace NetWorkflow.Scheduler
         /// <summary>
         /// Designates the WorkTime to repeat indefinitely.
         /// </summary>
-        internal bool Indefinitely { get; private set; }
+        public bool Indefinitely { get; private set; }
 
         /// <summary>
-        /// Designates a WorkflowScheduler should execute a Workflow on the given
-        /// month, at the given hour, and at the given minute. 
-        /// </summary>
-        /// <param name="day">The day of the month the Workflow should be executed.</param>
-        /// <param name="hour">The hour of the day the Workflow should be executed.</param>
-        /// <param name="minute">The minute of the hour the Workflow should be executed.</param>
-        /// <returns>A new instance of WorkflowTime.</returns>
-        public static WorkflowTime AtDay(int day, int hour, int minute)
-        {
-            return new WorkflowTime(day, hour, minute);
-        }
-
-        /// Designates a WorkflowScheduler should execute a Workflow at the given
-        /// hour and at the given minute. 
-        /// </summary>
-        /// <param name="hour">The hour of the day the Workflow should be executed.</param>
-        /// <param name="minute">The minute of the hour the Workflow should be executed.</param>
-        /// <returns>A new instance of WorkflowTime.</returns>
-        public static WorkflowTime AtHour(int hour, int minute)
-        {
-            return new WorkflowTime(hour, minute);
-        }
-
-        /// <summary>
-        /// Designates a WorkflowScheduler should execute a Workflow at the given minute.
-        /// </summary>
-        /// <param name="minute">The minute of the hour the Workflow should be executed.</param>
-        /// <returns>A new instance of WorkflowTime.</returns>
-        public static WorkflowTime AtMinute(int minute)
-        {
-            return new WorkflowTime(minute);
-        }
-
-        /// <summary>
-        /// Sets the WorkflowTime to run indefinitely
+        /// Sets the WorkflowTime to execute indefinitely
         /// </summary>
         /// <returns>The same instance of the WorkflowTime</returns>
-        public WorkflowTime Repeat()
+        public WorkflowDateTime Repeat()
         {
             Indefinitely = true;
 
             return this;
         }
 
-        private WorkflowTime(int day, int hour, int minute) : this(hour, minute)
+        internal WorkflowDateTime(int day, int hour, int minute) : this(hour, minute)
         {
             Day = day;
         }
 
-        private WorkflowTime(int hour, int minute) : this(minute)
+        internal WorkflowDateTime(int hour, int minute) : this(minute)
         {
             Hour = hour;
         }
 
-        private WorkflowTime(int minute)
+        internal WorkflowDateTime(int minute)
         {
             Minute = minute;
+        }
+    }
+
+    public class WorkflowFrequency : WorkflowTime
+    {
+        /// <summary>
+        /// Determines the frequency of how often the WorkflowScheduler executes a Workflow
+        /// </summary>
+        public readonly TimeSpan Frequency;
+
+        internal WorkflowFrequency(TimeSpan frequency)
+        {
+            Frequency = frequency;
         }
     }
 }

@@ -60,18 +60,18 @@ namespace NetWorkflow.Scheduler
             }
 
             // A user should specify a WorkflowScheduler to execute a specific frequency or time.
-            if (!_options._frequencySet && !_options._atTimeSet)
+            if (_options.ExecuteAt == null)
             {
-                throw new InvalidOperationException($"A {nameof(WorkflowSchedulerOptions.Frequency)} or {nameof(WorkflowSchedulerOptions.AtTime)} has not been set.");
+                throw new InvalidOperationException($"A {nameof(WorkflowSchedulerOptions.ExecuteAt)} has not been set.");
             }
 
             _runningTask = Task.Run(async () =>
             {
-                if (_options._frequencySet)
+                if (_options.ExecuteAt is WorkflowFrequency workflowFrequency)
                 {
                     while (!_tokenSource.IsCancellationRequested)
                     {
-                        await Task.Delay(_options.Frequency).ContinueWith(async t =>
+                        await Task.Delay(workflowFrequency.Frequency).ContinueWith(async t =>
                         {
                             if (_options.ExecuteAsync)
                             {
@@ -84,19 +84,19 @@ namespace NetWorkflow.Scheduler
                         });
                     }
                 }
-                else if (_options._atTimeSet)
+                else if (_options.ExecuteAt is WorkflowDateTime workflowDateTime)
                 {
                     // Note: Similer code being executed below. If separated out into a reusable async function that 
                     // would make so another state machine would be created and have to be awaited. Therefore to reduce the memory allocation
                     // the code to execute the Workflow was written within each WorkflowTime check.
 
-                    if (_options.AtTime.Day != -1)
+                    if (workflowDateTime.Day != -1)
                     {
                         while (!_tokenSource.IsCancellationRequested)
                         {
                             DateTime date = DateTime.Now;
 
-                            if (date.Day == _options.AtTime.Day && date.Hour == _options.AtTime.Hour && date.Minute == _options.AtTime.Minute)
+                            if (date.Day == workflowDateTime.Day && date.Hour == workflowDateTime.Hour && date.Minute == workflowDateTime.Minute)
                             {
                                 if (_options.ExecuteAsync)
                                 {
@@ -107,19 +107,19 @@ namespace NetWorkflow.Scheduler
                                     _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
                                 }
 
-                                if (!_options.AtTime.Indefinitely) break;
+                                if (!workflowDateTime.Indefinitely) break;
 
                                 await Task.Delay(60000); // Delay 1 minute
                             }
                         }
                     }
-                    else if (_options.AtTime.Hour != -1)
+                    else if (workflowDateTime.Hour != -1)
                     {
                         while (!_tokenSource.IsCancellationRequested)
                         {
                             DateTime date = DateTime.Now;
 
-                            if (date.Hour == _options.AtTime.Hour && date.Minute == _options.AtTime.Minute)
+                            if (date.Hour == workflowDateTime.Hour && date.Minute == workflowDateTime.Minute)
                             {
                                 if (_options.ExecuteAsync)
                                 {
@@ -130,17 +130,17 @@ namespace NetWorkflow.Scheduler
                                     _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
                                 }
 
-                                if (!_options.AtTime.Indefinitely) break;
+                                if (!workflowDateTime.Indefinitely) break;
 
                                 await Task.Delay(60000); // Delay 1 minute
                             }
                         }
                     }
-                    else if (_options.AtTime.Minute != -1)
+                    else if (workflowDateTime.Minute != -1)
                     {
                         while (!_tokenSource.IsCancellationRequested)
                         {
-                            if (DateTime.Now.Minute == _options.AtTime.Minute)
+                            if (DateTime.Now.Minute == workflowDateTime.Minute)
                             {
                                 if (_options.ExecuteAsync)
                                 {
@@ -151,7 +151,7 @@ namespace NetWorkflow.Scheduler
                                     _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
                                 }
 
-                                if (!_options.AtTime.Indefinitely) break;
+                                if (!workflowDateTime.Indefinitely) break;
 
                                 await Task.Delay(60000); // Delay 1 minute
                             }

@@ -12,7 +12,7 @@ namespace NetWorkflow.Tests.Examples
 
         public ParallelWorkflow(CancellationTokenSource tokenSource)
         {
-            Task.Delay(75).ContinueWith(t =>
+            Task.Delay(10).ContinueWith(t =>
             {
                 tokenSource.Cancel();
             });

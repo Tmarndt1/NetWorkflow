@@ -136,7 +136,7 @@ string[] results = new ParallelWorkflow()
 
 ```
 
-## WorkflowScheduler Frequency Example
+## WorkflowScheduler AtFrequency Example
 
 ```csharp
 
@@ -155,7 +155,7 @@ await scheduler.StartAsync();
 
 ```
 
-## WorkflowScheduler AtTime Example
+## WorkflowScheduler AtDateTime Example
 
 ```csharp
 

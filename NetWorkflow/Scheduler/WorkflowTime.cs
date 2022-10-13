@@ -7,7 +7,7 @@ namespace NetWorkflow.Scheduler
     /// </summary>
     /// <remarks>
     /// Days span from 1 to 31.
-    /// Hours are in military time so they span from 1 to 24.
+    /// Hours are in military time so they span from 0 to 23.
     /// Minutes span from 0 to 59.
     /// </remarks>
     public abstract class WorkflowTime
@@ -58,7 +58,7 @@ namespace NetWorkflow.Scheduler
         /// </remarks>
         public static WorkflowDateTime AtDay(int day)
         {
-            return new WorkflowDateTime(day, 1, 0);
+            return new WorkflowDateTime(day, 0, 0);
         }
 
         /// Designates a WorkflowScheduler should execute a Workflow at the given
@@ -122,9 +122,9 @@ namespace NetWorkflow.Scheduler
             get => _hour;
             private set
             {
-                if (value < 1) throw new WorkflowInvalidValueException("A hour cannot be less than 1");
+                if (value < 0) throw new WorkflowInvalidValueException("A hour cannot be less than 0");
 
-                if (value > 24) throw new WorkflowInvalidValueException("A hour cannot be greater than 24");
+                if (value > 23) throw new WorkflowInvalidValueException("A hour cannot be greater than 23");
 
                 _hour = value;
             }

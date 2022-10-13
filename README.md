@@ -166,7 +166,7 @@ var scheduler = new WorkflowScheduler<HelloWorldWorkflow>()
     .Configure(options =>
     {
         // Schedules the Workflow to be kicked off at midnight everyday
-        options.ExecuteAt = WorkflowTime.AtHour(24).Repeat();
+        options.ExecuteAt = WorkflowTime.AtHour(0).Repeat();
     });
 
 

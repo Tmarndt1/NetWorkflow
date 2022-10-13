@@ -8,7 +8,7 @@ namespace NetWorkflow.Scheduler
     {
         private Func<TWorkflow> _workflowFactory;
 
-        private readonly WorkflowSchedulerOptions _options = new WorkflowSchedulerOptions();
+        private readonly WorkflowSchedulerConfiguration _configuration = new WorkflowSchedulerConfiguration();
 
         private Task _runningTask;
 
@@ -37,11 +37,11 @@ namespace NetWorkflow.Scheduler
         /// <summary>
         /// Configures the WorkflowScheduler based on the values set within the provided WorkflowSchedulerOptions.
         /// </summary>
-        /// <param name="configureOptions">An action provides WorkflowSchedulerOptions to configure.</param>
+        /// <param name="configuration">An action provides WorkflowSchedulerOptions to configure.</param>
         /// <returns>The same instance of the WorkflowScheduler.</returns>
-        public WorkflowScheduler<TWorkflow> Configure(Action<WorkflowSchedulerOptions> configureOptions)
+        public WorkflowScheduler<TWorkflow> Configure(Action<WorkflowSchedulerConfiguration> configuration)
         {
-            configureOptions.Invoke(_options);
+            configuration.Invoke(_configuration);
 
             return this;
         }
@@ -60,20 +60,20 @@ namespace NetWorkflow.Scheduler
             }
 
             // A user should specify a WorkflowScheduler to execute a specific frequency or time.
-            if (_options.ExecuteAt == null)
+            if (_configuration.ExecuteAt == null)
             {
-                throw new InvalidOperationException($"A {nameof(WorkflowSchedulerOptions.ExecuteAt)} has not been set.");
+                throw new InvalidOperationException($"A {nameof(WorkflowSchedulerConfiguration.ExecuteAt)} has not been set.");
             }
 
             _runningTask = Task.Run(async () =>
             {
-                if (_options.ExecuteAt is WorkflowFrequency workflowFrequency)
+                if (_configuration.ExecuteAt is WorkflowFrequency workflowFrequency)
                 {
                     while (!_tokenSource.IsCancellationRequested)
                     {
                         await Task.Delay(workflowFrequency.Frequency).ContinueWith(async t =>
                         {
-                            if (_options.ExecuteAsync)
+                            if (_configuration.ExecuteAsync)
                             {
                                 await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
                             }
@@ -84,7 +84,7 @@ namespace NetWorkflow.Scheduler
                         });
                     }
                 }
-                else if (_options.ExecuteAt is WorkflowDateTime workflowDateTime)
+                else if (_configuration.ExecuteAt is WorkflowDateTime workflowDateTime)
                 {
                     // Note: Similer code being executed below. If separated out into a reusable async function that 
                     // would make so another state machine would be created and have to be awaited. Therefore to reduce the memory allocation
@@ -98,7 +98,7 @@ namespace NetWorkflow.Scheduler
 
                             if (date.Day == workflowDateTime.Day && date.Hour == workflowDateTime.Hour && date.Minute == workflowDateTime.Minute)
                             {
-                                if (_options.ExecuteAsync)
+                                if (_configuration.ExecuteAsync)
                                 {
                                     await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
                                 }
@@ -121,7 +121,7 @@ namespace NetWorkflow.Scheduler
 
                             if (date.Hour == workflowDateTime.Hour && date.Minute == workflowDateTime.Minute)
                             {
-                                if (_options.ExecuteAsync)
+                                if (_configuration.ExecuteAsync)
                                 {
                                     await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
                                 }
@@ -142,7 +142,7 @@ namespace NetWorkflow.Scheduler
                         {
                             if (DateTime.Now.Minute == workflowDateTime.Minute)
                             {
-                                if (_options.ExecuteAsync)
+                                if (_configuration.ExecuteAsync)
                                 {
                                     await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
                                 }

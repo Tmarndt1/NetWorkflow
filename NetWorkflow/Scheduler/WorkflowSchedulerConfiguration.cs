@@ -4,11 +4,11 @@ namespace NetWorkflow.Scheduler
     /// <summary>
     /// The options to use within a WorkflowScheduler.
     /// </summary>
-    public class WorkflowSchedulerOptions
+    public class WorkflowSchedulerConfiguration
     {
         private const string _changeExceptionMessage = "Cannot change the WorkflowSchedulerOptions after they have been set.";
 
-        internal bool _atTimeSet = false;
+        internal bool _executeAtSet = false;
 
         private WorkflowTime _executeAt;
 
@@ -23,9 +23,9 @@ namespace NetWorkflow.Scheduler
             get => _executeAt;
             set
             {
-                if (_atTimeSet) throw new InvalidOperationException(_changeExceptionMessage);
+                if (_executeAtSet) throw new InvalidOperationException(_changeExceptionMessage);
 
-                _atTimeSet = true;
+                _executeAtSet = true;
 
                 _executeAt = value;
             }

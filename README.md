@@ -143,7 +143,7 @@ string[] results = new ParallelWorkflow()
 using NetWorkflow.Scheduler;
 
 var scheduler = new WorkflowScheduler<HelloWorldWorkflow>()
-    .Use(() => new HelloWorldWorkflow()) // Will call the factory method on when scheduled
+    .Use(() => new HelloWorldWorkflow()) // Will invoke the factory method when scheduled
     .Configure(options =>
     {
         // Schedules the Workflow to be kicked off every 30 seconds
@@ -162,7 +162,7 @@ await scheduler.StartAsync();
 using NetWorkflow.Scheduler;
 
 var scheduler = new WorkflowScheduler<HelloWorldWorkflow>()
-    .Use(() => new HelloWorldWorkflow()) // Will call the factory method on when scheduled
+    .Use(() => new HelloWorldWorkflow()) // Will invoke the factory method when scheduled
     .Configure(options =>
     {
         // Schedules the Workflow to be kicked off at midnight everyday

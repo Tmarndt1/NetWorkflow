@@ -4,7 +4,7 @@ namespace NetWorkflow
 {
     public class WorkflowBuilder : IWorkflowBuilder
     {
-        protected WorkflowBuilder? _nextBuilder;
+        protected WorkflowBuilder _nextBuilder;
 
         public object Result { get; protected set; }
 

@@ -12,6 +12,8 @@ If you like or are using this project please give it a star. Thanks!
 
 ```csharp
 
+using NetWorkflow;
+
 public class HelloWorldWorkflow : Workflow<bool>
 {
     private const string _helloWorld = "HelloWorld";
@@ -43,6 +45,8 @@ public class HelloWorldWorkflow : Workflow<bool>
 ## Conditional Workflow Example
 
 ```csharp
+
+using NetWorkflow;
 
 public class ConditionalWorkflow : Workflow<int>
 {
@@ -94,6 +98,8 @@ int result = new ConditionalWorkflow().Run();
 
 ```csharp
 
+using NetWorkflow;
+
 public class ParallelWorkflow : Workflow<string[]>
 {
     public override IWorkflowBuilder<string[]> Build(IWorkflowBuilder builder) =>
@@ -127,6 +133,44 @@ public class ParallelWorkflow : Workflow<string[]>
 // Implicit cast to a string array
 string[] results = new ParallelWorkflow()
     .Run(new CancellationTokenSource().Token);
+
+```
+
+## WorkflowScheduler AtFrequency Example
+
+```csharp
+
+using NetWorkflow.Scheduler;
+
+var scheduler = new WorkflowScheduler<HelloWorldWorkflow>()
+    .Use(() => new HelloWorldWorkflow()) // Will call the factory method on when scheduled
+    .Configure(options =>
+    {
+        // Schedules the Workflow to be kicked off every 30 seconds
+        options.ExecuteAt = WorkflowTime.AtFrequency(TimeSpan.FromSeconds(30));
+    });
+
+
+await scheduler.StartAsync();
+
+```
+
+## WorkflowScheduler AtDateTime Example
+
+```csharp
+
+using NetWorkflow.Scheduler;
+
+var scheduler = new WorkflowScheduler<HelloWorldWorkflow>()
+    .Use(() => new HelloWorldWorkflow()) // Will call the factory method on when scheduled
+    .Configure(options =>
+    {
+        // Schedules the Workflow to be kicked off at midnight everyday
+        options.ExecuteAt = WorkflowTime.AtHour(0).Repeat();
+    });
+
+
+await scheduler.StartAsync();
 
 ```
 

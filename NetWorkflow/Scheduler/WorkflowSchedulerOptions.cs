@@ -10,7 +10,7 @@ namespace NetWorkflow.Scheduler
 
         internal bool _atTimeSet = false;
 
-        private WorkflowTime _atTime;
+        private WorkflowTime _executeAt;
 
         /// <summary>
         /// The specific time when a Workflow should be executed.
@@ -20,14 +20,14 @@ namespace NetWorkflow.Scheduler
         /// </remarks>
         public WorkflowTime ExecuteAt
         {
-            get => _atTime;
+            get => _executeAt;
             set
             {
                 if (_atTimeSet) throw new InvalidOperationException(_changeExceptionMessage);
 
                 _atTimeSet = true;
 
-                _atTime = value;
+                _executeAt = value;
             }
         }
 

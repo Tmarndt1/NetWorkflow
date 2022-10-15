@@ -1,9 +1,11 @@
-﻿using System.Linq.Expressions;
-using System.Reflection;
+﻿using System;
+using System.Linq.Expressions;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace NetWorkflow
 {
-    public class WorkflowStepAsyncExecutor<TIn, TOut> : IWorkflowExecutor<TIn, TOut>
+    public class WorkflowStepAsyncExecutor<TIn, TResult> : IWorkflowExecutor<TIn, TResult>
     {
         private readonly LambdaExpression _expression;
 
@@ -12,10 +14,8 @@ namespace NetWorkflow
             _expression = expression;
         }
 
-        public TOut Run(TIn args, CancellationToken token = default)
+        public TResult Run(TIn args, CancellationToken token = default)
         {
-            MethodInfo executingMethod = null;
-
             object body = null;
 
             if (_expression.Parameters.Count > 0) throw new InvalidOperationException("Parameter count within lambda cannot be greater than 0");
@@ -29,13 +29,13 @@ namespace NetWorkflow
                 throw new WorkflowStoppedException();
             }
 
-            if (body is IWorkflowStepAsync<TIn, TOut> stepAsync)
+            if (body is IWorkflowStepAsync<TIn, TResult> stepAsync)
             {
-                executingMethod = stepAsync.GetType().GetMethod(nameof(IWorkflowStepAsync<TOut>.RunAsync));
+                var executingMethod = stepAsync.GetType().GetMethod(nameof(IWorkflowStepAsync<TResult>.RunAsync));
 
                 if (executingMethod == null) throw new InvalidOperationException("WorkflowStep executing method not found");
 
-                Task<TOut> task = (Task<TOut>)executingMethod.Invoke(body, new object[] { args, token });
+                Task<TResult> task = (Task<TResult>)executingMethod.Invoke(body, new object[] { args, token });
 
                 Task.WaitAll(task);
 

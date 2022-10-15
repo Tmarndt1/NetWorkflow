@@ -1,4 +1,7 @@
-﻿namespace NetWorkflow
+﻿using System.Threading;
+using System.Threading.Tasks;
+
+namespace NetWorkflow
 {
     /// <summary>
     /// Marker interface for the WorkflowStep.

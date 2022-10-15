@@ -1,9 +1,11 @@
-﻿namespace NetWorkflow
+﻿using System.Threading;
+
+namespace NetWorkflow
 {
     public interface IWorkflowExecutor { }
 
-    public interface IWorkflowExecutor<TIn, TOut> : IWorkflowExecutor   
+    public interface IWorkflowExecutor<in T, out TResult> : IWorkflowExecutor
     {
-        public TOut Run(TIn args, CancellationToken token = default);
+        public TResult Run(T args, CancellationToken token = default);
     }
 }

@@ -1,7 +1,10 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using System.Threading;
+using Microsoft.Extensions.DependencyInjection;
 using NetWorkflow.Extensions;
 using NetWorkflow.Scheduler;
 using NetWorkflow.Tests.Examples;
+using Xunit;
 
 namespace NetWorkflow.Tests
 {

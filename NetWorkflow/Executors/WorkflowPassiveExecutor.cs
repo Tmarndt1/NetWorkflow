@@ -1,4 +1,6 @@
 ﻿
+using System.Threading;
+
 namespace NetWorkflow
 {
     public class WorkflowPassiveExecutor<TArgs> : IWorkflowExecutor<TArgs, TArgs>

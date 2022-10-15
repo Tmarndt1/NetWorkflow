@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
-using System.Reflection;
+using System.Threading;
 
 namespace NetWorkflow
 {
@@ -15,8 +15,6 @@ namespace NetWorkflow
 
         public TOut Run(TIn args, CancellationToken token = default)
         {
-            MethodInfo executingMethod = null;
-
             object body = null;
 
             if (_expression.Parameters.Count > 0) throw new InvalidOperationException("Parameter count within lambda cannot be greater than 0");
@@ -32,7 +30,7 @@ namespace NetWorkflow
 
             if (body is IWorkflowStep step)
             {
-                executingMethod = step.GetType().GetMethod(nameof(IWorkflowStep<TOut>.Run));
+                var executingMethod = step.GetType().GetMethod(nameof(IWorkflowStep<TOut>.Run));
 
                 if (executingMethod == null) throw new InvalidOperationException("Workflow executing method not found");
 

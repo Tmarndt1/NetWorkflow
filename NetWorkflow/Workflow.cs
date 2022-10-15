@@ -1,4 +1,8 @@
-﻿namespace NetWorkflow
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace NetWorkflow
 {
     /// <summary>
     /// Defines a Workflow and runs the various WorkflowSteps in sequence that are established within the Build method.

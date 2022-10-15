@@ -1,4 +1,7 @@
 ﻿
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace NetWorkflow.Tests.Examples
 {
     public class ConditionalParallelWorkflow : Workflow<int>

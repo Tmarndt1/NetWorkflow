@@ -1,4 +1,7 @@
 ﻿
+using System;
+using System.Threading;
+
 namespace NetWorkflow.Tests.Examples
 {
     public class RetryWorkflow : Workflow<int>

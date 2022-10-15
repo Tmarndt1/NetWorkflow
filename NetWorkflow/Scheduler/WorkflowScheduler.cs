@@ -1,5 +1,7 @@
-﻿using System.Reflection;
-using System.Timers;
+﻿using System;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace NetWorkflow.Scheduler
 {
@@ -67,102 +69,106 @@ namespace NetWorkflow.Scheduler
 
             _runningTask = Task.Run(async () =>
             {
-                if (_configuration.ExecuteAt is WorkflowFrequency workflowFrequency)
+                switch (_configuration.ExecuteAt)
                 {
-                    while (!_tokenSource.IsCancellationRequested)
-                    {
-                        await Task.Delay(workflowFrequency.Frequency).ContinueWith(async t =>
+                    case WorkflowFrequency workflowFrequency:
                         {
-                            if (_configuration.ExecuteAsync)
+                            while (!_tokenSource.IsCancellationRequested)
                             {
-                                await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
+                                await Task.Delay(workflowFrequency.Frequency).ContinueWith(async t =>
+                                {
+                                    if (_configuration.ExecuteAsync)
+                                    {
+                                        await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
+                                    }
+                                    else
+                                    {
+                                        _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
+                                    }
+                                });
                             }
-                            else
-                            {
-                                _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
-                            }
-                        });
-                    }
-                }
-                else if (_configuration.ExecuteAt is WorkflowDateTime workflowDateTime)
-                {
+
+                            break;
+                        }
                     // Note: Similer code being executed below. If separated out into a reusable async function that 
                     // would make so another state machine would be created and have to be awaited. Therefore to reduce the memory allocation
                     // the code to execute the Workflow was written within each WorkflowTime check.
-
-                    if (workflowDateTime.Day != -1)
-                    {
-                        while (!_tokenSource.IsCancellationRequested)
+                    case WorkflowDateTime workflowDateTime when workflowDateTime.Day != -1:
                         {
-                            DateTime date = DateTime.Now;
-
-                            if (date.Day == workflowDateTime.Day && date.Hour == workflowDateTime.Hour && date.Minute == workflowDateTime.Minute)
+                            while (!_tokenSource.IsCancellationRequested)
                             {
-                                if (_configuration.ExecuteAsync)
-                                {
-                                    await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
-                                }
-                                else
-                                {
-                                    _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
-                                }
+                                DateTime date = DateTime.Now;
 
-                                if (!workflowDateTime.Indefinitely) break;
+                                if (date.Day == workflowDateTime.Day && date.Hour == workflowDateTime.Hour && date.Minute == workflowDateTime.Minute)
+                                {
+                                    if (_configuration.ExecuteAsync)
+                                    {
+                                        await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
+                                    }
+                                    else
+                                    {
+                                        _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
+                                    }
 
-                                await Task.Delay(60000); // Delay 1 minute
+                                    if (!workflowDateTime.Indefinitely) break;
+
+                                    await Task.Delay(60000); // Delay 1 minute
+                                }
                             }
+
+                            break;
                         }
-                    }
-                    else if (workflowDateTime.Hour != -1)
-                    {
-                        while (!_tokenSource.IsCancellationRequested)
+                    case WorkflowDateTime workflowDateTime when workflowDateTime.Hour != -1:
                         {
-                            DateTime date = DateTime.Now;
-
-                            if (date.Hour == workflowDateTime.Hour && date.Minute == workflowDateTime.Minute)
+                            while (!_tokenSource.IsCancellationRequested)
                             {
-                                if (_configuration.ExecuteAsync)
-                                {
-                                    await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
-                                }
-                                else
-                                {
-                                    _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
-                                }
+                                DateTime date = DateTime.Now;
 
-                                if (!workflowDateTime.Indefinitely) break;
+                                if (date.Hour == workflowDateTime.Hour && date.Minute == workflowDateTime.Minute)
+                                {
+                                    if (_configuration.ExecuteAsync)
+                                    {
+                                        await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
+                                    }
+                                    else
+                                    {
+                                        _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
+                                    }
 
-                                await Task.Delay(60000); // Delay 1 minute
+                                    if (!workflowDateTime.Indefinitely) break;
+
+                                    await Task.Delay(60000); // Delay 1 minute
+                                }
                             }
+
+                            break;
                         }
-                    }
-                    else if (workflowDateTime.Minute != -1)
-                    {
-                        while (!_tokenSource.IsCancellationRequested)
+                    case WorkflowDateTime workflowDateTime when workflowDateTime.Minute != -1:
                         {
-                            if (DateTime.Now.Minute == workflowDateTime.Minute)
+                            while (!_tokenSource.IsCancellationRequested)
                             {
-                                if (_configuration.ExecuteAsync)
+                                if (DateTime.Now.Minute == workflowDateTime.Minute)
                                 {
-                                    await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
-                                }
-                                else
-                                {
-                                    _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
-                                }
+                                    if (_configuration.ExecuteAsync)
+                                    {
+                                        await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
+                                    }
+                                    else
+                                    {
+                                        _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
+                                    }
 
-                                if (!workflowDateTime.Indefinitely) break;
+                                    if (!workflowDateTime.Indefinitely) break;
 
-                                await Task.Delay(60000); // Delay 1 minute
+                                    await Task.Delay(60000); // Delay 1 minute
+                                }
                             }
+
+                            break;
                         }
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException("A WorkflowTime must specificy to run at the Day, Hour, or Minute mark");
-                    }
+                    case WorkflowDateTime workflowDateTime:
+                        throw new InvalidOperationException("A WorkflowTime must specify to run at the Day, Hour, or Minute mark");
                 }
-
             }, _tokenSource.Token);
 
             return _runningTask;

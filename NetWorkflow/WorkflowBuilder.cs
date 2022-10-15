@@ -1,4 +1,7 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Threading;
 
 namespace NetWorkflow
 {
@@ -21,7 +24,7 @@ namespace NetWorkflow
     public class WorkflowBuilder<TIn, TOut> : WorkflowBuilder, IWorkflowBuilderNext<TOut>, IWorkflowBuilderNext<TIn, TOut>
     {
         internal readonly IWorkflowExecutor<TIn, TOut> _executor;
-        
+
         public WorkflowBuilder(IWorkflowExecutor<TIn, TOut> executor)
         {
             _executor = executor;
@@ -65,10 +68,10 @@ namespace NetWorkflow
         }
     }
 
-    public class WorkflowBuilderConditional<TIn> : WorkflowBuilder, 
-        IWorkflowBuilderConditional<TIn>, 
-        IWorkflowBuilderConditionalNext<TIn>, 
-        IWorkflowBuilderConditionalFinal<TIn>, 
+    public class WorkflowBuilderConditional<TIn> : WorkflowBuilder,
+        IWorkflowBuilderConditional<TIn>,
+        IWorkflowBuilderConditionalNext<TIn>,
+        IWorkflowBuilderConditionalFinal<TIn>,
         IWorkflowBuilderConditionalFinalAggregate
     {
         private readonly WorkflowExecutorConditional<TIn> _executor;

@@ -1,5 +1,7 @@
-﻿using NetWorkflow.Exceptions;
+﻿using System;
+using NetWorkflow.Exceptions;
 using NetWorkflow.Scheduler;
+using Xunit;
 
 namespace NetWorkflow.Tests
 {

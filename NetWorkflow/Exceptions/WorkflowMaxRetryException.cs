@@ -1,8 +1,10 @@
 ﻿
+using System;
+
 namespace NetWorkflow
 {
     /// <summary>
-    /// Exception that is thrown when the maximum ammount of retries has been met within a Workflow
+    /// Exception that is thrown when the maximum amount of retries has been met within a Workflow
     /// </summary>
     public class WorkflowMaxRetryException : Exception
     {

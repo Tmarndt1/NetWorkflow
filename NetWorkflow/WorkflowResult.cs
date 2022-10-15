@@ -1,4 +1,6 @@
-﻿namespace NetWorkflow
+﻿using System;
+
+namespace NetWorkflow
 {
     public class WorkflowResult
     {
@@ -59,7 +61,7 @@
                 Duration = duration,
                 IsCompleted = true
             };
-        } 
+        }
 
         public static WorkflowResult<TOut> Faulted(Exception ex, TimeSpan duration)
         {

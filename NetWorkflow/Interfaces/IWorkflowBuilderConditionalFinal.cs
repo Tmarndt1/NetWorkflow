@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Linq.Expressions;
 
 namespace NetWorkflow
 {
@@ -36,6 +37,6 @@ namespace NetWorkflow
         /// <param name="delay">The amount of time to delay before retrying.</param>
         /// <param name="maxRetries">Max number of retries before breaking.</param>
         /// <returns>An instance of a WorkflowBuilder.</returns>
-        public IWorkflowBuilderConditionalFinalAggregate Retry(TimeSpan delay , int maxRetries = 1);
+        public IWorkflowBuilderConditionalFinalAggregate Retry(TimeSpan delay, int maxRetries = 1);
     }
 }

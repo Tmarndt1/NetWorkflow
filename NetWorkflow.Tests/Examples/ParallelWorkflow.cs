@@ -1,4 +1,8 @@
 ﻿
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace NetWorkflow.Tests.Examples
 {
     public class ParallelWorkflow : Workflow<bool>

@@ -1,4 +1,6 @@
 ﻿
+using System.Threading;
+
 namespace NetWorkflow.Tests.Examples
 {
     public class ConditionalStopWorkflow : Workflow<object>

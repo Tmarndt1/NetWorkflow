@@ -1,7 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using NetWorkflow.Extensions;
 using NetWorkflow.Tests.Examples;
-using System.Text.Json;
 
 namespace NetWorkflow.Tests
 {
@@ -153,8 +152,6 @@ namespace NetWorkflow.Tests
 
             // Act
             var result = workflow.Run();
-
-            var json = JsonSerializer.Serialize(workflow);
 
             // Assert
             Assert.Null(result.Output); // Should be null if it passes

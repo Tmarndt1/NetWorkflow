@@ -4,36 +4,38 @@ namespace NetWorkflow
 {
     public class WorkflowExecutorConditional<TIn> : IWorkflowExecutor<TIn, object>
     {
-        private readonly List<ExecutorWrapper> _next = new List<ExecutorWrapper>();
+        private List<ExecutorWrapper> _wrappers = new List<ExecutorWrapper>();
+
+        private bool _disposedValue;
 
         public WorkflowExecutorConditional(Expression<Func<TIn, bool>> expression)
         {
-            _next.Add(new ExecutorWrapper(expression));
+            _wrappers.Add(new ExecutorWrapper(expression));
         }
 
         public void Append(Expression<Func<TIn, bool>> expression)
         {
-            _next.Add(new ExecutorWrapper(expression));
+            _wrappers.Add(new ExecutorWrapper(expression));
         }
 
         public void Append(IWorkflowExecutor<TIn, object> executor)
         {
-            _next.Last().Executor = executor;
+            _wrappers.Last().Executor = executor;
         }
 
         public void SetStop()
         {
-            _next.Last().ShouldStop = true;
+            _wrappers.Last().ShouldStop = true;
         }
 
         public void SetExceptionToThrow(Expression<Func<Exception>> func)
         {
-            _next.Last().ExceptionFunc = func;
+            _wrappers.Last().ExceptionFunc = func;
         }
 
         public void SetRetry(TimeSpan delay, int maxRetries, Action onRetry)
         {
-            ExecutorWrapper wrapper = _next.Last();
+            ExecutorWrapper wrapper = _wrappers.Last();
 
             wrapper.Retry = true;
 
@@ -46,7 +48,7 @@ namespace NetWorkflow
 
         public object Run(TIn args, CancellationToken token = default)
         {
-            var enumerator = _next.GetEnumerator();
+            var enumerator = _wrappers.GetEnumerator();
 
             while (enumerator.MoveNext())
             {
@@ -103,6 +105,33 @@ namespace NetWorkflow
             {
                 Expression = expression;
             }
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    _wrappers = null;
+                }
+
+                _disposedValue = true;
+            }
+        }
+
+        ~WorkflowExecutorConditional()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+
+            GC.SuppressFinalize(this);
         }
     }
 }

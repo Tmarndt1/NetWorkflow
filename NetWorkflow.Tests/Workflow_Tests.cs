@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using NetWorkflow.Extensions;
 using NetWorkflow.Tests.Examples;
+using System.Text.Json;
 
 namespace NetWorkflow.Tests
 {
@@ -134,6 +135,8 @@ namespace NetWorkflow.Tests
             // Act
             var result = workflow.Run();
 
+            var json = JsonSerializer.Serialize(workflow);
+
             // Assert
             Assert.Null(result.Output); // Should be null if it passes
             Assert.True(result.IsCanceled);
@@ -233,6 +236,32 @@ namespace NetWorkflow.Tests
             Assert.False(result.IsCompleted);
             Assert.False(result.IsCanceled);
             Assert.IsType<WorkflowMaxRetryException>(result.Exception);
+        }
+
+        [Fact]
+        public void Dispose_Success()
+        {
+            // Arrange
+            var workflow = new ConditionalThrowWorkflow();
+
+            bool hit = false;
+
+            // Act
+            try
+            {
+                workflow.Dispose();
+
+                var result = workflow.Run();
+
+                hit = true;
+            }
+            catch (Exception ex)
+            {
+                Assert.IsType<ObjectDisposedException>(ex);
+            }
+
+            // Assert
+            Assert.False(hit);
         }
     }
 }

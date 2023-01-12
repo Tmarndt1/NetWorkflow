@@ -1,22 +1,21 @@
 ﻿using System.Reflection;
-using System.Timers;
 
 namespace NetWorkflow.Scheduler
 {
-    public class WorkflowScheduler<TWorkflow>
+    public class WorkflowScheduler<TWorkflow> : IDisposable
         where TWorkflow : IWorkflow
     {
         private Func<TWorkflow> _workflowFactory;
 
-        private readonly WorkflowSchedulerConfiguration _configuration = new WorkflowSchedulerConfiguration();
+        private WorkflowSchedulerConfiguration _configuration = new WorkflowSchedulerConfiguration();
 
-        private Task _runningTask;
-
-        private CancellationTokenSource _tokenSource;
+        private Task _task;
 
         private MethodInfo _executingMethod;
 
         private MethodInfo _executingMethodAsync;
+
+        private bool _disposedValue;
 
         /// <summary>
         /// Designates the WorkflowScheduler to use the function to create the new Workflow.
@@ -49,11 +48,10 @@ namespace NetWorkflow.Scheduler
         /// <summary>
         /// Starts the WorkflowScheduler and returns the Task/Thread the WorkflowScheduler is running on.
         /// </summary>
+        /// <param name="token">The CancellationToken to cancel the request.</param>
         /// <returns>A long running Task.</returns>
-        public Task StartAsync()
+        public Task StartAsync(CancellationToken token = default)
         {
-            _tokenSource = new CancellationTokenSource();
-
             if (_workflowFactory == null)
             {
                 throw new InvalidOperationException($"A {nameof(WorkflowScheduler<TWorkflow>)} requires a Workflow Factory function provided in the {nameof(WorkflowScheduler<TWorkflow>.Use)} method");
@@ -65,26 +63,26 @@ namespace NetWorkflow.Scheduler
                 throw new InvalidOperationException($"A {nameof(WorkflowSchedulerConfiguration.ExecuteAt)} has not been set.");
             }
 
-            _runningTask = Task.Run(async () =>
+            _task = Task.Run(async () =>
             {
-                if (_configuration.ExecuteAt is WorkflowFrequency workflowFrequency)
+                if (_configuration?.ExecuteAt is WorkflowFrequency workflowFrequency)
                 {
-                    while (!_tokenSource.IsCancellationRequested)
+                    while (!token.IsCancellationRequested)
                     {
                         await Task.Delay(workflowFrequency.Frequency).ContinueWith(async t =>
                         {
                             if (_configuration.ExecuteAsync)
                             {
-                                await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
+                                await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { token });
                             }
                             else
                             {
-                                _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
+                                _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { token });
                             }
                         });
                     }
                 }
-                else if (_configuration.ExecuteAt is WorkflowDateTime workflowDateTime)
+                else if (_configuration?.ExecuteAt is WorkflowDateTime workflowDateTime)
                 {
                     // Note: Similer code being executed below. If separated out into a reusable async function that 
                     // would make so another state machine would be created and have to be awaited. Therefore to reduce the memory allocation
@@ -92,7 +90,7 @@ namespace NetWorkflow.Scheduler
 
                     if (workflowDateTime.Day != -1)
                     {
-                        while (!_tokenSource.IsCancellationRequested)
+                        while (!token.IsCancellationRequested && !_disposedValue)
                         {
                             DateTime date = DateTime.Now;
 
@@ -100,11 +98,11 @@ namespace NetWorkflow.Scheduler
                             {
                                 if (_configuration.ExecuteAsync)
                                 {
-                                    await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
+                                    await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { token });
                                 }
                                 else
                                 {
-                                    _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
+                                    _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { token });
                                 }
 
                                 if (!workflowDateTime.Indefinitely) break;
@@ -115,7 +113,7 @@ namespace NetWorkflow.Scheduler
                     }
                     else if (workflowDateTime.Hour != -1)
                     {
-                        while (!_tokenSource.IsCancellationRequested)
+                        while (!token.IsCancellationRequested && !_disposedValue)
                         {
                             DateTime date = DateTime.Now;
 
@@ -123,11 +121,11 @@ namespace NetWorkflow.Scheduler
                             {
                                 if (_configuration.ExecuteAsync)
                                 {
-                                    await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
+                                    await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { token });
                                 }
                                 else
                                 {
-                                    _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
+                                    _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { token });
                                 }
 
                                 if (!workflowDateTime.Indefinitely) break;
@@ -138,17 +136,17 @@ namespace NetWorkflow.Scheduler
                     }
                     else if (workflowDateTime.Minute != -1)
                     {
-                        while (!_tokenSource.IsCancellationRequested)
+                        while (!token.IsCancellationRequested && !_disposedValue)
                         {
                             if (DateTime.Now.Minute == workflowDateTime.Minute)
                             {
                                 if (_configuration.ExecuteAsync)
                                 {
-                                    await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
+                                    await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { token });
                                 }
                                 else
                                 {
-                                    _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
+                                    _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { token });
                                 }
 
                                 if (!workflowDateTime.Indefinitely) break;
@@ -163,17 +161,40 @@ namespace NetWorkflow.Scheduler
                     }
                 }
 
-            }, _tokenSource.Token);
+            }, token);
 
-            return _runningTask;
+            return _task;
         }
 
-        /// <summary>
-        /// Stops the WorkflowScheduler by cancelling the CancellationToken that is passed in to each instance of the Workflow.
-        /// </summary>
-        public void Stop()
+        protected virtual void Dispose(bool disposing)
         {
-            _tokenSource.Cancel();
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    _workflowFactory = null;
+                    _task = null;
+                    _executingMethod = null;
+                    _executingMethodAsync = null;
+                    _configuration = null;
+                }
+
+                _disposedValue = true;
+            }
+        }
+
+        ~WorkflowScheduler()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+
+            GC.SuppressFinalize(this);
         }
     }
 }

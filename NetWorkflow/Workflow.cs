@@ -3,11 +3,13 @@
     /// <summary>
     /// Defines a Workflow and runs the various WorkflowSteps in sequence that are established within the Build method.
     /// </summary>
-    public abstract class Workflow<TOut> : IWorkflow<TOut>
+    public abstract class Workflow<TOut> : IWorkflow<TOut>, IDisposable
     {
         private readonly WorkflowBuilder _next;
 
-        private readonly WorkflowOptions _options;
+        private WorkflowOptions _options;
+
+        private bool _disposedValue;
 
         /// <summary>
         /// Workflow constructor.
@@ -40,6 +42,11 @@
         /// <returns>A generic WorkflowResult.</returns>
         public WorkflowResult<TOut> Run(CancellationToken token = default)
         {
+            if (_disposedValue)
+            {
+                throw new ObjectDisposedException(typeof(WorkflowResult<TOut>).Name);
+            }
+
             // Builds the Workflow
             Build(_next);
 
@@ -78,6 +85,36 @@
         public Task<WorkflowResult<TOut>> RunAsync(CancellationToken token = default)
         {
             return Task.Run(() => Run(token), token);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    _next.Dispose();
+                }
+
+                _options = null;
+
+                _disposedValue = true;
+            }
+        }
+
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~Workflow()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+
+            GC.SuppressFinalize(this);
         }
     }
 }

@@ -45,10 +45,12 @@ namespace NetWorkflow.Tests
 
             bool hit = false;
 
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
+
             // Act
             try
             {
-                scheduler.StartAsync();
+                scheduler.StartAsync(tokenSource.Token);
 
                 hit = true;
             }
@@ -78,15 +80,17 @@ namespace NetWorkflow.Tests
                     config.ExecuteAt = WorkflowTime.AtFrequency(TimeSpan.FromMilliseconds(200));
                 });
 
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
+
             // Act
-            scheduler.StartAsync();
+            scheduler.StartAsync(tokenSource.Token);
 
             // Assert
             while (true)
             {
                 Thread.Sleep(TimeSpan.FromMilliseconds(450));
 
-                scheduler.Stop();
+                tokenSource.Cancel();
 
                 break;
             }
@@ -110,15 +114,17 @@ namespace NetWorkflow.Tests
                     config.ExecuteAt = WorkflowTime.AtMinute(DateTime.Now.Minute).Repeat();
                 });
 
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
+
             // Act
-            scheduler.StartAsync();
+            scheduler.StartAsync(tokenSource.Token);
 
             // Assert
             while (true)
             {
                 Thread.Sleep(1000); // Must sleep for a second 
 
-                scheduler.Stop();
+                tokenSource.Cancel();
 
                 break;
             }
@@ -142,15 +148,17 @@ namespace NetWorkflow.Tests
                     config.ExecuteAt = WorkflowTime.AtHour(1, DateTime.Now.Minute - 1).Repeat();
                 });
 
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
+
             // Act
-            scheduler.StartAsync();
+            scheduler.StartAsync(tokenSource.Token);
 
             // Assert
             while (true)
             {
                 Thread.Sleep(200);
 
-                scheduler.Stop();
+                tokenSource.Cancel();
 
                 break;
             }
@@ -170,6 +178,36 @@ namespace NetWorkflow.Tests
 
             // Assert
             Assert.NotNull(workflowScheduler);
+        }
+
+        [Fact]
+        public void Dispose_Success()
+        {
+            // Arrange
+            int count = 0;
+
+            var scheduler = new WorkflowScheduler<HelloWorldWorkflow>()
+                .Use(() => new HelloWorldWorkflow((stepName) =>
+                {
+                    count++;
+                }))
+                .Configure(config =>
+                {
+                    config.ExecuteAt = WorkflowTime.AtFrequency(TimeSpan.FromMilliseconds(50));
+                });
+
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
+
+            // Act
+            using (scheduler)
+            {
+                scheduler.StartAsync(tokenSource.Token);
+            }
+
+            Thread.Sleep(100);
+
+            // Assert
+            Assert.Equal(0, count);
         }
     }
 }

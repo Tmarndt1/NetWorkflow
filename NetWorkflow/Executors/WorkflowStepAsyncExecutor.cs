@@ -5,7 +5,9 @@ namespace NetWorkflow
 {
     public class WorkflowStepAsyncExecutor<TIn, TOut> : IWorkflowExecutor<TIn, TOut>
     {
-        private readonly LambdaExpression _expression;
+        private LambdaExpression _expression;
+        
+        private bool _disposedValue;
 
         public WorkflowStepAsyncExecutor(LambdaExpression expression)
         {
@@ -43,6 +45,33 @@ namespace NetWorkflow
             }
 
             throw new InvalidOperationException("Internal error");
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    _expression = null;
+                }
+
+                _disposedValue = true;
+            }
+        }
+
+        ~WorkflowStepAsyncExecutor()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+
+            GC.SuppressFinalize(this);
         }
     }
 }

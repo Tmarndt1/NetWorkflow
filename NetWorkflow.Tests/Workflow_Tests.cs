@@ -25,6 +25,25 @@ namespace NetWorkflow.Tests
         }
 
         [Fact]
+        public void HelloWorld_Ran_Twice_Success()
+        {
+            // Arrange
+            var workflow = new HelloWorldWorkflow();
+
+            // Act
+            workflow.Run();
+
+            var result = workflow.Run();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.True(result.IsCompleted);
+            Assert.False(result.IsCanceled);
+            Assert.False(result.IsFaulted);
+            Assert.True(result);
+        }
+
+        [Fact]
         public void Parallel_Success()
         {
             // Arrange

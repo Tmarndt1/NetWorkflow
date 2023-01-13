@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace NetWorkflow
 {
-    public class WorkflowParallelExecutor<TIn, TOut> : IWorkflowExecutor<TIn, TOut[]>
+    public class WorkflowParallelExecutor<TIn, TOut> : IWorkflowExecutor<TIn, IEnumerable<TOut>>
     {
         private LambdaExpression _expression;
 
@@ -14,7 +14,7 @@ namespace NetWorkflow
             _expression = expression;
         }
 
-        public TOut[] Run(TIn args, CancellationToken token = default)
+        public IEnumerable<TOut> Run(TIn args, CancellationToken token = default)
         {
             MethodInfo executor = null;
 
@@ -56,7 +56,7 @@ namespace NetWorkflow
 
                 Task.WaitAll(tasks, token);
 
-                return tasks.Select(x => x.Result).ToArray();
+                return tasks.Select(x => x.Result);
             }
 
             throw new InvalidOperationException("Internal error");

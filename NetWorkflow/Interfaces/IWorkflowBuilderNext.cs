@@ -36,7 +36,7 @@ namespace NetWorkflow
         /// For compile time validation, each WorkflowStep must return the same type. The follwing WorkflowStep requires input type of TNext[].
         /// The TNext[] will be ordered in the same as the AsyncSteps passed into the func parameter. 
         /// </remarks>
-        public IWorkflowBuilderNext<TNext[]> Parallel<TNext>(Expression<Func<IEnumerable<IWorkflowStepAsync<TIn, TNext>>>> func);
+        public IWorkflowBuilderNext<IEnumerable<TNext>> Parallel<TNext>(Expression<Func<IEnumerable<IWorkflowStepAsync<TIn, TNext>>>> func);
 
         /// <summary>
         /// Defines the first conditional to execute following the last WorkflowStep.

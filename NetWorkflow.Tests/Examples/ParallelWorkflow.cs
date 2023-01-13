@@ -66,11 +66,11 @@ namespace NetWorkflow.Tests.Examples
             }
         }
 
-        private class Step3 : IWorkflowStepAsync<string[], string>
+        private class Step3 : IWorkflowStepAsync<IEnumerable<string>, string>
         {
-            public Task<string> RunAsync(string[] args, CancellationToken token = default)
+            public Task<string> RunAsync(IEnumerable<string> args, CancellationToken token = default)
             {
-                if (args.Length < 1) return Task.FromResult(string.Empty);
+                if (args.Count() < 1) return Task.FromResult(string.Empty);
 
                 return Task.FromResult($"{nameof(Step3)} ran");
             }

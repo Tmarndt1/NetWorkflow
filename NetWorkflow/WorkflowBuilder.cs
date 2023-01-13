@@ -60,11 +60,11 @@ namespace NetWorkflow
             _executor = executor;
         }
 
-        public IWorkflowBuilderNext<TNext[]> Parallel<TNext>(Expression<Func<IEnumerable<IWorkflowStepAsync<TOut, TNext>>>> func)
+        public IWorkflowBuilderNext<IEnumerable<TNext>> Parallel<TNext>(Expression<Func<IEnumerable<IWorkflowStepAsync<TOut, TNext>>>> func)
         {
-            _next = new WorkflowBuilder<TOut, TNext[]>(new WorkflowParallelExecutor<TOut, TNext>(func));
+            _next = new WorkflowBuilder<TOut, IEnumerable<TNext>>(new WorkflowParallelExecutor<TOut, TNext>(func));
 
-            return (IWorkflowBuilderNext<TNext[]>)_next;
+            return (IWorkflowBuilderNext<IEnumerable<TNext>>)_next;
         }
 
         public IWorkflowBuilderNext<TOut, TNext> Then<TNext>(Expression<Func<IWorkflowStep<TOut, TNext>>> func)

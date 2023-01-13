@@ -47,9 +47,9 @@ namespace NetWorkflow.Tests.Examples
                 return "Failed";
             }
         }
-        private class FlattenStep : IWorkflowStep<string[], string>
+        private class FlattenStep : IWorkflowStep<IEnumerable<string>, string>
         {
-            public string Run(string[] args, CancellationToken token = default)
+            public string Run(IEnumerable<string> args, CancellationToken token = default)
             {
                 return string.Join(", ", args);
             }

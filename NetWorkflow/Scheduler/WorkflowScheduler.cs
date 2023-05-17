@@ -5,6 +5,10 @@ using System.Threading.Tasks;
 
 namespace NetWorkflow.Scheduler
 {
+    /// <summary>
+    /// The WorkflowScheduler is a generic workflow scheduler that is responsible for scheduling and executing workflows.
+    /// </summary>
+    /// <typeparam name="TWorkflow">The Workflow to executed.</typeparam>
     public class WorkflowScheduler<TWorkflow> : IDisposable
         where TWorkflow : IWorkflow
     {
@@ -64,10 +68,9 @@ namespace NetWorkflow.Scheduler
                 {
                     while (!token.IsCancellationRequested)
                     {
-                        await Task.Delay(workflowFrequency.Frequency).ContinueWith(t =>
-                        {
-                            _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { token });
-                        });
+                        await Task.Delay(workflowFrequency.Frequency);
+
+                        _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { token });
                     }
                 }
                 else if (_configuration?.ExecuteAt is WorkflowDateTime workflowDateTime)

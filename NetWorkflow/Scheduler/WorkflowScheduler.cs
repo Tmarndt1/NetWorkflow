@@ -9,8 +9,8 @@ namespace NetWorkflow.Scheduler
     /// The WorkflowScheduler is a generic workflow scheduler that is responsible for scheduling and executing workflows.
     /// </summary>
     /// <typeparam name="TWorkflow">The Workflow to executed.</typeparam>
-    public class WorkflowScheduler<TWorkflow> : IDisposable
-        where TWorkflow : IWorkflow
+    public class WorkflowScheduler<TWorkflow, Tout> : IDisposable
+        where TWorkflow : IWorkflow<Tout>
     {
         private Func<TWorkflow> _workflowFactory;
 
@@ -29,7 +29,7 @@ namespace NetWorkflow.Scheduler
         {
             _workflowFactory = workflowFactory;
 
-            _executingMethod = typeof(TWorkflow).GetMethod("Run");
+            _executingMethod = typeof(TWorkflow).GetMethod(nameof(IWorkflow<TWorkflow>.Run));
         }
 
         /// <summary>
@@ -37,7 +37,7 @@ namespace NetWorkflow.Scheduler
         /// </summary>
         /// <param name="configuration">An action provides WorkflowSchedulerOptions to configure.</param>
         /// <returns>The same instance of the WorkflowScheduler.</returns>
-        public WorkflowScheduler<TWorkflow> Configure(Action<WorkflowSchedulerConfiguration> configuration)
+        public WorkflowScheduler<TWorkflow, Tout> Configure(Action<WorkflowSchedulerConfiguration> configuration)
         {
             configuration.Invoke(_configuration);
 
@@ -53,7 +53,7 @@ namespace NetWorkflow.Scheduler
         {
             if (_workflowFactory == null)
             {
-                throw new InvalidOperationException($"A {nameof(WorkflowScheduler<TWorkflow>)} requires a Workflow Factory function.");
+                throw new InvalidOperationException($"A {nameof(WorkflowScheduler<TWorkflow, Tout>)} requires a Workflow Factory function.");
             }
 
             // A user should specify a WorkflowScheduler to execute a specific frequency or time.
@@ -75,7 +75,7 @@ namespace NetWorkflow.Scheduler
                 }
                 else if (_configuration?.ExecuteAt is WorkflowDateTime workflowDateTime)
                 {
-                    // Note: Similer code being executed below. If separated out into a reusable async function that 
+                    // Note: Similar code being executed below. If separated out into a reusable async function that 
                     // would make so another state machine would be created and have to be awaited. Therefore to reduce the memory allocation
                     // the code to execute the Workflow was written within each WorkflowTime check.
 
@@ -107,7 +107,7 @@ namespace NetWorkflow.Scheduler
 
                                 if (!workflowDateTime.Indefinitely) break;
 
-                                await Task.Delay(60000); // Delay 1 minute
+                                await Task.Delay(TimeSpan.FromMinutes(1)); // Delay 1 minute
                             }
                         }
                     }
@@ -121,13 +121,13 @@ namespace NetWorkflow.Scheduler
 
                                 if (!workflowDateTime.Indefinitely) break;
 
-                                await Task.Delay(60000); // Delay 1 minute
+                                await Task.Delay(TimeSpan.FromMinutes(1)); // Delay 1 minute
                             }
                         }
                     }
                     else
                     {
-                        throw new InvalidOperationException("A WorkflowTime must specificy to run at the Day, Hour, or Minute mark");
+                        throw new InvalidOperationException("A WorkflowTime must specify to run at the Day, Hour, or Minute mark");
                     }
                 }
 

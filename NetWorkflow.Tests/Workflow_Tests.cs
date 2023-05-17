@@ -223,7 +223,7 @@ namespace NetWorkflow.Tests
         {
             // Arrange
             var workflow = new ServiceCollection()
-                .AddWorkflow(() => new HelloWorldWorkflow())
+                .AddWorkflow<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow())
                 .BuildServiceProvider()
                 .GetRequiredService<HelloWorldWorkflow>();
 

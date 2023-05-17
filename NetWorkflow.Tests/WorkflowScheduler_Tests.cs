@@ -11,7 +11,7 @@ namespace NetWorkflow.Tests
         public void No_Options_Success()
         {
             // Arrange
-            var scheduler = new WorkflowScheduler<HelloWorldWorkflow>(() => new HelloWorldWorkflow());
+            var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow());
 
             bool hit = false;
 
@@ -36,7 +36,7 @@ namespace NetWorkflow.Tests
         public void No_Factory_Success()
         {
             // Arrange
-            var scheduler = new WorkflowScheduler<HelloWorldWorkflow>(null)
+            var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(null)
                 .Configure(config =>
                 {
                     config.ExecuteAt = WorkflowTime.AtFrequency(TimeSpan.FromMilliseconds(200));
@@ -69,7 +69,7 @@ namespace NetWorkflow.Tests
             // Arrange
             int count = 0;
 
-            var scheduler = new WorkflowScheduler<HelloWorldWorkflow>(() => new HelloWorldWorkflow((stepName) =>
+            var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow((stepName) =>
             {
                 count++;
             }))
@@ -97,7 +97,7 @@ namespace NetWorkflow.Tests
             // Arrange
             int count = 0;
             
-            var scheduler = new WorkflowScheduler<HelloWorldWorkflow>(() => new HelloWorldWorkflow((stepName) =>
+            var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow((stepName) =>
             {
                 count++;
             }))
@@ -125,7 +125,7 @@ namespace NetWorkflow.Tests
             // Arrange
             int count = 0;
             
-            var scheduler = new WorkflowScheduler<HelloWorldWorkflow>(() => new HelloWorldWorkflow((stepName) =>
+            var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow((stepName) =>
             {
                 count++;
             }))
@@ -153,9 +153,9 @@ namespace NetWorkflow.Tests
             // Arrange
             // Act
             var workflowScheduler = new ServiceCollection()
-                .AddWorkflowScheduler(() => new WorkflowScheduler<HelloWorldWorkflow>(() => new HelloWorldWorkflow()))
+                .AddWorkflowScheduler(() => new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow()))
                 .BuildServiceProvider()
-                .GetRequiredService<WorkflowScheduler<HelloWorldWorkflow>>();
+                .GetRequiredService<WorkflowScheduler<HelloWorldWorkflow, bool>>();
 
             // Assert
             Assert.NotNull(workflowScheduler);
@@ -167,7 +167,7 @@ namespace NetWorkflow.Tests
             // Arrange
             int count = 0;
 
-            var scheduler = new WorkflowScheduler<HelloWorldWorkflow>(() => new HelloWorldWorkflow((stepName) =>
+            var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow((stepName) =>
             {
                 count++;
             }))

@@ -177,12 +177,10 @@ namespace NetWorkflow.Tests
             });
 
             CancellationTokenSource tokenSource = new CancellationTokenSource();
+            scheduler.StartAsync(tokenSource.Token);
 
             // Act
-            using (scheduler)
-            {
-                scheduler.StartAsync(tokenSource.Token);
-            }
+            scheduler.Dispose();
 
             Thread.Sleep(100);
 

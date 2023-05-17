@@ -12,11 +12,7 @@ namespace NetWorkflow.Scheduler
 
         private WorkflowSchedulerConfiguration _configuration = new WorkflowSchedulerConfiguration();
 
-        private Task _task;
-
         private MethodInfo _executingMethod;
-
-        private MethodInfo _executingMethodAsync;
 
         private bool _disposedValue;
 
@@ -25,15 +21,11 @@ namespace NetWorkflow.Scheduler
         /// </summary>
         /// <param name="workflowFactory">A function that returns a Workflow.</param>
         /// <returns>The same instance of the WorkflowScheduler.</returns>
-        public WorkflowScheduler<TWorkflow> Use(Func<TWorkflow> workflowFactory)
+        public WorkflowScheduler(Func<TWorkflow> workflowFactory)
         {
             _workflowFactory = workflowFactory;
 
             _executingMethod = typeof(TWorkflow).GetMethod("Run");
-
-            _executingMethodAsync = typeof(TWorkflow).GetMethod("RunAsync");
-
-            return this;
         }
 
         /// <summary>
@@ -57,7 +49,7 @@ namespace NetWorkflow.Scheduler
         {
             if (_workflowFactory == null)
             {
-                throw new InvalidOperationException($"A {nameof(WorkflowScheduler<TWorkflow>)} requires a Workflow Factory function provided in the {nameof(WorkflowScheduler<TWorkflow>.Use)} method");
+                throw new InvalidOperationException($"A {nameof(WorkflowScheduler<TWorkflow>)} requires a Workflow Factory function.");
             }
 
             // A user should specify a WorkflowScheduler to execute a specific frequency or time.
@@ -66,22 +58,15 @@ namespace NetWorkflow.Scheduler
                 throw new InvalidOperationException($"A {nameof(WorkflowSchedulerConfiguration.ExecuteAt)} has not been set.");
             }
 
-            _task = Task.Run(async () =>
+            return Task.Run(async () =>
             {
                 if (_configuration?.ExecuteAt is WorkflowFrequency workflowFrequency)
                 {
                     while (!token.IsCancellationRequested)
                     {
-                        await Task.Delay(workflowFrequency.Frequency).ContinueWith(async t =>
+                        await Task.Delay(workflowFrequency.Frequency).ContinueWith(t =>
                         {
-                            if (_configuration.ExecuteAsync)
-                            {
-                                await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { token });
-                            }
-                            else
-                            {
-                                _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { token });
-                            }
+                            _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { token });
                         });
                     }
                 }
@@ -99,14 +84,7 @@ namespace NetWorkflow.Scheduler
 
                             if (date.Day == workflowDateTime.Day && date.Hour == workflowDateTime.Hour && date.Minute == workflowDateTime.Minute)
                             {
-                                if (_configuration.ExecuteAsync)
-                                {
-                                    await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { token });
-                                }
-                                else
-                                {
-                                    _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { token });
-                                }
+                                _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { token });
 
                                 if (!workflowDateTime.Indefinitely) break;
 
@@ -122,14 +100,7 @@ namespace NetWorkflow.Scheduler
 
                             if (date.Hour == workflowDateTime.Hour && date.Minute == workflowDateTime.Minute)
                             {
-                                if (_configuration.ExecuteAsync)
-                                {
-                                    await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { token });
-                                }
-                                else
-                                {
-                                    _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { token });
-                                }
+                                _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { token });
 
                                 if (!workflowDateTime.Indefinitely) break;
 
@@ -143,14 +114,7 @@ namespace NetWorkflow.Scheduler
                         {
                             if (DateTime.Now.Minute == workflowDateTime.Minute)
                             {
-                                if (_configuration.ExecuteAsync)
-                                {
-                                    await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { token });
-                                }
-                                else
-                                {
-                                    _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { token });
-                                }
+                                _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { token });
 
                                 if (!workflowDateTime.Indefinitely) break;
 
@@ -165,8 +129,6 @@ namespace NetWorkflow.Scheduler
                 }
 
             }, token);
-
-            return _task;
         }
 
         protected virtual void Dispose(bool disposing)
@@ -176,9 +138,7 @@ namespace NetWorkflow.Scheduler
                 if (disposing)
                 {
                     _workflowFactory = null;
-                    _task = null;
                     _executingMethod = null;
-                    _executingMethodAsync = null;
                     _configuration = null;
                 }
 

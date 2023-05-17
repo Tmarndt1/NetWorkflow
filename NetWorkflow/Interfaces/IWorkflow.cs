@@ -7,7 +7,10 @@ namespace NetWorkflow
     /// <summary>
     /// Marker interace for all Workflows to implement.
     /// </summary>
-    public interface IWorkflow { }
+    public interface IWorkflow 
+    {
+        
+    }
 
     /// <summary>
     /// Defines the required members and methods of the Workflow.

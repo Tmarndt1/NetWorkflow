@@ -32,26 +32,5 @@ namespace NetWorkflow.Scheduler
                 _executeAt = value;
             }
         }
-
-
-        internal bool _executeAsyncSet = false;
-
-        private bool _executeAsync = false;
-
-        /// <summary>
-        /// Determines if the WorkflowScheduler should execute each Workflow on it's own thread via the RunAsync method.
-        /// </summary>
-        public bool ExecuteAsync
-        {
-            get => _executeAsync;
-            set
-            {
-                if (_executeAsyncSet) throw new InvalidOperationException(_changeExceptionMessage);
-
-                _executeAsyncSet = true;
-
-                _executeAsync = value;
-            }
-        }
     }
 }

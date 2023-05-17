@@ -1,9 +1,12 @@
-﻿namespace NetWorkflow
-{
-    public interface IWorkflowExecutor : IDisposable { }
+﻿using System;
+using System.Threading;
 
-    public interface IWorkflowExecutor<TIn, TOut> : IWorkflowExecutor
+namespace NetWorkflow
+{
+    internal interface IWorkflowExecutor : IDisposable { }
+
+    internal interface IWorkflowExecutor<in TIn, out TOut> : IWorkflowExecutor
     {
-        public TOut Run(TIn args, CancellationToken token = default);
+        TOut Run(TIn args, CancellationToken token = default);
     }
 }

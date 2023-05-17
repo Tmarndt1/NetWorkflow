@@ -1,4 +1,7 @@
-﻿namespace NetWorkflow
+﻿using System.Threading;
+using System.Threading.Tasks;
+
+namespace NetWorkflow
 {
     /// <summary>
     /// Marker interface for the WorkflowStep.
@@ -9,7 +12,7 @@
     /// Interface that defines a WorkflowStep that requires no input and defines an output of type TOut.
     /// </summary>
     /// <typeparam name="TOut">The type of the WorkflowStep's output.</typeparam>
-    public interface IWorkflowStep<TOut> : IWorkflowStep
+    public interface IWorkflowStep<out TOut> : IWorkflowStep
     {
         /// <summary>
         /// Runs the WorkflowStep and returns a result of type TOut.
@@ -24,7 +27,7 @@
     /// </summary>
     /// <typeparam name="TIn">The type of the previous output.</typeparam>
     /// <typeparam name="TOut">The type of the WorkflowStep's output.</typeparam>
-    public interface IWorkflowStep<TIn, TOut> : IWorkflowStep
+    public interface IWorkflowStep<in TIn, out TOut> : IWorkflowStep
     {
         /// <summary>
         /// Runs the WorkflowStep and returns a result of type TOut.

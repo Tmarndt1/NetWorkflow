@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Linq.Expressions;
 
 namespace NetWorkflow
 {
@@ -20,7 +21,7 @@ namespace NetWorkflow
     /// Extended generic IWorkflowBuilder interface that defines the base methods on a WorkflowBuilder.
     /// </summary>
     /// <typeparam name="TOut">The end result of the Workflow.</typeparam>
-    public interface IWorkflowBuilder<TOut>
+    public interface IWorkflowBuilder<out TOut>
     {
 
     }

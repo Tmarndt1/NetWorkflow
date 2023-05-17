@@ -1,4 +1,8 @@
-﻿namespace NetWorkflow
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace NetWorkflow
 {
     /// <summary>
     /// Defines a Workflow and runs the various WorkflowSteps in sequence that are established within the Build method.
@@ -101,13 +105,6 @@
                 _disposedValue = true;
             }
         }
-
-        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
-        // ~Workflow()
-        // {
-        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-        //     Dispose(disposing: false);
-        // }
 
         public void Dispose()
         {

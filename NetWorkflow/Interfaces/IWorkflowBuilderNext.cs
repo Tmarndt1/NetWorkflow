@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 
 namespace NetWorkflow
@@ -6,7 +7,6 @@ namespace NetWorkflow
     /// <summary>
     /// Interface that defines the base WorkflowSteps on a Workflow after the initial WorkflowStep has been determined.
     /// </summary>
-
     /// <typeparam name="TIn">The type of the incoming parameter.</typeparam>
     public interface IWorkflowBuilderNext<TIn> : IWorkflowBuilder<TIn>
     {

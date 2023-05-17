@@ -1,8 +1,11 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Threading;
 
 namespace NetWorkflow
 {
-    public class WorkflowBuilder : IWorkflowBuilder, IDisposable
+    internal class WorkflowBuilder : IWorkflowBuilder, IDisposable
     {
         protected WorkflowBuilder _next;
 
@@ -49,13 +52,13 @@ namespace NetWorkflow
         }
     }
 
-    public class WorkflowBuilder<TIn, TOut> : WorkflowBuilder, IWorkflowBuilderNext<TOut>, IWorkflowBuilderNext<TIn, TOut>, IDisposable
+    internal class WorkflowBuilder<TIn, TOut> : WorkflowBuilder, IWorkflowBuilderNext<TIn, TOut>, IDisposable
     {
         internal readonly IWorkflowExecutor<TIn, TOut> _executor;
 
         private bool _disposedValue;
 
-        public WorkflowBuilder(IWorkflowExecutor<TIn, TOut> executor)
+        internal WorkflowBuilder(IWorkflowExecutor<TIn, TOut> executor)
         {
             _executor = executor;
         }
@@ -127,7 +130,7 @@ namespace NetWorkflow
         }
     }
 
-    public class WorkflowBuilderConditional<TIn> : WorkflowBuilder, 
+    internal class WorkflowBuilderConditional<TIn> : WorkflowBuilder, 
         IWorkflowBuilderConditional<TIn>, 
         IWorkflowBuilderConditionalNext<TIn>, 
         IWorkflowBuilderConditionalFinal<TIn>, 

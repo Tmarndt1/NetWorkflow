@@ -1,7 +1,10 @@
 ﻿
+using System;
+using System.Threading;
+
 namespace NetWorkflow
 {
-    public class WorkflowSkipExecutor<TArgs> : IWorkflowExecutor<TArgs, TArgs>
+    internal class WorkflowSkipExecutor<TArgs> : IWorkflowExecutor<TArgs, TArgs>
     {
         private bool _disposedValue;
 

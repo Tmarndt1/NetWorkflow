@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Linq.Expressions;
 
 namespace NetWorkflow
 {
@@ -37,10 +38,5 @@ namespace NetWorkflow
         /// <param name="maxRetries">Max number of retries before breaking.</param>
         /// <returns>An instance of a WorkflowBuilder.</returns>
         public IWorkflowBuilderConditionalNext<TIn> Retry(TimeSpan delay, int maxRetries = 1);
-    }
-
-    public interface IWorkflowBuilderConditional<TIn, TOut> : IWorkflowBuilderConditional<TOut>
-    {
-
     }
 }

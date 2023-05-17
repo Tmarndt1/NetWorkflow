@@ -1,9 +1,14 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace NetWorkflow
 {
-    public class WorkflowParallelExecutor<TIn, TOut> : IWorkflowExecutor<TIn, IEnumerable<TOut>>
+    internal class WorkflowParallelExecutor<TIn, TOut> : IWorkflowExecutor<TIn, IEnumerable<TOut>>
     {
         private LambdaExpression _expression;
 

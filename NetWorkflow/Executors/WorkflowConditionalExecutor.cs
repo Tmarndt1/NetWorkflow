@@ -1,8 +1,12 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Threading;
 
 namespace NetWorkflow
 {
-    public class WorkflowExecutorConditional<TIn> : IWorkflowExecutor<TIn, object>
+    internal class WorkflowExecutorConditional<TIn> : IWorkflowExecutor<TIn, object>
     {
         private List<ExecutorWrapper> _wrappers = new List<ExecutorWrapper>();
 

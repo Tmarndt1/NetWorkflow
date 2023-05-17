@@ -1,5 +1,10 @@
-﻿namespace NetWorkflow
+﻿using System;
+
+namespace NetWorkflow
 {
+    /// <summary>
+    /// Represents the result of a workflow, providing information about its execution.
+    /// </summary>
     public class WorkflowResult
     {
         /// <summary>
@@ -42,6 +47,10 @@
         }
     }
 
+    /// <summary>
+    /// Represents the result of a workflow, providing information about its execution.
+    /// </summary>
+    /// <typeparam name="TOut">The type of the Workflow's output.</typeparam>
     public sealed class WorkflowResult<TOut> : WorkflowResult
     {
         /// <summary>
@@ -51,7 +60,7 @@
 
         private WorkflowResult(string message) : base(message) { }
 
-        public static WorkflowResult<TOut> Success(TOut output, TimeSpan duration)
+        internal static WorkflowResult<TOut> Success(TOut output, TimeSpan duration)
         {
             return new WorkflowResult<TOut>("The Workflow has completed successfully.")
             {
@@ -59,9 +68,8 @@
                 Duration = duration,
                 IsCompleted = true
             };
-        } 
-
-        public static WorkflowResult<TOut> Faulted(Exception ex, TimeSpan duration)
+        }
+        internal static WorkflowResult<TOut> Faulted(Exception ex, TimeSpan duration)
         {
             return new WorkflowResult<TOut>("The Workflow was stopped because an exception was thrown.")
             {
@@ -70,7 +78,7 @@
             };
         }
 
-        public static WorkflowResult<TOut> Cancelled(TimeSpan duration)
+        internal static WorkflowResult<TOut> Cancelled(TimeSpan duration)
         {
             return new WorkflowResult<TOut>("The Workflow was cancelled.")
             {

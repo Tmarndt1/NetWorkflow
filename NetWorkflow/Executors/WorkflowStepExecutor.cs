@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading;
 
 namespace NetWorkflow
 {
-    public class WorkflowStepExecutor<TIn, TOut> : IWorkflowExecutor<TIn, TOut>
+    internal class WorkflowStepExecutor<TIn, TOut> : IWorkflowExecutor<TIn, TOut>
     {
         private LambdaExpression _expression;
 

@@ -44,7 +44,7 @@ namespace NetWorkflow
         /// </summary>
         /// <param name="token">The CancellationToken to cancel the workflow.</param>
         /// <returns>A generic WorkflowResult.</returns>
-        public WorkflowResult<TOut> Run(CancellationToken token = default)
+        public IWorkflowResult<TOut> Run(CancellationToken token = default)
         {
             if (_disposedValue)
             {
@@ -86,7 +86,7 @@ namespace NetWorkflow
         /// </summary>
         /// <param name="token">The CancellationToken to cancel the workflow.</param>
         /// <returns>A Task with a generic WorkflowResult.</returns>
-        public Task<WorkflowResult<TOut>> RunAsync(CancellationToken token = default)
+        public Task<IWorkflowResult<TOut>> RunAsync(CancellationToken token = default)
         {
             return Task.Run(() => Run(token), token);
         }

@@ -20,7 +20,7 @@ namespace NetWorkflow.Tests
             Assert.True(result.IsCompleted);
             Assert.False(result.IsCanceled);
             Assert.False(result.IsFaulted);
-            Assert.True(result);
+            Assert.True(result.Output);
         }
 
         [Fact]
@@ -39,7 +39,7 @@ namespace NetWorkflow.Tests
             Assert.True(result.IsCompleted);
             Assert.False(result.IsCanceled);
             Assert.False(result.IsFaulted);
-            Assert.True(result);
+            Assert.True(result.Output);
         }
 
         [Fact]
@@ -56,7 +56,7 @@ namespace NetWorkflow.Tests
             Assert.True(result.IsCompleted);
             Assert.False(result.IsCanceled);
             Assert.False(result.IsFaulted);
-            Assert.True(result);
+            Assert.True(result as WorkflowResult<bool>);
         }
 
         [Fact]
@@ -223,7 +223,7 @@ namespace NetWorkflow.Tests
         {
             // Arrange
             var workflow = new ServiceCollection()
-                .AddWorkflow(() => new HelloWorldWorkflow())
+                .AddWorkflow<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow())
                 .BuildServiceProvider()
                 .GetRequiredService<HelloWorldWorkflow>();
 
@@ -235,7 +235,7 @@ namespace NetWorkflow.Tests
             Assert.True(result.IsCompleted);
             Assert.False(result.IsCanceled);
             Assert.False(result.IsFaulted);
-            Assert.True(result);
+            Assert.True(result.Output);
         }
 
         [Fact]

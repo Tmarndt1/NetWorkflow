@@ -84,7 +84,7 @@ namespace NetWorkflow
             }
 
             // If no condition was met then default to a WorkflowConditionResult
-            return new WorkflowResult("No condition was met");
+            return WorkflowResult<TIn>.Default("No condition was met");
         }
 
         private sealed class ExecutorWrapper

@@ -108,7 +108,7 @@ namespace NetWorkflow.Tests
         }
 
         [Fact]
-        public void AtTime_Success()
+        public void AtTime_Minute_Success()
         {
             // Arrange
             int count = 0;
@@ -116,6 +116,62 @@ namespace NetWorkflow.Tests
             var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
             {
                 config.ExecuteAt = WorkflowTime.AtMinute(DateTime.Now.Minute);
+            });
+
+            scheduler.OnExecuted += (o, e) => ++count;
+
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
+
+            // Act
+            scheduler.StartAsync(tokenSource.Token);
+
+            // Assert
+            Thread.Sleep(1000); // Must sleep for a second 
+
+            tokenSource.Cancel();
+
+            Assert.Equal(1, count); // Count should be two because both WorkflowStep's increment
+        }
+
+        [Fact]
+        public void AtTime_Hour_Success()
+        {
+            // Arrange
+            int count = 0;
+
+            DateTime now = DateTime.Now;
+
+            var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
+            {
+                config.ExecuteAt = WorkflowTime.AtHour(now.Hour, now.Minute);
+            });
+
+            scheduler.OnExecuted += (o, e) => ++count;
+
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
+
+            // Act
+            scheduler.StartAsync(tokenSource.Token);
+
+            // Assert
+            Thread.Sleep(1000); // Must sleep for a second 
+
+            tokenSource.Cancel();
+
+            Assert.Equal(1, count); // Count should be two because both WorkflowStep's increment
+        }
+
+        [Fact]
+        public void AtTime_Day_Success()
+        {
+            // Arrange
+            int count = 0;
+
+            DateTime now = DateTime.Now;
+
+            var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
+            {
+                config.ExecuteAt = WorkflowTime.AtDay(now.Day, now.Hour, now.Minute);
             });
 
             scheduler.OnExecuted += (o, e) => ++count;

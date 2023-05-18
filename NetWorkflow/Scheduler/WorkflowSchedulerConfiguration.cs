@@ -8,7 +8,7 @@ namespace NetWorkflow.Scheduler
     /// </summary>
     public class WorkflowSchedulerConfiguration
     {
-        private const string _changeExceptionMessage = "Cannot change the WorkflowSchedulerOptions after they have been set.";
+        private const string _changeExceptionMessage = $"Cannot change the {nameof(WorkflowSchedulerConfiguration)} after they have been set.";
 
         internal bool _executeAtSet = false;
 

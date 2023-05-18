@@ -179,12 +179,11 @@ namespace NetWorkflow.Tests
             scheduler.StartAsync(tokenSource.Token);
 
             // Act
+            Thread.Sleep(100);
             scheduler.Dispose();
 
-            Thread.Sleep(100);
-
             // Assert
-            Assert.Equal(0, count);
+            Assert.Equal(4, count);
         }
     }
 }

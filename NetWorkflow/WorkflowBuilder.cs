@@ -43,7 +43,7 @@ namespace NetWorkflow
             Dispose(disposing: false);
         }
 
-        public virtual void Dispose()
+        public void Dispose()
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
@@ -52,7 +52,7 @@ namespace NetWorkflow
         }
     }
 
-    internal class WorkflowBuilder<TIn, TOut> : WorkflowBuilder, IWorkflowBuilderNext<TIn, TOut>, IDisposable
+    internal class WorkflowBuilder<TIn, TOut> : WorkflowBuilder, IWorkflowBuilderNext<TIn, TOut>
     {
         internal readonly IWorkflowExecutor<TIn, TOut> _executor;
 
@@ -113,20 +113,6 @@ namespace NetWorkflow
 
                 base.Dispose(disposing);
             }
-        }
-
-        ~WorkflowBuilder()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: false);
-        }
-
-        public override void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-
-            GC.SuppressFinalize(this);
         }
     }
 
@@ -252,20 +238,6 @@ namespace NetWorkflow
 
                 base.Dispose(disposing);
             }
-        }
-
-        ~WorkflowBuilderConditional()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: false);
-        }
-
-        public override void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-
-            GC.SuppressFinalize(this);
         }
     }
 }

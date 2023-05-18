@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,14 +8,17 @@ namespace NetWorkflow.Scheduler
     /// The WorkflowScheduler is a generic workflow scheduler that is responsible for scheduling and executing workflows.
     /// </summary>
     /// <typeparam name="TWorkflow">The Workflow to executed.</typeparam>
-    public class WorkflowScheduler<TWorkflow> : IDisposable
-        where TWorkflow : IWorkflow
+    public class WorkflowScheduler<TWorkflow, TResult> : IDisposable
+        where TWorkflow : IWorkflow<TResult>
     {
+        // Declare the event.
+        public event EventHandler<TResult> OnExecuted = delegate { };
+
         private Func<TWorkflow> _workflowFactory;
 
         private WorkflowSchedulerConfiguration _configuration = new WorkflowSchedulerConfiguration();
 
-        private MethodInfo _executingMethod;
+        private int _count = 0;
 
         private bool _disposedValue;
 
@@ -25,23 +27,15 @@ namespace NetWorkflow.Scheduler
         /// </summary>
         /// <param name="workflowFactory">A function that returns a Workflow.</param>
         /// <returns>The same instance of the WorkflowScheduler.</returns>
-        public WorkflowScheduler(Func<TWorkflow> workflowFactory)
+        public WorkflowScheduler(Func<TWorkflow> workflowFactory, Action<WorkflowSchedulerConfiguration> configuration)
         {
+            if (workflowFactory == null) throw new ArgumentNullException(nameof(workflowFactory), "The WorkflowScheduler requires a workflow factory.");
+
+            if (configuration == null) throw new ArgumentNullException(nameof(configuration), "The WorkflowScheduler requires a configuration to define when to execute thew workflow.");
+
             _workflowFactory = workflowFactory;
 
-            _executingMethod = typeof(TWorkflow).GetMethod("Run");
-        }
-
-        /// <summary>
-        /// Configures the WorkflowScheduler based on the values set within the provided WorkflowSchedulerOptions.
-        /// </summary>
-        /// <param name="configuration">An action provides WorkflowSchedulerOptions to configure.</param>
-        /// <returns>The same instance of the WorkflowScheduler.</returns>
-        public WorkflowScheduler<TWorkflow> Configure(Action<WorkflowSchedulerConfiguration> configuration)
-        {
             configuration.Invoke(_configuration);
-
-            return this;
         }
 
         /// <summary>
@@ -53,7 +47,7 @@ namespace NetWorkflow.Scheduler
         {
             if (_workflowFactory == null)
             {
-                throw new InvalidOperationException($"A {nameof(WorkflowScheduler<TWorkflow>)} requires a Workflow Factory function.");
+                throw new InvalidOperationException($"A {nameof(WorkflowScheduler<TWorkflow, TResult>)} requires a Workflow Factory function.");
             }
 
             // A user should specify a WorkflowScheduler to execute a specific frequency or time.
@@ -70,7 +64,11 @@ namespace NetWorkflow.Scheduler
                     {
                         await Task.Delay(workflowFrequency.Frequency);
 
-                        _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { token });
+                        OnExecuted.Invoke(this, _workflowFactory.Invoke().Run(token));
+
+                        _count++;
+
+                        if (workflowFrequency.ExecutionCount == _count) break;
                     }
                 }
                 else if (_configuration?.ExecuteAt is WorkflowDateTime workflowDateTime)
@@ -87,9 +85,11 @@ namespace NetWorkflow.Scheduler
 
                             if (date.Day == workflowDateTime.Day && date.Hour == workflowDateTime.Hour && date.Minute == workflowDateTime.Minute)
                             {
-                                _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { token });
+                                OnExecuted.Invoke(this, _workflowFactory.Invoke().Run(token));
 
-                                if (!workflowDateTime.Indefinitely) break;
+                                _count++;
+
+                                if (workflowDateTime.ExecutionCount == _count) break;
 
                                 await Task.Delay(60000); // Delay 1 minute
                             }
@@ -103,9 +103,11 @@ namespace NetWorkflow.Scheduler
 
                             if (date.Hour == workflowDateTime.Hour && date.Minute == workflowDateTime.Minute)
                             {
-                                _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { token });
+                                OnExecuted.Invoke(this, _workflowFactory.Invoke().Run(token));
 
-                                if (!workflowDateTime.Indefinitely) break;
+                                _count++;
+
+                                if (workflowDateTime.ExecutionCount == _count) break;
 
                                 await Task.Delay(60000); // Delay 1 minute
                             }
@@ -117,9 +119,11 @@ namespace NetWorkflow.Scheduler
                         {
                             if (DateTime.Now.Minute == workflowDateTime.Minute)
                             {
-                                _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { token });
+                                OnExecuted.Invoke(this, _workflowFactory.Invoke().Run(token));
 
-                                if (!workflowDateTime.Indefinitely) break;
+                                _count++;
+
+                                if (workflowDateTime.ExecutionCount == _count) break;
 
                                 await Task.Delay(60000); // Delay 1 minute
                             }
@@ -141,7 +145,6 @@ namespace NetWorkflow.Scheduler
                 if (disposing)
                 {
                     _workflowFactory = null;
-                    _executingMethod = null;
                     _configuration = null;
                 }
 

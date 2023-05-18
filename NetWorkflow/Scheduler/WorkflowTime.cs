@@ -91,6 +91,24 @@ namespace NetWorkflow.Scheduler
         {
             return new WorkflowDateTime(minute);
         }
+
+        /// <summary>
+        /// Designates the Workflow to execute until the count is met.
+        /// </summary>
+        internal int ExecutionCount { get; private set; } = -1;
+
+        /// <summary>
+        /// Designates the Workflow to execute until the count is met.
+        /// </summary>
+        /// <param name="count">The max ammount of times the Workflow should execute.</param>
+        /// <returns>The same instance of the WorkflowTime.</returns>
+        public WorkflowTime Until(int count)
+        {
+            ExecutionCount = count;
+
+            return this;
+        }
+
     }
 
     public class WorkflowDateTime : WorkflowTime
@@ -147,22 +165,6 @@ namespace NetWorkflow.Scheduler
 
                 _minute = value;
             }
-        }
-
-        /// <summary>
-        /// Designates the WorkTime to repeat indefinitely.
-        /// </summary>
-        public bool Indefinitely { get; private set; }
-
-        /// <summary>
-        /// Sets the WorkflowTime to execute indefinitely
-        /// </summary>
-        /// <returns>The same instance of the WorkflowTime</returns>
-        public WorkflowDateTime Repeat()
-        {
-            Indefinitely = true;
-
-            return this;
         }
 
         internal WorkflowDateTime(int day, int hour, int minute) : this(hour, minute)

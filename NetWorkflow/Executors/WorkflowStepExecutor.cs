@@ -1,57 +1,47 @@
 ﻿using System;
 using System.Linq.Expressions;
-using System.Reflection;
 using System.Threading;
 
 namespace NetWorkflow
 {
-    internal class WorkflowStepExecutor<TIn, TOut> : IWorkflowExecutor<TIn, TOut>
+    internal class WorkflowStepExecutor<TIn, TOut> : IWorkflowExecutor<TIn, TOut>, IDisposable
     {
-        private LambdaExpression _expression;
+        private readonly LambdaExpression _expression;
 
         private bool _disposedValue;
 
         public WorkflowStepExecutor(LambdaExpression expression)
         {
-            _expression = expression;
+            _expression = expression ?? throw new ArgumentNullException(nameof(expression));
         }
 
         public TOut Run(TIn args, CancellationToken token = default)
         {
-            MethodInfo executingMethod = null;
+            if (_expression.Parameters.Count > 0)
+                throw new InvalidOperationException("Parameter count within lambda cannot be greater than 0");
 
-            object body = null;
+            var body = _expression.Compile().DynamicInvoke();
 
-            if (_expression.Parameters.Count > 0) throw new InvalidOperationException("Parameter count within lambda cannot be greater than 0");
-
-            body = _expression.Compile().DynamicInvoke();
-
-            if (body == null) throw new InvalidOperationException("IWorkflowStep cannot be null");
+            if (body == null)
+                throw new InvalidOperationException("IWorkflowStep cannot be null");
 
             if (token.IsCancellationRequested)
-            {
                 throw new WorkflowStoppedException();
-            }
 
-            if (body is IWorkflowStep step)
-            {
-                executingMethod = step.GetType().GetMethod(nameof(IWorkflowStep<TOut>.Run));
+            if (!(body is IWorkflowStep step))
+                throw new InvalidOperationException("Internal error");
 
-                if (executingMethod == null) throw new InvalidOperationException("Workflow executing method not found");
+            var executingMethod = step.GetType().GetMethod(nameof(IWorkflowStep<TOut>.Run));
 
-                int count = executingMethod.GetParameters().Length;
+            if (executingMethod == null)
+                throw new InvalidOperationException("Workflow executing method not found");
 
-                if (count == 1)
-                {
-                    return (TOut)executingMethod.Invoke(body, new object[] { token });
-                }
-                else
-                {
-                    return (TOut)executingMethod.Invoke(body, new object[] { args, token });
-                }
-            }
+            var parameters = executingMethod.GetParameters();
 
-            throw new InvalidOperationException("Internal error");
+            if (parameters.Length == 1)
+                return (TOut)executingMethod.Invoke(step, new object[] { token });
+            else
+                return (TOut)executingMethod.Invoke(step, new object[] { args, token });
         }
 
         protected virtual void Dispose(bool disposing)
@@ -60,22 +50,19 @@ namespace NetWorkflow
             {
                 if (disposing)
                 {
-                    _expression = null;
+                    // Dispose managed resources
+                    (_expression as IDisposable)?.Dispose();
                 }
+
+                // Clean up unmanaged resources
+                // (none in this case)
 
                 _disposedValue = true;
             }
         }
 
-        ~WorkflowStepExecutor()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: false);
-        }
-
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
 
             GC.SuppressFinalize(this);

@@ -160,21 +160,21 @@ namespace NetWorkflow
 
         public IWorkflowBuilderNext<object> EndIf()
         {
-            _next = new WorkflowBuilder<object, object>(new WorkflowSkipExecutor<object>());
+            _next = new WorkflowBuilder<object, object>(new WorkflowMoveNextExecutor<object>());
 
             return (IWorkflowBuilderNext<object>)_next;
         }
 
         public IWorkflowBuilderConditionalNext<TIn> Stop()
         {
-            _executor.SetStop();
+            _executor.Stop();
 
             return this;
         }
 
         public IWorkflowBuilderConditionalNext<TIn> Throw(Expression<Func<Exception>> func)
         {
-            _executor.SetExceptionToThrow(func);
+            _executor.OnExceptionDo(func);
 
             return this;
         }

@@ -42,7 +42,7 @@ namespace NetWorkflow.Scheduler
         /// Starts the WorkflowScheduler and returns the Task/Thread the WorkflowScheduler is running on.
         /// </summary>
         /// <param name="token">The CancellationToken to cancel the request.</param>
-        /// <returns>A long running Task.</returns>
+        /// <returns>A long running Task until canceled.</returns>
         public Task StartAsync(CancellationToken token = default)
         {
             if (_workflowFactory == null)
@@ -56,86 +56,48 @@ namespace NetWorkflow.Scheduler
                 throw new InvalidOperationException($"A {nameof(WorkflowSchedulerConfiguration.ExecuteAt)} has not been set.");
             }
 
-            return Task.Run(async () =>
+            return Task.Run(() =>
             {
-                if (_configuration?.ExecuteAt is WorkflowFrequency workflowFrequency)
+                if (_configuration.ExecuteAt is WorkflowFrequency workflowFrequency)
                 {
-                    while (!token.IsCancellationRequested)
-                    {
-                        await Task.Delay(workflowFrequency.Frequency);
-
-                        OnExecuted.Invoke(this, _workflowFactory.Invoke().Run(token));
-
-                        _count++;
-
-                        if (workflowFrequency.ExecutionCount == _count) break;
-                    }
+                    ExecuteAsync(workflowFrequency, token).Wait();
                 }
-                else if (_configuration?.ExecuteAt is WorkflowDateTime workflowDateTime)
+                else if (_configuration.ExecuteAt is WorkflowDateTime workflowDateTime)
                 {
-                    // Note: Similer code being executed below. If separated out into a reusable async function that 
-                    // would make so another state machine would be created and have to be awaited. Therefore to reduce the memory allocation
-                    // the code to execute the Workflow was written within each WorkflowTime check.
-
-                    if (workflowDateTime.Day != -1)
-                    {
-                        while (!token.IsCancellationRequested && !_disposedValue)
-                        {
-                            DateTime date = DateTime.Now;
-
-                            if (date.Day == workflowDateTime.Day && date.Hour == workflowDateTime.Hour && date.Minute == workflowDateTime.Minute)
-                            {
-                                OnExecuted.Invoke(this, _workflowFactory.Invoke().Run(token));
-
-                                _count++;
-
-                                if (workflowDateTime.ExecutionCount == _count) break;
-
-                                await Task.Delay(60000); // Delay 1 minute
-                            }
-                        }
-                    }
-                    else if (workflowDateTime.Hour != -1)
-                    {
-                        while (!token.IsCancellationRequested && !_disposedValue)
-                        {
-                            DateTime date = DateTime.Now;
-
-                            if (date.Hour == workflowDateTime.Hour && date.Minute == workflowDateTime.Minute)
-                            {
-                                OnExecuted.Invoke(this, _workflowFactory.Invoke().Run(token));
-
-                                _count++;
-
-                                if (workflowDateTime.ExecutionCount == _count) break;
-
-                                await Task.Delay(60000); // Delay 1 minute
-                            }
-                        }
-                    }
-                    else if (workflowDateTime.Minute != -1)
-                    {
-                        while (!token.IsCancellationRequested && !_disposedValue)
-                        {
-                            if (DateTime.Now.Minute == workflowDateTime.Minute)
-                            {
-                                OnExecuted.Invoke(this, _workflowFactory.Invoke().Run(token));
-
-                                _count++;
-
-                                if (workflowDateTime.ExecutionCount == _count) break;
-
-                                await Task.Delay(60000); // Delay 1 minute
-                            }
-                        }
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException("A WorkflowTime must specificy to run at the Day, Hour, or Minute mark");
-                    }
+                    ExecuteAsync(workflowDateTime, token).Wait();
                 }
-
+                else
+                {
+                    throw new InvalidOperationException("Invalid workflow execution configuration.");
+                }
             }, token);
+        }
+
+        private async Task ExecuteAsync(WorkflowFrequency workflowFrequency, CancellationToken token)
+        {
+            while (!token.IsCancellationRequested)
+            {
+                await Task.Delay(workflowFrequency.Frequency, token);
+
+                OnExecuted.Invoke(this, _workflowFactory.Invoke().Run(token));
+
+                if (++_count == workflowFrequency.ExecutionCount) break;
+            }
+        }
+
+        private async Task ExecuteAsync(WorkflowDateTime workflowDateTime, CancellationToken token)
+        {
+            while (!token.IsCancellationRequested && !_disposedValue)
+            {
+                if (workflowDateTime.IsNow())
+                {
+                    OnExecuted.Invoke(this, _workflowFactory.Invoke().Run(token));
+
+                    if (++_count == workflowDateTime.ExecutionCount) break;
+                }
+
+                await Task.Delay(60000, token); // Delay 1 minute
+            }
         }
 
         protected virtual void Dispose(bool disposing)

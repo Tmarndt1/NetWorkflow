@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace NetWorkflow
 {
-    internal class WorkflowSkipExecutor<TArgs> : IWorkflowExecutor<TArgs, TArgs>
+    internal class WorkflowMoveNextExecutor<TArgs> : IWorkflowExecutor<TArgs, TArgs>
     {
         private bool _disposedValue;
 

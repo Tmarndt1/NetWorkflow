@@ -10,54 +10,46 @@ namespace NetWorkflow
 {
     internal class WorkflowParallelExecutor<TIn, TOut> : IWorkflowExecutor<TIn, IEnumerable<TOut>>
     {
-        private LambdaExpression _expression;
+        private readonly LambdaExpression _expression;
 
         private bool _disposedValue;
 
         public WorkflowParallelExecutor(LambdaExpression expression)
         {
-            _expression = expression;
+            _expression = expression ?? throw new ArgumentNullException(nameof(expression));
         }
 
         public IEnumerable<TOut> Run(TIn args, CancellationToken token = default)
         {
-            MethodInfo executor = null;
+            if (_expression.Parameters.Count > 0)
+                throw new InvalidOperationException("Parameter count within lambda cannot be greater than 0");
 
-            object body = null;
+            var body = _expression.Compile().DynamicInvoke();
 
-            if (_expression.Parameters.Count > 0) throw new InvalidOperationException("Parameter count within lambda cannot be greater than 0");
-
-            body = _expression.Compile().DynamicInvoke();
-
-            if (body == null) throw new InvalidOperationException("IWorkflowStep cannot be null");
+            if (body == null)
+                throw new InvalidOperationException("IWorkflowStep cannot be null");
 
             if (token.IsCancellationRequested)
-            {
                 throw new WorkflowStoppedException();
-            }
 
             if (body is IEnumerable<IWorkflowStepAsync> asyncSteps)
             {
-                Task<TOut>[] tasks = asyncSteps.Select(x =>
+                var tasks = asyncSteps.Select(x =>
                 {
-                    executor = x.GetType().GetMethod(nameof(IWorkflowStepAsync<TOut>.RunAsync));
+                    var executor = x.GetType().GetMethod(nameof(IWorkflowStepAsync<TOut>.RunAsync));
 
-                    if (executor == null) throw new InvalidOperationException("Internal error");
+                    if (executor == null)
+                        throw new InvalidOperationException("Internal error");
 
                     if (executor.GetParameters().Length > 1)
-                    {
                         return (Task<TOut>)executor.Invoke(x, new object[] { args, token });
-                    }
                     else
-                    {
                         return (Task<TOut>)executor.Invoke(x, new object[] { token });
-                    }
+
                 }).ToArray();
 
                 if (token.IsCancellationRequested)
-                {
                     throw new WorkflowStoppedException();
-                }
 
                 Task.WaitAll(tasks, token);
 
@@ -73,22 +65,19 @@ namespace NetWorkflow
             {
                 if (disposing)
                 {
-                    _expression = null;
+                    // Dispose managed resources
+                    (_expression as IDisposable)?.Dispose();
                 }
+
+                // Clean up unmanaged resources
+                // (none in this case)
 
                 _disposedValue = true;
             }
         }
 
-        ~WorkflowParallelExecutor()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: false);
-        }
-
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
 
             GC.SuppressFinalize(this);

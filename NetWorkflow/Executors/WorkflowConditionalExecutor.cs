@@ -82,8 +82,7 @@ namespace NetWorkflow
                 }
             }
 
-            // If no condition was met then default to a WorkflowConditionResult
-            return new WorkflowResult("No condition was met");
+            throw new WorkflowNoConditionMetException();
         }
 
         protected virtual void Dispose(bool disposing)

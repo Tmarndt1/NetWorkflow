@@ -8,7 +8,7 @@ namespace NetWorkflow
     /// </summary>
     public class WorkflowStoppedException : Exception
     {
-        public WorkflowStoppedException() : base("The Workflow has stopped")
+        public WorkflowStoppedException() : base("The Workflow has stopped.")
         {
 
         }

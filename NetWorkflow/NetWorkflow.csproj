@@ -2,8 +2,7 @@
 
     <PropertyGroup>
         <Authors>Travis Arndt</Authors>
-        <TargetFramework>net6.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
+        <TargetFrameworks>netstandard2.1;net6.0;net7.0;</TargetFrameworks>
         <Nullable>disable</Nullable>
         <PackageId>NetWorkflow</PackageId>
         <Description>Fluent .NET Workflow Library that allows a user to explicitly define their workflow steps in a single location with compile time validation.</Description>

@@ -64,7 +64,7 @@ namespace NetWorkflow.Tests
             var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
             {
                 config.ExecuteAt = WorkflowTime.AtFrequency(TimeSpan.FromMilliseconds(50));
-                config.OnExecuted = (o) => count++;
+                config.OnExecuted = (result) => count++;
             });
 
             CancellationTokenSource tokenSource = new CancellationTokenSource();
@@ -89,7 +89,7 @@ namespace NetWorkflow.Tests
             var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
             {
                 config.ExecuteAt = WorkflowTime.AtFrequency(TimeSpan.FromMilliseconds(50)).Until(2);
-                config.OnExecuted = (o) => count++;
+                config.OnExecuted = (WorkflowResult<bool> result) => count++;
             });
 
             CancellationTokenSource tokenSource = new CancellationTokenSource();
@@ -114,7 +114,7 @@ namespace NetWorkflow.Tests
             var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
             {
                 config.ExecuteAt = WorkflowTime.AtMinute(DateTime.Now.Minute);
-                config.OnExecuted = (o) => count++;
+                config.OnExecuted = (result) => count++;
             });
 
             CancellationTokenSource tokenSource = new CancellationTokenSource();
@@ -141,7 +141,7 @@ namespace NetWorkflow.Tests
             var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
             {
                 config.ExecuteAt = WorkflowTime.AtHour(now.Hour, now.Minute);
-                config.OnExecuted = (o) => count++;
+                config.OnExecuted = (result) => count++;
             });
 
             CancellationTokenSource tokenSource = new CancellationTokenSource();
@@ -168,7 +168,7 @@ namespace NetWorkflow.Tests
             var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
             {
                 config.ExecuteAt = WorkflowTime.AtDay(now.Day, now.Hour, now.Minute);
-                config.OnExecuted = (o) => count++;
+                config.OnExecuted = (result) => count++;
             });
 
             CancellationTokenSource tokenSource = new CancellationTokenSource();
@@ -193,7 +193,7 @@ namespace NetWorkflow.Tests
             var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
             {
                 config.ExecuteAt = WorkflowTime.AtHour(1, DateTime.Now.Minute - 1);
-                config.OnExecuted = (o) => count++;
+                config.OnExecuted = (result) => count++;
             });
 
             CancellationTokenSource tokenSource = new CancellationTokenSource();
@@ -235,7 +235,7 @@ namespace NetWorkflow.Tests
             var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
             {
                 config.ExecuteAt = WorkflowTime.AtFrequency(TimeSpan.FromMilliseconds(50));
-                config.OnExecuted = (o) => count++;
+                config.OnExecuted = (result) => count++;
             });
 
             CancellationTokenSource tokenSource = new CancellationTokenSource();

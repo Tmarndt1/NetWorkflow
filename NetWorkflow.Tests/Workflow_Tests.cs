@@ -24,6 +24,25 @@ namespace NetWorkflow.Tests
         }
 
         [Fact]
+        public void HelloWorld_Ran_Twice_Success()
+        {
+            // Arrange
+            var workflow = new HelloWorldWorkflow();
+
+            // Act
+            workflow.Run();
+
+            var result = workflow.Run();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.True(result.IsCompleted);
+            Assert.False(result.IsCanceled);
+            Assert.False(result.IsFaulted);
+            Assert.True(result);
+        }
+
+        [Fact]
         public void Parallel_Success()
         {
             // Arrange
@@ -171,7 +190,7 @@ namespace NetWorkflow.Tests
             // Act
             try
             {
-                var result = workflow.Run();
+                _ = workflow.Run();
 
                 hit = true;
             }
@@ -204,7 +223,7 @@ namespace NetWorkflow.Tests
         {
             // Arrange
             var workflow = new ServiceCollection()
-                .AddWorkflow(() => new HelloWorldWorkflow())
+                .AddWorkflow<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow())
                 .BuildServiceProvider()
                 .GetRequiredService<HelloWorldWorkflow>();
 
@@ -233,6 +252,32 @@ namespace NetWorkflow.Tests
             Assert.False(result.IsCompleted);
             Assert.False(result.IsCanceled);
             Assert.IsType<WorkflowMaxRetryException>(result.Exception);
+        }
+
+        [Fact]
+        public void Dispose_Success()
+        {
+            // Arrange
+            var workflow = new ConditionalThrowWorkflow();
+
+            bool hit = false;
+
+            // Act
+            try
+            {
+                workflow.Dispose();
+
+                _= workflow.Run();
+
+                hit = true;
+            }
+            catch (Exception ex)
+            {
+                Assert.IsType<ObjectDisposedException>(ex);
+            }
+
+            // Assert
+            Assert.False(hit);
         }
     }
 }

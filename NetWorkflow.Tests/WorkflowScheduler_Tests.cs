@@ -11,22 +11,19 @@ namespace NetWorkflow.Tests
         public void No_Options_Success()
         {
             // Arrange
-            var scheduler = new WorkflowScheduler<HelloWorldWorkflow>()
-                .Use(() => new HelloWorldWorkflow());
-
             bool hit = false;
 
             // Act
             try
             {
-                scheduler.StartAsync();
+               _ = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), null);
 
                 hit = true;
             }
             catch (Exception ex)
             {
                 // Assert
-                Assert.IsType<InvalidOperationException>(ex);
+                Assert.IsType<ArgumentNullException>(ex);
             }
 
             // Assert
@@ -37,25 +34,21 @@ namespace NetWorkflow.Tests
         public void No_Factory_Success()
         {
             // Arrange
-            var scheduler = new WorkflowScheduler<HelloWorldWorkflow>()
-                .Configure(config =>
-                {
-                    config.ExecuteAt = WorkflowTime.AtFrequency(TimeSpan.FromMilliseconds(200));
-                });
+
 
             bool hit = false;
 
             // Act
             try
             {
-                scheduler.StartAsync();
+                _ = new WorkflowScheduler<HelloWorldWorkflow, bool>(null, config => config.ExecuteAt = WorkflowTime.AtFrequency(TimeSpan.FromMilliseconds(200)));
 
                 hit = true;
             }
             catch (Exception ex)
             {
                 // Assert
-                Assert.IsType<InvalidOperationException>(ex);
+                Assert.IsType<ArgumentNullException>(ex);
             }
 
             // Assert
@@ -68,62 +61,127 @@ namespace NetWorkflow.Tests
             // Arrange
             int count = 0;
 
-            var scheduler = new WorkflowScheduler<HelloWorldWorkflow>()
-                .Use(() => new HelloWorldWorkflow((stepName) =>
-                {
-                    count++;
-                }))
-                .Configure(config =>
-                {
-                    config.ExecuteAt = WorkflowTime.AtFrequency(TimeSpan.FromMilliseconds(200));
-                });
+            var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
+            {
+                config.ExecuteAt = WorkflowTime.AtFrequency(TimeSpan.FromMilliseconds(50));
+                config.OnExecuted = (result) => count++;
+            });
+
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
 
             // Act
-            scheduler.StartAsync();
+            scheduler.StartAsync(tokenSource.Token);
 
             // Assert
-            while (true)
-            {
-                Thread.Sleep(TimeSpan.FromMilliseconds(450));
+            Thread.Sleep(TimeSpan.FromMilliseconds(149));
 
-                scheduler.Stop();
+            tokenSource.Cancel();
 
-                break;
-            }
-
-            Assert.Equal(4, count);
+            Assert.Equal(2, count);
         }
 
         [Fact]
-        public void AtTime_Success()
+        public void Frequency_Max_Count_Success()
         {
             // Arrange
             int count = 0;
 
-            var scheduler = new WorkflowScheduler<HelloWorldWorkflow>()
-                .Use(() => new HelloWorldWorkflow((stepName) =>
-                {
-                    count++;
-                }))
-                .Configure(config =>
-                {
-                    config.ExecuteAt = WorkflowTime.AtMinute(DateTime.Now.Minute).Repeat();
-                });
+            var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
+            {
+                config.ExecuteAt = WorkflowTime.AtFrequency(TimeSpan.FromMilliseconds(50)).Until(2);
+                config.OnExecuted = (WorkflowResult<bool> result) => count++;
+            });
+
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
 
             // Act
-            scheduler.StartAsync();
+            scheduler.StartAsync(tokenSource.Token);
 
             // Assert
-            while (true)
+            Thread.Sleep(TimeSpan.FromMilliseconds(200));
+
+            tokenSource.Cancel();
+
+            Assert.Equal(2, count);
+        }
+
+        [Fact]
+        public void AtTime_Minute_Success()
+        {
+            // Arrange
+            int count = 0;
+
+            var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
             {
-                Thread.Sleep(1000); // Must sleep for a second 
+                config.ExecuteAt = WorkflowTime.AtMinute(DateTime.Now.Minute);
+                config.OnExecuted = (result) => count++;
+            });
 
-                scheduler.Stop();
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
 
-                break;
-            }
+            // Act
+            scheduler.StartAsync(tokenSource.Token);
 
-            Assert.Equal(2, count); // Count should be two because both WorkflowStep's increment
+            // Assert
+            Thread.Sleep(1000); // Must sleep for a second 
+
+            tokenSource.Cancel();
+
+            Assert.Equal(1, count); // Count should be two because both WorkflowStep's increment
+        }
+
+        [Fact]
+        public void AtTime_Hour_Success()
+        {
+            // Arrange
+            int count = 0;
+
+            DateTime now = DateTime.Now;
+
+            var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
+            {
+                config.ExecuteAt = WorkflowTime.AtHour(now.Hour, now.Minute);
+                config.OnExecuted = (result) => count++;
+            });
+
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
+
+            // Act
+            scheduler.StartAsync(tokenSource.Token);
+
+            // Assert
+            Thread.Sleep(1000); // Must sleep for a second 
+
+            tokenSource.Cancel();
+
+            Assert.Equal(1, count); // Count should be two because both WorkflowStep's increment
+        }
+
+        [Fact]
+        public void AtTime_Day_Success()
+        {
+            // Arrange
+            int count = 0;
+
+            DateTime now = DateTime.Now;
+
+            var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
+            {
+                config.ExecuteAt = WorkflowTime.AtDay(now.Day, now.Hour, now.Minute);
+                config.OnExecuted = (result) => count++;
+            });
+
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
+
+            // Act
+            scheduler.StartAsync(tokenSource.Token);
+
+            // Assert
+            Thread.Sleep(1000); // Must sleep for a second 
+
+            tokenSource.Cancel();
+
+            Assert.Equal(1, count); // Count should be two because both WorkflowStep's increment
         }
 
         [Fact]
@@ -132,28 +190,21 @@ namespace NetWorkflow.Tests
             // Arrange
             int count = 0;
 
-            var scheduler = new WorkflowScheduler<HelloWorldWorkflow>()
-                .Use(() => new HelloWorldWorkflow((stepName) =>
-                {
-                    count++;
-                }))
-                .Configure(config =>
-                {
-                    config.ExecuteAt = WorkflowTime.AtHour(1, DateTime.Now.Minute - 1).Repeat();
-                });
+            var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
+            {
+                config.ExecuteAt = WorkflowTime.AtHour(1, DateTime.Now.Minute - 1);
+                config.OnExecuted = (result) => count++;
+            });
+
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
 
             // Act
-            scheduler.StartAsync();
+            scheduler.StartAsync(tokenSource.Token);
 
             // Assert
-            while (true)
-            {
-                Thread.Sleep(200);
+            Thread.Sleep(200);
 
-                scheduler.Stop();
-
-                break;
-            }
+            tokenSource.Cancel();
 
             Assert.Equal(0, count);
         }
@@ -164,12 +215,40 @@ namespace NetWorkflow.Tests
             // Arrange
             // Act
             var workflowScheduler = new ServiceCollection()
-                .AddWorkflowScheduler(() => new WorkflowScheduler<HelloWorldWorkflow>())
+                .AddWorkflowScheduler(() => new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
+                {
+                    config.ExecuteAt = WorkflowTime.AtHour(1);
+                }))
                 .BuildServiceProvider()
-                .GetRequiredService<WorkflowScheduler<HelloWorldWorkflow>>();
+                .GetRequiredService<WorkflowScheduler<HelloWorldWorkflow, bool>>();
 
             // Assert
             Assert.NotNull(workflowScheduler);
+        }
+
+        [Fact]
+        public void Dispose_Success()
+        {
+            // Arrange
+            int count = 0;
+
+            var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
+            {
+                config.ExecuteAt = WorkflowTime.AtFrequency(TimeSpan.FromMilliseconds(50));
+                config.OnExecuted = (result) => count++;
+            });
+
+            CancellationTokenSource tokenSource = new CancellationTokenSource();
+
+            scheduler.StartAsync(tokenSource.Token);
+
+            // Act
+            scheduler.Dispose();
+
+            Thread.Sleep(100);
+
+            // Assert
+            Assert.Equal(0, count);
         }
     }
 }

@@ -7,20 +7,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - name: Setup .NET 6.x
+    - name: Setup .NET 7.x
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 6.x
+        dotnet-version: 7.x
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
       run: |
         dotnet build NetWorkflow.sln \
           -c Release
-    - name: Test net6.0
+    - name: Test net7.0
       run: |
         dotnet test NetWorkflow.Tests/NetWorkflow.Tests.csproj \
           -c Release --no-build --no-restore \
-          -f net6.0 \
+          -f net7.0 \
           -v normal \
           --filter "TestCategory!=very.slow"

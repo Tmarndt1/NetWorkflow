@@ -1,179 +1,134 @@
-﻿using System.Reflection;
-using System.Timers;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace NetWorkflow.Scheduler
 {
-    public class WorkflowScheduler<TWorkflow>
-        where TWorkflow : IWorkflow
+    /// <summary>
+    /// The WorkflowScheduler is a generic workflow scheduler that is responsible for scheduling and executing workflows.
+    /// </summary>
+    /// <typeparam name="TWorkflow">The Workflow to executed.</typeparam>
+    /// <typeparam name="TOut">The output type of the Workflow.</typeparam>
+    public class WorkflowScheduler<TWorkflow, TOut> : IDisposable
+        where TWorkflow : IWorkflow<TOut>
     {
+        // Declare the event.
         private Func<TWorkflow> _workflowFactory;
 
-        private readonly WorkflowSchedulerConfiguration _configuration = new WorkflowSchedulerConfiguration();
+        private WorkflowSchedulerConfiguration<TOut> _configuration = new WorkflowSchedulerConfiguration<TOut>();
 
-        private Task _runningTask;
+        private int _count = 0;
 
-        private CancellationTokenSource _tokenSource;
-
-        private MethodInfo _executingMethod;
-
-        private MethodInfo _executingMethodAsync;
+        private bool _disposedValue;
 
         /// <summary>
         /// Designates the WorkflowScheduler to use the function to create the new Workflow.
         /// </summary>
         /// <param name="workflowFactory">A function that returns a Workflow.</param>
         /// <returns>The same instance of the WorkflowScheduler.</returns>
-        public WorkflowScheduler<TWorkflow> Use(Func<TWorkflow> workflowFactory)
+        public WorkflowScheduler(Func<TWorkflow> workflowFactory, Action<WorkflowSchedulerConfiguration<TOut>> configuration)
         {
+            if (workflowFactory == null) throw new ArgumentNullException(nameof(workflowFactory), "The WorkflowScheduler requires a workflow factory.");
+
+            if (configuration == null) throw new ArgumentNullException(nameof(configuration), "The WorkflowScheduler requires a configuration to define when to execute thew workflow.");
+
             _workflowFactory = workflowFactory;
 
-            _executingMethod = typeof(TWorkflow).GetMethod("Run");
-
-            _executingMethodAsync = typeof(TWorkflow).GetMethod("RunAsync");
-
-            return this;
-        }
-
-        /// <summary>
-        /// Configures the WorkflowScheduler based on the values set within the provided WorkflowSchedulerOptions.
-        /// </summary>
-        /// <param name="configuration">An action provides WorkflowSchedulerOptions to configure.</param>
-        /// <returns>The same instance of the WorkflowScheduler.</returns>
-        public WorkflowScheduler<TWorkflow> Configure(Action<WorkflowSchedulerConfiguration> configuration)
-        {
             configuration.Invoke(_configuration);
-
-            return this;
         }
 
         /// <summary>
         /// Starts the WorkflowScheduler and returns the Task/Thread the WorkflowScheduler is running on.
         /// </summary>
-        /// <returns>A long running Task.</returns>
-        public Task StartAsync()
+        /// <param name="token">The CancellationToken to cancel the request.</param>
+        /// <returns>A long running Task until canceled.</returns>
+        public Task StartAsync(CancellationToken token = default)
         {
-            _tokenSource = new CancellationTokenSource();
-
             if (_workflowFactory == null)
             {
-                throw new InvalidOperationException($"A {nameof(WorkflowScheduler<TWorkflow>)} requires a Workflow Factory function provided in the {nameof(WorkflowScheduler<TWorkflow>.Use)} method");
+                throw new InvalidOperationException($"A {nameof(WorkflowScheduler<TWorkflow, TOut>)} requires a Workflow Factory function.");
             }
 
             // A user should specify a WorkflowScheduler to execute a specific frequency or time.
             if (_configuration.ExecuteAt == null)
             {
-                throw new InvalidOperationException($"A {nameof(WorkflowSchedulerConfiguration.ExecuteAt)} has not been set.");
+                throw new InvalidOperationException($"A {nameof(WorkflowSchedulerConfiguration<TOut>.ExecuteAt)} has not been set.");
             }
 
-            _runningTask = Task.Run(async () =>
+            return Task.Run(() =>
             {
                 if (_configuration.ExecuteAt is WorkflowFrequency workflowFrequency)
                 {
-                    while (!_tokenSource.IsCancellationRequested)
-                    {
-                        await Task.Delay(workflowFrequency.Frequency).ContinueWith(async t =>
-                        {
-                            if (_configuration.ExecuteAsync)
-                            {
-                                await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
-                            }
-                            else
-                            {
-                                _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
-                            }
-                        });
-                    }
+                    ExecuteAsync(workflowFrequency, token).Wait();
                 }
                 else if (_configuration.ExecuteAt is WorkflowDateTime workflowDateTime)
                 {
-                    // Note: Similer code being executed below. If separated out into a reusable async function that 
-                    // would make so another state machine would be created and have to be awaited. Therefore to reduce the memory allocation
-                    // the code to execute the Workflow was written within each WorkflowTime check.
-
-                    if (workflowDateTime.Day != -1)
-                    {
-                        while (!_tokenSource.IsCancellationRequested)
-                        {
-                            DateTime date = DateTime.Now;
-
-                            if (date.Day == workflowDateTime.Day && date.Hour == workflowDateTime.Hour && date.Minute == workflowDateTime.Minute)
-                            {
-                                if (_configuration.ExecuteAsync)
-                                {
-                                    await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
-                                }
-                                else
-                                {
-                                    _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
-                                }
-
-                                if (!workflowDateTime.Indefinitely) break;
-
-                                await Task.Delay(60000); // Delay 1 minute
-                            }
-                        }
-                    }
-                    else if (workflowDateTime.Hour != -1)
-                    {
-                        while (!_tokenSource.IsCancellationRequested)
-                        {
-                            DateTime date = DateTime.Now;
-
-                            if (date.Hour == workflowDateTime.Hour && date.Minute == workflowDateTime.Minute)
-                            {
-                                if (_configuration.ExecuteAsync)
-                                {
-                                    await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
-                                }
-                                else
-                                {
-                                    _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
-                                }
-
-                                if (!workflowDateTime.Indefinitely) break;
-
-                                await Task.Delay(60000); // Delay 1 minute
-                            }
-                        }
-                    }
-                    else if (workflowDateTime.Minute != -1)
-                    {
-                        while (!_tokenSource.IsCancellationRequested)
-                        {
-                            if (DateTime.Now.Minute == workflowDateTime.Minute)
-                            {
-                                if (_configuration.ExecuteAsync)
-                                {
-                                    await (Task)_executingMethodAsync.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
-                                }
-                                else
-                                {
-                                    _executingMethod.Invoke(_workflowFactory.Invoke(), new object[] { _tokenSource.Token });
-                                }
-
-                                if (!workflowDateTime.Indefinitely) break;
-
-                                await Task.Delay(60000); // Delay 1 minute
-                            }
-                        }
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException("A WorkflowTime must specificy to run at the Day, Hour, or Minute mark");
-                    }
+                    ExecuteAsync(workflowDateTime, token).Wait();
                 }
-
-            }, _tokenSource.Token);
-
-            return _runningTask;
+                else
+                {
+                    throw new InvalidOperationException("Invalid workflow execution configuration.");
+                }
+            }, token);
         }
 
-        /// <summary>
-        /// Stops the WorkflowScheduler by cancelling the CancellationToken that is passed in to each instance of the Workflow.
-        /// </summary>
-        public void Stop()
+        private async Task ExecuteAsync(WorkflowFrequency workflowFrequency, CancellationToken token)
         {
-            _tokenSource.Cancel();
+            while (!token.IsCancellationRequested)
+            {
+                await Task.Delay(workflowFrequency.Frequency, token);
+
+                WorkflowResult<TOut> output = _workflowFactory.Invoke().Run(token);
+
+                _configuration?.OnExecuted?.Invoke(output);
+
+                if (++_count == workflowFrequency.ExecutionCount) break;
+            }
+        }
+
+        private async Task ExecuteAsync(WorkflowDateTime workflowDateTime, CancellationToken token)
+        {
+            while (!token.IsCancellationRequested && !_disposedValue)
+            {
+                if (workflowDateTime.IsNow())
+                {
+                    WorkflowResult<TOut> output = _workflowFactory.Invoke().Run(token);
+
+                    _configuration?.OnExecuted?.Invoke(output);
+
+                    if (++_count == workflowDateTime.ExecutionCount) break;
+                }
+
+                await Task.Delay(60000, token); // Delay 1 minute
+            }
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    _workflowFactory = null;
+                    _configuration = null;
+                }
+
+                _disposedValue = true;
+            }
+        }
+
+        ~WorkflowScheduler()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: false);
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+
+            GC.SuppressFinalize(this);
         }
     }
 }

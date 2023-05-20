@@ -1,48 +1,72 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace NetWorkflow
 {
-    public class WorkflowStepAsyncExecutor<TIn, TOut> : IWorkflowExecutor<TIn, TOut>
+    internal class WorkflowStepAsyncExecutor<TIn, TOut> : IWorkflowExecutor<TIn, TOut>
     {
         private readonly LambdaExpression _expression;
 
+        private bool _disposedValue;
+
         public WorkflowStepAsyncExecutor(LambdaExpression expression)
         {
-            _expression = expression;
+            _expression = expression ?? throw new ArgumentNullException(nameof(expression));
         }
 
         public TOut Run(TIn args, CancellationToken token = default)
         {
-            MethodInfo executingMethod = null;
+            if (_expression.Parameters.Count > 0)
+                throw new InvalidOperationException("Parameter count within lambda cannot be greater than 0");
 
-            object body = null;
+            var body = _expression.Compile().DynamicInvoke();
 
-            if (_expression.Parameters.Count > 0) throw new InvalidOperationException("Parameter count within lambda cannot be greater than 0");
-
-            body = _expression.Compile().DynamicInvoke();
-
-            if (body == null) throw new InvalidOperationException("IWorkflowStep cannot be null");
+            if (body == null)
+                throw new InvalidOperationException("IWorkflowStep cannot be null");
 
             if (token.IsCancellationRequested)
-            {
                 throw new WorkflowStoppedException();
-            }
 
-            if (body is IWorkflowStepAsync<TIn, TOut> stepAsync)
+            if (!(body is IWorkflowStepAsync<TIn, TOut> stepAsync))
+                throw new InvalidOperationException("Internal error");
+
+            var executingMethod = stepAsync.GetType().GetMethod(nameof(IWorkflowStepAsync<TIn, TOut>.RunAsync));
+
+            if (executingMethod == null)
+                throw new InvalidOperationException("WorkflowStep executing method not found");
+
+            var task = (Task<TOut>)executingMethod.Invoke(stepAsync, new object[] { args, token });
+
+            task.Wait(token);
+
+            return task.GetAwaiter().GetResult();
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
             {
-                executingMethod = stepAsync.GetType().GetMethod(nameof(IWorkflowStepAsync<TOut>.RunAsync));
+                if (disposing)
+                {
+                    // Dispose managed resources
+                    (_expression as IDisposable)?.Dispose();
+                }
 
-                if (executingMethod == null) throw new InvalidOperationException("WorkflowStep executing method not found");
+                // Clean up unmanaged resources
+                // (none in this case)
 
-                Task<TOut> task = (Task<TOut>)executingMethod.Invoke(body, new object[] { args, token });
-
-                Task.WaitAll(task);
-
-                return task.Result;
+                _disposedValue = true;
             }
+        }
 
-            throw new InvalidOperationException("Internal error");
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+
+            GC.SuppressFinalize(this);
         }
     }
 }

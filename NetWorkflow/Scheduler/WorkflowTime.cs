@@ -1,9 +1,10 @@
 ﻿using NetWorkflow.Exceptions;
+using System;
 
 namespace NetWorkflow.Scheduler
 {
     /// <summary>
-    /// WorflowTime represents when a WorkflowScheduler should execute a Workflow
+    /// WorkflowTime represents when a WorkflowScheduler should execute a Workflow
     /// </summary>
     /// <remarks>
     /// Days span from 1 to 31.
@@ -23,7 +24,7 @@ namespace NetWorkflow.Scheduler
         }
 
         /// <summary>
-        /// Designates a WorkflowScheduler should execute a Workflow on the given day, hour, and minute.
+        /// Designates a WorkflowScheduler should execute a Workflow at the given day, hour, and minute.
         /// </summary>
         /// <param name="day">The day of the month the Workflow should be executed.</param>
         /// <param name="hour">The hour of the day the Workflow should be executed.</param>
@@ -35,7 +36,7 @@ namespace NetWorkflow.Scheduler
         }
 
         /// <summary>
-        /// Designates a WorkflowScheduler should execute a Workflow on the given day, hour, and minute 0.
+        /// Designates a WorkflowScheduler should execute a Workflow at the given day, hour, and minute 0.
         /// </summary>
         /// <param name="day">The day of the month the Workflow should be executed.</param>
         /// <param name="hour">The hour of the day the Workflow should be executed.</param>
@@ -61,6 +62,7 @@ namespace NetWorkflow.Scheduler
             return new WorkflowDateTime(day, 0, 0);
         }
 
+        /// <summary>
         /// Designates a WorkflowScheduler should execute a Workflow at the given
         /// hour and at the given minute. 
         /// </summary>
@@ -72,6 +74,7 @@ namespace NetWorkflow.Scheduler
             return new WorkflowDateTime(hour, minute);
         }
 
+        /// <summary>
         /// Designates a WorkflowScheduler should execute a Workflow at the given hour and minute 0.
         /// </summary>
         /// <param name="hour">The hour of the day the Workflow should be executed.</param>
@@ -90,93 +93,104 @@ namespace NetWorkflow.Scheduler
         {
             return new WorkflowDateTime(minute);
         }
+
+        /// <summary>
+        /// Designates the Workflow to execute until the count is met.
+        /// </summary>
+        /// <param name="count">The max amount of times the Workflow should execute.</param>
+        /// <returns>The same instance of the WorkflowTime.</returns>
+        public WorkflowTime Until(int count)
+        {
+            ExecutionCount = count;
+            return this;
+        }
+
+        /// <summary>
+        /// Designates the Workflow to execute until the count is met.
+        /// </summary>
+        internal int ExecutionCount { get; private set; } = -1;
     }
 
     public class WorkflowDateTime : WorkflowTime
     {
-        private int _day = -1;
-
         /// <summary>
         /// The day of the month a Workflow should be executed.
         /// </summary>
-        public int Day
-        {
-            get => _day;
-            private set
-            {
-                if (value < 1) throw new WorkflowInvalidValueException("A month cannot be less than 1");
-
-                if (value > 31) throw new WorkflowInvalidValueException("A month cannot be greater than 12");
-
-                _day = value;
-            }
-        }
-
-        private int _hour = -1;
+        public int Day { get; private set; } = -1;
 
         /// <summary>
         /// The hour of the day a Workflow should be executed.
         /// </summary>
-        public int Hour
-        {
-            get => _hour;
-            private set
-            {
-                if (value < 0) throw new WorkflowInvalidValueException("A hour cannot be less than 0");
-
-                if (value > 23) throw new WorkflowInvalidValueException("A hour cannot be greater than 23");
-
-                _hour = value;
-            }
-        }
-
-        private int _minute = -1;
+        public int Hour { get; private set; } = -1;
 
         /// <summary>
         /// The minute of the hour a Workflow should be executed.
         /// </summary>
-        public int Minute
+        public int Minute { get; private set; }
+
+        internal WorkflowDateTime(int day, int hour, int minute)
         {
-            get => _minute;
-            private set
-            {
-                if (value < 0) throw new WorkflowInvalidValueException("A minute cannot be less than 0");
-
-                if (value > 59) throw new WorkflowInvalidValueException("A minute cannot be greater than 59");
-
-                _minute = value;
-            }
+            Day = ValidateDay(day);
+            Hour = ValidateHour(hour);
+            Minute = ValidateMinute(minute);
         }
 
-        /// <summary>
-        /// Designates the WorkTime to repeat indefinitely.
-        /// </summary>
-        public bool Indefinitely { get; private set; }
-
-        /// <summary>
-        /// Sets the WorkflowTime to execute indefinitely
-        /// </summary>
-        /// <returns>The same instance of the WorkflowTime</returns>
-        public WorkflowDateTime Repeat()
+        internal WorkflowDateTime(int hour, int minute)
         {
-            Indefinitely = true;
-
-            return this;
-        }
-
-        internal WorkflowDateTime(int day, int hour, int minute) : this(hour, minute)
-        {
-            Day = day;
-        }
-
-        internal WorkflowDateTime(int hour, int minute) : this(minute)
-        {
-            Hour = hour;
+            Hour = ValidateHour(hour);
+            Minute = ValidateMinute(minute);
         }
 
         internal WorkflowDateTime(int minute)
         {
-            Minute = minute;
+            Minute = ValidateMinute(minute);
+        }
+
+        private static int ValidateDay(int day)
+        {
+            if (day < 1 || day > 31)
+            {
+                throw new WorkflowInvalidValueException("Day must be between 1 and 31.");
+            }
+            return day;
+        }
+
+        private static int ValidateHour(int hour)
+        {
+            if (hour < 0 || hour > 23)
+            {
+                throw new WorkflowInvalidValueException("Hour must be between 0 and 23.");
+            }
+            return hour;
+        }
+
+        private static int ValidateMinute(int minute)
+        {
+            if (minute < 0 || minute > 59)
+            {
+                throw new WorkflowInvalidValueException("Minute must be between 0 and 59.");
+            }
+            return minute;
+        }
+
+        internal bool IsNow()
+        {
+            DateTime now = DateTime.Now;
+
+            if (Day != -1)
+            {
+                return now.Day == Day && now.Hour == Hour && now.Minute == Minute;
+            }
+            else if (Hour != -1)
+            {
+                return now.Hour == Hour && now.Minute == Minute;
+            }
+            else if (Minute != -1)
+            {
+                return now.Minute == Minute;
+            }
+
+            return false;
         }
     }
 
@@ -185,7 +199,7 @@ namespace NetWorkflow.Scheduler
         /// <summary>
         /// Determines the frequency of how often the WorkflowScheduler executes a Workflow
         /// </summary>
-        public readonly TimeSpan Frequency;
+        public TimeSpan Frequency { get; }
 
         internal WorkflowFrequency(TimeSpan frequency)
         {
@@ -193,4 +207,3 @@ namespace NetWorkflow.Scheduler
         }
     }
 }
-

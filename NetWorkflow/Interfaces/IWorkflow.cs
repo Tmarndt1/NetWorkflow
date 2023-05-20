@@ -1,16 +1,14 @@
 ﻿
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace NetWorkflow
 {
-    /// <summary>
-    /// Marker interace for all Workflows to implement.
-    /// </summary>
-    public interface IWorkflow { }
-
     /// <summary>
     /// Defines the required members and methods of the Workflow.
     /// </summary>
     /// <typeparam name="TOut">The result of the Workflow.</typeparam>
-    public interface IWorkflow<TOut> : IWorkflow
+    public interface IWorkflow<TOut>
     {
         /// <summary>
         /// Abstract method that injects a IWorkflowBuilder to build the steps of the Workflow.

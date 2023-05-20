@@ -142,16 +142,19 @@ string[] results = new ParallelWorkflow()
 
 using NetWorkflow.Scheduler;
 
-var scheduler = new WorkflowScheduler<HelloWorldWorkflow>()
-    .Use(() => new HelloWorldWorkflow()) // Will invoke the factory method when scheduled
-    .Configure(options =>
+var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
+{
+    // Will execute every 10 seconds until the Workflow has been executed 5 times.
+    config.ExecuteAt = WorkflowTime.AtFrequency(TimeSpan.FromSeconds(10)).Until(5);
+    config.OnExecuted = (WorkflowResult<bool> result) => 
     {
-        // Schedules the Workflow to be kicked off every 30 seconds
-        options.ExecuteAt = WorkflowTime.AtFrequency(TimeSpan.FromSeconds(30));
-    });
+        Console.WriteLine($"Workflow result: {result.Output}");
+    }
+});
 
+CancellationTokenSource tokenSource = new CancellationTokenSource();
 
-await scheduler.StartAsync();
+_ = scheduler.StartAsync(tokenSource.Token);
 
 ```
 
@@ -161,16 +164,18 @@ await scheduler.StartAsync();
 
 using NetWorkflow.Scheduler;
 
-var scheduler = new WorkflowScheduler<HelloWorldWorkflow>()
-    .Use(() => new HelloWorldWorkflow()) // Will invoke the factory method when scheduled
-    .Configure(options =>
+var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
+{
+    config.ExecuteAt = WorkflowTime.AtMinute(DateTime.Now.Minute);
+    config.OnExecuted = (WorkfowResult<bool> result) => 
     {
-        // Schedules the Workflow to be kicked off at midnight everyday
-        options.ExecuteAt = WorkflowTime.AtHour(0).Repeat();
-    });
+        Console.WriteLine($"Workflow result: {result.Output}");
+    }
+});
 
+CancellationTokenSource tokenSource = new CancellationTokenSource();
 
-await scheduler.StartAsync();
+_ = scheduler.StartAsync(tokenSource.Token);
 
 ```
 

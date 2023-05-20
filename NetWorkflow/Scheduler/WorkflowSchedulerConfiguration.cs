@@ -6,11 +6,11 @@ namespace NetWorkflow.Scheduler
     /// <summary>
     /// The options to use within a WorkflowScheduler.
     /// </summary>
-    public class WorkflowSchedulerConfiguration
+    public class WorkflowSchedulerConfiguration<TResult>
     {
-        private readonly string _changeExceptionMessage = $"Cannot change the {nameof(WorkflowSchedulerConfiguration)} after they have been set.";
+        private readonly string _changeExceptionMessage = $"Cannot change the {nameof(WorkflowSchedulerConfiguration<TResult>)} after initial definition.";
 
-        internal bool _executeAtSet = false;
+        private bool _executeAtSet = false;
 
         private WorkflowTime _executeAt;
 
@@ -32,5 +32,28 @@ namespace NetWorkflow.Scheduler
                 _executeAt = value;
             }
         }
+
+        private bool _onExecutedSet = false;
+
+        private Action<WorkflowResult<TResult>> _onExecuted;
+
+        /// <summary>
+        /// Provides a hook into retrieving the result of an executed Workflow.
+        /// <remarks>Will be called once a Workflow has been completed, canceled or faulted.</remarks>
+        /// </summary>
+        public Action<WorkflowResult<TResult>> OnExecuted
+        {
+            get => _onExecuted;
+            set
+            {
+                if (_onExecutedSet) throw new InvalidOperationException(_changeExceptionMessage);
+
+                _onExecutedSet= true;
+
+                _onExecuted = value;
+            }
+        }
+
+        internal WorkflowSchedulerConfiguration() { }
     }
 }

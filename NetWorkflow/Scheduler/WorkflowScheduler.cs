@@ -8,15 +8,14 @@ namespace NetWorkflow.Scheduler
     /// The WorkflowScheduler is a generic workflow scheduler that is responsible for scheduling and executing workflows.
     /// </summary>
     /// <typeparam name="TWorkflow">The Workflow to executed.</typeparam>
-    public class WorkflowScheduler<TWorkflow, TResult> : IDisposable
-        where TWorkflow : IWorkflow<TResult>
+    /// <typeparam name="TOut">The output type of the Workflow.</typeparam>
+    public class WorkflowScheduler<TWorkflow, TOut> : IDisposable
+        where TWorkflow : IWorkflow<TOut>
     {
         // Declare the event.
-        public event EventHandler<TResult> OnExecuted = delegate { };
-
         private Func<TWorkflow> _workflowFactory;
 
-        private WorkflowSchedulerConfiguration _configuration = new WorkflowSchedulerConfiguration();
+        private WorkflowSchedulerConfiguration<TOut> _configuration = new WorkflowSchedulerConfiguration<TOut>();
 
         private int _count = 0;
 
@@ -27,7 +26,7 @@ namespace NetWorkflow.Scheduler
         /// </summary>
         /// <param name="workflowFactory">A function that returns a Workflow.</param>
         /// <returns>The same instance of the WorkflowScheduler.</returns>
-        public WorkflowScheduler(Func<TWorkflow> workflowFactory, Action<WorkflowSchedulerConfiguration> configuration)
+        public WorkflowScheduler(Func<TWorkflow> workflowFactory, Action<WorkflowSchedulerConfiguration<TOut>> configuration)
         {
             if (workflowFactory == null) throw new ArgumentNullException(nameof(workflowFactory), "The WorkflowScheduler requires a workflow factory.");
 
@@ -47,13 +46,13 @@ namespace NetWorkflow.Scheduler
         {
             if (_workflowFactory == null)
             {
-                throw new InvalidOperationException($"A {nameof(WorkflowScheduler<TWorkflow, TResult>)} requires a Workflow Factory function.");
+                throw new InvalidOperationException($"A {nameof(WorkflowScheduler<TWorkflow, TOut>)} requires a Workflow Factory function.");
             }
 
             // A user should specify a WorkflowScheduler to execute a specific frequency or time.
             if (_configuration.ExecuteAt == null)
             {
-                throw new InvalidOperationException($"A {nameof(WorkflowSchedulerConfiguration.ExecuteAt)} has not been set.");
+                throw new InvalidOperationException($"A {nameof(WorkflowSchedulerConfiguration<TOut>.ExecuteAt)} has not been set.");
             }
 
             return Task.Run(() =>
@@ -79,7 +78,9 @@ namespace NetWorkflow.Scheduler
             {
                 await Task.Delay(workflowFrequency.Frequency, token);
 
-                OnExecuted.Invoke(this, _workflowFactory.Invoke().Run(token));
+                WorkflowResult<TOut> output = _workflowFactory.Invoke().Run(token);
+
+                _configuration?.OnExecuted?.Invoke(output);
 
                 if (++_count == workflowFrequency.ExecutionCount) break;
             }
@@ -91,7 +92,9 @@ namespace NetWorkflow.Scheduler
             {
                 if (workflowDateTime.IsNow())
                 {
-                    OnExecuted.Invoke(this, _workflowFactory.Invoke().Run(token));
+                    WorkflowResult<TOut> output = _workflowFactory.Invoke().Run(token);
+
+                    _configuration?.OnExecuted?.Invoke(output);
 
                     if (++_count == workflowDateTime.ExecutionCount) break;
                 }

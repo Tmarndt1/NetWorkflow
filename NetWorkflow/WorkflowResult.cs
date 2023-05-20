@@ -9,22 +9,22 @@ namespace NetWorkflow
     public sealed class WorkflowResult<TOut>
     {
         /// <summary>
-        /// A user friendly string message capturing the end result of the Workflow
+        /// A user friendly string message capturing the end result of the Workflow.
         /// </summary>
         public string Message { get; private set; } = "The Workflow completed successfully.";
 
         /// <summary>
-        /// Boolean value on whether the Workflow has successfully completed all its steps
+        /// Boolean value on whether the Workflow has successfully completed all its steps.
         /// </summary>
         public bool IsCompleted { get; private set; } = false;
 
         /// <summary>
-        /// Boolean value on whether the Workflow has catched an exception within the steps
+        /// Boolean value on whether the Workflow has catched an exception within the steps.
         /// </summary>
         public bool IsFaulted => Exception != null;
 
         /// <summary>
-        /// Boolean value on whether the Worfklow has been cancelled
+        /// Boolean value on whether the Worfklow has been canceled.
         /// </summary>
         public bool IsCanceled { get; private set; } = false;
 
@@ -34,12 +34,12 @@ namespace NetWorkflow
         public Exception Exception { get; private set; }
 
         /// <summary>
-        /// The duration from when the Workflow was initially ran until the WorkflowResult is retuend
+        /// The duration from when the Workflow was initially ran until the WorkflowResult is returned.
         /// </summary>
         public TimeSpan Duration { get; private set; }
 
         /// <summary>
-        /// The final resulting data of the Workflow
+        /// The Workflow's output.
         /// </summary>
         public TOut Output { get; private set; }
 

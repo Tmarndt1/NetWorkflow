@@ -1,12 +1,37 @@
 # NetWorkflow
 
-NetWorkflow is a light weight C# .NET Workflow library that leverages the fluent syntax and allows a user to explicitly define their WorkflowSteps in a single location with compile time validation between WorkflowStep inputs and outputs.
+NetWorkflow is a powerful and flexible workflow library for .NET that enables you to define and execute complex workflows with ease. It provides a fluent and intuitive API for building workflows, supporting sequential, conditional, parallel, and scheduled execution of workflow steps.
 
 main: ![Build Status](https://github.com/Tmarndt1/NetWorkflow/workflows/.NET/badge.svg?branch=main)
 
 ## Give a Star! :star:
 
 If you like or are using this project please give it a star. Thanks!
+
+## Features
+
+* **Sequential Execution:** Easily define and execute workflows with a sequence of steps.
+* **Conditional Branching:** Create conditional branches based on runtime values and conditions.
+* **Parallel Execution:** Execute multiple workflow steps in parallel, improving efficiency and performance.
+* **Asynchronous Workflows:** Seamlessly integrate asynchronous workflows for handling time-consuming operations.
+* **Workflow Scheduling:** Schedule workflows to execute at specific times or frequencies.
+* **Flexible Configuration:** Configure execution options and event hooks to tailor workflows to your specific needs.
+
+## Installation
+### NuGet Package Manager
+Open the NuGet Package Manager console in Visual Studio.
+
+Run the following command:
+```
+dotnet add package NetWorkflow
+```
+
+## Getting Started
+To get started with NetWorkflow, follow these steps:
+
+1. Define your workflow by inheriting from the appropriate base class (Workflow<T> or AsyncWorkflow<T>).
+2. Implement the Build method to configure the workflow steps using the fluent API.
+3. Execute the workflow using the Run or RunAsync method.
 
 ## HelloWorld Workflow Example
 
@@ -178,6 +203,10 @@ CancellationTokenSource tokenSource = new CancellationTokenSource();
 _ = scheduler.StartAsync(tokenSource.Token);
 
 ```
+
+## Contributing
+
+Contributions to the NetWorkflow library are highly appreciated! If you find any issues or have suggestions for improvements, please create a new issue or submit a pull request.
 
 ## Authors
 

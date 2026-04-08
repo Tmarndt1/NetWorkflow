@@ -239,22 +239,6 @@ namespace NetWorkflow.Tests
         }
 
         [Fact]
-        public void Retry_WorkflowStep_Success()
-        {
-            // Arrange
-            var workflow = new RetryWorkflow();
-
-            // Act
-            var result = workflow.Run();
-
-            // Assert
-            Assert.Equal(2, RetryWorkflow.FirstStep.RanCount);
-            Assert.False(result.IsCompleted);
-            Assert.False(result.IsCanceled);
-            Assert.IsType<WorkflowMaxRetryException>(result.Exception);
-        }
-
-        [Fact]
         public void Dispose_Success()
         {
             // Arrange

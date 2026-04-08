@@ -15,28 +15,19 @@ namespace NetWorkflow
         /// <typeparam name="TNext">The return type of the WorkflowStep.</typeparam>
         /// <param name="func">A function that returns a WorkflowStep.</param>
         /// <returns>An instance of a WorkflowBuilder.</returns>
-        public IWorkflowBuilderConditionalFinalAggregate Do<TNext>(Expression<Func<IWorkflowStep<TIn, TNext>>> func);
+        public IWorkflowBuilderConditionalEnd Do<TNext>(Expression<Func<IWorkflowStep<TIn, TNext>>> func);
 
         /// <summary>
         /// Designates the Workflow to stop execution if the condition is true
         /// </summary>
         /// <returns>An instance of a WorkflowBuilder.</returns>
-        public IWorkflowBuilderConditionalFinalAggregate Stop();
+        public IWorkflowBuilderConditionalEnd Stop();
 
         /// <summary>
         /// Designates the Workflow to throw an exception if the condition is true.
         /// </summary>
         /// <param name="func">A function that returns an exception.</param>
         /// <returns>An instance of a WorkflowBuilder.</returns>
-        public IWorkflowBuilderConditionalFinalAggregate Throw(Expression<Func<Exception>> func);
-
-        /// <summary>
-        /// Defines the Workflow to retry the previous WorkflowStep. 
-        /// Optional max retries count can be passed in with the default value being 1.
-        /// </summary>
-        /// <param name="delay">The amount of time to delay before retrying.</param>
-        /// <param name="maxRetries">Max number of retries before breaking.</param>
-        /// <returns>An instance of a WorkflowBuilder.</returns>
-        public IWorkflowBuilderConditionalFinalAggregate Retry(TimeSpan delay , int maxRetries = 1);
+        public IWorkflowBuilderConditionalEnd Throw(Expression<Func<Exception>> func);
     }
 }

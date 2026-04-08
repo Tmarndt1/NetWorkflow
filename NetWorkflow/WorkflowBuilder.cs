@@ -86,7 +86,7 @@ namespace NetWorkflow
 
         public IWorkflowBuilderConditional<TOut> If(Expression<Func<TOut, bool>> func)
         {
-            _next = new WorkflowBuilderConditional<TOut>(new WorkflowExecutorConditional<TOut>(func), this);
+            _next = new WorkflowBuilderConditional<TOut>(new WorkflowExecutorConditional<TOut>(func));
 
             return (IWorkflowBuilderConditional<TOut>)_next;
         }
@@ -120,21 +120,15 @@ namespace NetWorkflow
         IWorkflowBuilderConditional<TIn>, 
         IWorkflowBuilderConditionalNext<TIn>, 
         IWorkflowBuilderConditionalFinal<TIn>, 
-        IWorkflowBuilderConditionalFinalAggregate
+        IWorkflowBuilderConditionalEnd
     {
         private readonly WorkflowExecutorConditional<TIn> _executor;
 
-        private readonly WorkflowBuilder _lastBuilder;
-
-        private CancellationToken _token;
-
         private bool _disposedValue;
 
-        public WorkflowBuilderConditional(WorkflowExecutorConditional<TIn> executor, WorkflowBuilder lastBuilder)
+        public WorkflowBuilderConditional(WorkflowExecutorConditional<TIn> executor)
         {
             _executor = executor;
-
-            _lastBuilder = lastBuilder;
         }
 
         public IWorkflowBuilderConditionalNext<TIn> Do<TNext>(Expression<Func<IWorkflowStep<TIn, TNext>>> func)
@@ -179,17 +173,8 @@ namespace NetWorkflow
             return this;
         }
 
-        public IWorkflowBuilderConditionalNext<TIn> Retry(TimeSpan delay, int maxRetries = 1)
-        {
-            _executor.SetRetry(delay, maxRetries, () => _lastBuilder.Run(_lastBuilder.Result, _token));
-
-            return this;
-        }
-
         public override object Run(object args, CancellationToken token = default)
         {
-            _token = token;
-
             Result = _executor.Run((TIn)args, token);
 
             if (_next == null) return Result;
@@ -197,30 +182,23 @@ namespace NetWorkflow
             return _next?.Run(Result, token);
         }
 
-        IWorkflowBuilderConditionalFinalAggregate IWorkflowBuilderConditionalFinal<TIn>.Do<TNext>(Expression<Func<IWorkflowStep<TIn, TNext>>> func)
+        IWorkflowBuilderConditionalEnd IWorkflowBuilderConditionalFinal<TIn>.Do<TNext>(Expression<Func<IWorkflowStep<TIn, TNext>>> func)
         {
             Do(func);
 
             return this;
         }
 
-        IWorkflowBuilderConditionalFinalAggregate IWorkflowBuilderConditionalFinal<TIn>.Stop()
+        IWorkflowBuilderConditionalEnd IWorkflowBuilderConditionalFinal<TIn>.Stop()
         {
             Stop();
 
             return this;
         }
 
-        IWorkflowBuilderConditionalFinalAggregate IWorkflowBuilderConditionalFinal<TIn>.Throw(Expression<Func<Exception>> func)
+        IWorkflowBuilderConditionalEnd IWorkflowBuilderConditionalFinal<TIn>.Throw(Expression<Func<Exception>> func)
         {
             Throw(func);
-
-            return this;
-        }
-
-        IWorkflowBuilderConditionalFinalAggregate IWorkflowBuilderConditionalFinal<TIn>.Retry(TimeSpan delay, int maxRetries)
-        {
-            Retry(delay, maxRetries);
 
             return this;
         }

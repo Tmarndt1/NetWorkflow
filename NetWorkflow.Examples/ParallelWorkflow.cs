@@ -26,8 +26,8 @@ namespace NetWorkflow.Tests.Examples
                         new Step2(100, _throw),
                         new Step2(50, _throw),
                     })
-                    .Then(() => new Step3())
-                        .Then(() => new Step4());
+                    .ThenAsync(() => new Step3())
+                        .ThenAsync(() => new Step4());
 
         private class Step1 : IWorkflowStep<Guid>
         {
@@ -42,11 +42,6 @@ namespace NetWorkflow.Tests.Examples
             private readonly int _delay;
 
             private readonly bool _throw = false;
-
-            public Step2(int delay)
-            {
-                _delay = delay;
-            }
 
             public Step2(int delay, bool throwWithin)
             {
@@ -66,21 +61,21 @@ namespace NetWorkflow.Tests.Examples
             }
         }
 
-        private class Step3 : IWorkflowStep<IEnumerable<string>, string>
+        private class Step3 : IWorkflowStepAsync<IEnumerable<string>, string>
         {
-            public string Run(IEnumerable<string> args, CancellationToken token = default)
+            public Task<string> RunAsync(IEnumerable<string> args, CancellationToken token = default)
             {
-                if (!args.Any()) return string.Empty;
+                if (!args.Any()) return Task.FromResult(string.Empty);
 
-                return $"{nameof(Step3)} ran";
+                return Task.FromResult($"{nameof(Step3)} ran");
             }
         }
 
-        private class Step4 : IWorkflowStep<string, bool>
+        private class Step4 : IWorkflowStepAsync<string, bool>
         {
-            public bool Run(string args, CancellationToken token = default)
+            public Task<bool> RunAsync(string args, CancellationToken token = default)
             {
-                return args == $"{nameof(Step3)} ran";
+                return Task.FromResult(args == $"{nameof(Step3)} ran");
             }
         }
     }

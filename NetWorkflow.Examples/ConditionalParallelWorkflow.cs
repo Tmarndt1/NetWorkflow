@@ -17,7 +17,7 @@ namespace NetWorkflow.Tests.Examples
                         .ElseIf(x => x == "Failed")
                             .Do(() => new ConditionalStep(-1))
                     .EndIf()
-                        .Then(() => new FinalStepAsync());
+                        .ThenAsync(() => new FinalStepAsync());
 
 
         private class Step2 : IWorkflowStepAsync<string, string>

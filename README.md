@@ -64,8 +64,6 @@ public class ConditionalWorkflow : Workflow<int>
                     .Do(() => new ConditionalStep())
                 .ElseIf(x => x == "Failed")
                     .Do(() => new ConditionalStep())
-                .Else()
-                    .Retry(TimeSpan.FromSeconds(10), 2) // Max retry 2 times
             .EndIf()
                 .Then(() => new FinalStep());
 

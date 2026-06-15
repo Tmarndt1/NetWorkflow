@@ -1,26 +1,31 @@
-﻿using NetWorkflow.Exceptions;
 using System;
+using NetWorkflow.Exceptions;
 
 namespace NetWorkflow.Scheduler
 {
     /// <summary>
-    /// WorkflowTime represents when a WorkflowScheduler should execute a Workflow
+    /// WorkflowSchedule represents when a WorkflowScheduler should execute a Workflow.
     /// </summary>
     /// <remarks>
     /// Days span from 1 to 31.
     /// Hours are in military time so they span from 0 to 23.
     /// Minutes span from 0 to 59.
     /// </remarks>
-    public abstract class WorkflowTime
+    public abstract class WorkflowSchedule
     {
         /// <summary>
-        /// Designates the WorkflowScheduler to execute the Workflow at the given frequency
+        /// Designates the WorkflowScheduler to execute the Workflow at the given frequency.
         /// </summary>
-        /// <param name="frequency">The frequency to execute the Workflow</param>
-        /// <returns>An instance of WorkflowFrequency</returns>
-        public static WorkflowFrequency AtFrequency(TimeSpan frequency)
+        /// <param name="frequency">The frequency to execute the Workflow.</param>
+        /// <returns>An instance of FrequencySchedule.</returns>
+        public static FrequencySchedule AtFrequency(TimeSpan frequency)
         {
-            return new WorkflowFrequency(frequency);
+            if (frequency <= TimeSpan.Zero)
+            {
+                throw new WorkflowInvalidValueException("Frequency must be greater than zero.");
+            }
+
+            return new FrequencySchedule(frequency);
         }
 
         /// <summary>
@@ -29,10 +34,10 @@ namespace NetWorkflow.Scheduler
         /// <param name="day">The day of the month the Workflow should be executed.</param>
         /// <param name="hour">The hour of the day the Workflow should be executed.</param>
         /// <param name="minute">The minute of the hour the Workflow should be executed.</param>
-        /// <returns>A new instance of WorkflowTime.</returns>
-        public static WorkflowDateTime AtDay(int day, int hour, int minute)
+        /// <returns>A new instance of CalendarSchedule.</returns>
+        public static CalendarSchedule AtDay(int day, int hour, int minute)
         {
-            return new WorkflowDateTime(day, hour, minute);
+            return new CalendarSchedule(day, hour, minute);
         }
 
         /// <summary>
@@ -40,67 +45,65 @@ namespace NetWorkflow.Scheduler
         /// </summary>
         /// <param name="day">The day of the month the Workflow should be executed.</param>
         /// <param name="hour">The hour of the day the Workflow should be executed.</param>
-        /// <returns>A new instance of WorkflowTime.</returns>
-        /// <remarks>
-        /// Will execute at the beginning of the provided day and hour.
-        /// </remarks>
-        public static WorkflowDateTime AtDay(int day, int hour)
+        /// <returns>A new instance of CalendarSchedule.</returns>
+        public static CalendarSchedule AtDay(int day, int hour)
         {
-            return new WorkflowDateTime(day, hour, 0);
+            return new CalendarSchedule(day, hour, 0);
         }
 
         /// <summary>
         /// Designates a WorkflowScheduler should execute a Workflow on the given day, hour 0, and minute 0.
         /// </summary>
         /// <param name="day">The day of the month the Workflow should be executed.</param>
-        /// <returns>A new instance of WorkflowTime.</returns>
-        /// <remarks>
-        /// Will execute at midnight on the given day.
-        /// </remarks>
-        public static WorkflowDateTime AtDay(int day)
+        /// <returns>A new instance of CalendarSchedule.</returns>
+        public static CalendarSchedule AtDay(int day)
         {
-            return new WorkflowDateTime(day, 0, 0);
+            return new CalendarSchedule(day, 0, 0);
         }
 
         /// <summary>
-        /// Designates a WorkflowScheduler should execute a Workflow at the given
-        /// hour and at the given minute. 
+        /// Designates a WorkflowScheduler should execute a Workflow at the given hour and minute.
         /// </summary>
         /// <param name="hour">The hour of the day the Workflow should be executed.</param>
         /// <param name="minute">The minute of the hour the Workflow should be executed.</param>
-        /// <returns>A new instance of WorkflowTime.</returns>
-        public static WorkflowDateTime AtHour(int hour, int minute)
+        /// <returns>A new instance of CalendarSchedule.</returns>
+        public static CalendarSchedule AtHour(int hour, int minute)
         {
-            return new WorkflowDateTime(hour, minute);
+            return new CalendarSchedule(hour, minute);
         }
 
         /// <summary>
         /// Designates a WorkflowScheduler should execute a Workflow at the given hour and minute 0.
         /// </summary>
         /// <param name="hour">The hour of the day the Workflow should be executed.</param>
-        /// <returns>A new instance of WorkflowTime.</returns>
-        public static WorkflowDateTime AtHour(int hour)
+        /// <returns>A new instance of CalendarSchedule.</returns>
+        public static CalendarSchedule AtHour(int hour)
         {
-            return new WorkflowDateTime(hour, 0);
+            return new CalendarSchedule(hour, 0);
         }
 
         /// <summary>
         /// Designates a WorkflowScheduler should execute a Workflow at the given minute.
         /// </summary>
         /// <param name="minute">The minute of the hour the Workflow should be executed.</param>
-        /// <returns>A new instance of WorkflowTime.</returns>
-        public static WorkflowDateTime AtMinute(int minute)
+        /// <returns>A new instance of CalendarSchedule.</returns>
+        public static CalendarSchedule AtMinute(int minute)
         {
-            return new WorkflowDateTime(minute);
+            return new CalendarSchedule(minute);
         }
 
         /// <summary>
         /// Designates the Workflow to execute until the count is met.
         /// </summary>
         /// <param name="count">The max amount of times the Workflow should execute.</param>
-        /// <returns>The same instance of the WorkflowTime.</returns>
-        public WorkflowTime Until(int count)
+        /// <returns>The same instance of the WorkflowSchedule.</returns>
+        public WorkflowSchedule Until(int count)
         {
+            if (count < 1)
+            {
+                throw new WorkflowInvalidValueException("Execution count must be greater than zero.");
+            }
+
             ExecutionCount = count;
             return this;
         }
@@ -111,7 +114,7 @@ namespace NetWorkflow.Scheduler
         internal int ExecutionCount { get; private set; } = -1;
     }
 
-    public class WorkflowDateTime : WorkflowTime
+    public class CalendarSchedule : WorkflowSchedule
     {
         /// <summary>
         /// The day of the month a Workflow should be executed.
@@ -128,20 +131,20 @@ namespace NetWorkflow.Scheduler
         /// </summary>
         public int Minute { get; private set; }
 
-        internal WorkflowDateTime(int day, int hour, int minute)
+        internal CalendarSchedule(int day, int hour, int minute)
         {
             Day = ValidateDay(day);
             Hour = ValidateHour(hour);
             Minute = ValidateMinute(minute);
         }
 
-        internal WorkflowDateTime(int hour, int minute)
+        internal CalendarSchedule(int hour, int minute)
         {
             Hour = ValidateHour(hour);
             Minute = ValidateMinute(minute);
         }
 
-        internal WorkflowDateTime(int minute)
+        internal CalendarSchedule(int minute)
         {
             Minute = ValidateMinute(minute);
         }
@@ -152,6 +155,7 @@ namespace NetWorkflow.Scheduler
             {
                 throw new WorkflowInvalidValueException("Day must be between 1 and 31.");
             }
+
             return day;
         }
 
@@ -161,6 +165,7 @@ namespace NetWorkflow.Scheduler
             {
                 throw new WorkflowInvalidValueException("Hour must be between 0 and 23.");
             }
+
             return hour;
         }
 
@@ -170,38 +175,34 @@ namespace NetWorkflow.Scheduler
             {
                 throw new WorkflowInvalidValueException("Minute must be between 0 and 59.");
             }
+
             return minute;
         }
 
-        internal bool IsNow()
+        internal bool IsNow(DateTimeOffset now)
         {
-            DateTime now = DateTime.Now;
-
             if (Day != -1)
             {
                 return now.Day == Day && now.Hour == Hour && now.Minute == Minute;
             }
-            else if (Hour != -1)
+
+            if (Hour != -1)
             {
                 return now.Hour == Hour && now.Minute == Minute;
             }
-            else if (Minute != -1)
-            {
-                return now.Minute == Minute;
-            }
 
-            return false;
+            return now.Minute == Minute;
         }
     }
 
-    public class WorkflowFrequency : WorkflowTime
+    public class FrequencySchedule : WorkflowSchedule
     {
         /// <summary>
-        /// Determines the frequency of how often the WorkflowScheduler executes a Workflow
+        /// Determines the frequency of how often the WorkflowScheduler executes a Workflow.
         /// </summary>
         public TimeSpan Frequency { get; }
 
-        internal WorkflowFrequency(TimeSpan frequency)
+        internal FrequencySchedule(TimeSpan frequency)
         {
             Frequency = frequency;
         }

@@ -1,12 +1,11 @@
-﻿using System;
+using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace NetWorkflow
 {
-    internal interface IWorkflowExecutor : IDisposable { }
-
-    internal interface IWorkflowExecutor<in TIn, out TOut> : IWorkflowExecutor
+    internal interface IWorkflowExecutor : IDisposable
     {
-        TOut Run(TIn args, CancellationToken token = default);
+        ValueTask<object> RunAsync(object args, CancellationToken token = default);
     }
 }

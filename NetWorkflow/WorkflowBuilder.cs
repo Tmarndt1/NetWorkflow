@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace NetWorkflow
 {
@@ -15,12 +16,20 @@ namespace NetWorkflow
 
         public IWorkflowBuilderNext<TOut> StartWith<TOut>(Expression<Func<IWorkflowStep<TOut>>> func)
         {
-            _next = new WorkflowBuilder<object, TOut>(new WorkflowStepExecutor<object, TOut>(func));
+            _next = new WorkflowExecutionNode<object, TOut>(new StartStepExecutor<TOut>(func));
 
             return (IWorkflowBuilderNext<TOut>)_next;
         }
 
-        public virtual object Run(object args, CancellationToken token = default) => _next?.Run(args, token);
+        public virtual object Run(object args, CancellationToken token = default)
+        {
+            return RunAsync(args, token).GetAwaiter().GetResult();
+        }
+
+        public virtual ValueTask<object> RunAsync(object args, CancellationToken token = default)
+        {
+            return _next?.RunAsync(args, token) ?? new ValueTask<object>((object)null);
+        }
 
         protected virtual void Dispose(bool disposing)
         {
@@ -37,67 +46,60 @@ namespace NetWorkflow
             }
         }
 
-        ~WorkflowBuilder()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: false);
-        }
-
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
 
             GC.SuppressFinalize(this);
         }
     }
 
-    internal class WorkflowBuilder<TIn, TOut> : WorkflowBuilder, IWorkflowBuilderNext<TIn, TOut>
+    internal class WorkflowExecutionNode<TIn, TOut> : WorkflowBuilder, IWorkflowBuilderNext<TIn, TOut>
     {
-        internal readonly IWorkflowExecutor<TIn, TOut> _executor;
+        private readonly IWorkflowExecutor _executor;
 
         private bool _disposedValue;
 
-        internal WorkflowBuilder(IWorkflowExecutor<TIn, TOut> executor)
+        internal WorkflowExecutionNode(IWorkflowExecutor executor)
         {
-            _executor = executor;
+            _executor = executor ?? throw new ArgumentNullException(nameof(executor));
         }
 
         public IWorkflowBuilderNext<IEnumerable<TNext>> Parallel<TNext>(Expression<Func<IEnumerable<IWorkflowStepAsync<TOut, TNext>>>> func)
         {
-            _next = new WorkflowBuilder<TOut, IEnumerable<TNext>>(new WorkflowParallelExecutor<TOut, TNext>(func));
+            _next = new WorkflowExecutionNode<TOut, IEnumerable<TNext>>(new ParallelStepExecutor<TOut, TNext>(func));
 
             return (IWorkflowBuilderNext<IEnumerable<TNext>>)_next;
         }
 
         public IWorkflowBuilderNext<TOut, TNext> Then<TNext>(Expression<Func<IWorkflowStep<TOut, TNext>>> func)
         {
-            _next = new WorkflowBuilder<TOut, TNext>(new WorkflowStepExecutor<TOut, TNext>(func));
+            _next = new WorkflowExecutionNode<TOut, TNext>(new SyncStepExecutor<TOut, TNext>(func));
 
             return (IWorkflowBuilderNext<TOut, TNext>)_next;
         }
 
         public IWorkflowBuilderNext<TOut, TNext> ThenAsync<TNext>(Expression<Func<IWorkflowStepAsync<TOut, TNext>>> func)
         {
-            _next = new WorkflowBuilder<TOut, TNext>(new WorkflowStepAsyncExecutor<TOut, TNext>(func));
+            _next = new WorkflowExecutionNode<TOut, TNext>(new AsyncStepExecutor<TOut, TNext>(func));
 
             return (IWorkflowBuilderNext<TOut, TNext>)_next;
         }
 
         public IWorkflowBuilderConditional<TOut> If(Expression<Func<TOut, bool>> func)
         {
-            _next = new WorkflowBuilderConditional<TOut>(new WorkflowExecutorConditional<TOut>(func));
+            _next = new ConditionalWorkflowBuilder<TOut>(new ConditionalExecutor<TOut>(func));
 
             return (IWorkflowBuilderConditional<TOut>)_next;
         }
 
-        public override object Run(object args, CancellationToken token = default)
+        public override async ValueTask<object> RunAsync(object args, CancellationToken token = default)
         {
-            Result = _executor.Run((TIn)args, token);
+            Result = await _executor.RunAsync(args, token).ConfigureAwait(false);
 
             if (_next == null) return Result;
 
-            return _next?.Run(Result, token);
+            return await _next.RunAsync(Result, token).ConfigureAwait(false);
         }
 
         protected override void Dispose(bool disposing)
@@ -106,7 +108,7 @@ namespace NetWorkflow
             {
                 if (disposing)
                 {
-                    _executor?.Dispose();
+                    _executor.Dispose();
                 }
 
                 _disposedValue = true;
@@ -116,24 +118,24 @@ namespace NetWorkflow
         }
     }
 
-    internal class WorkflowBuilderConditional<TIn> : WorkflowBuilder, 
-        IWorkflowBuilderConditional<TIn>, 
-        IWorkflowBuilderConditionalNext<TIn>, 
-        IWorkflowBuilderConditionalFinal<TIn>, 
+    internal class ConditionalWorkflowBuilder<TIn> : WorkflowBuilder,
+        IWorkflowBuilderConditional<TIn>,
+        IWorkflowBuilderConditionalNext<TIn>,
+        IWorkflowBuilderConditionalFinal<TIn>,
         IWorkflowBuilderConditionalEnd
     {
-        private readonly WorkflowExecutorConditional<TIn> _executor;
+        private readonly ConditionalExecutor<TIn> _executor;
 
         private bool _disposedValue;
 
-        public WorkflowBuilderConditional(WorkflowExecutorConditional<TIn> executor)
+        public ConditionalWorkflowBuilder(ConditionalExecutor<TIn> executor)
         {
-            _executor = executor;
+            _executor = executor ?? throw new ArgumentNullException(nameof(executor));
         }
 
         public IWorkflowBuilderConditionalNext<TIn> Do<TNext>(Expression<Func<IWorkflowStep<TIn, TNext>>> func)
         {
-            _executor.Append(new WorkflowStepExecutor<TIn, object>(func));
+            _executor.Append(new SyncStepExecutor<TIn, TNext>(func));
 
             return this;
         }
@@ -154,7 +156,7 @@ namespace NetWorkflow
 
         public IWorkflowBuilderNext<object> EndIf()
         {
-            _next = new WorkflowBuilder<object, object>(new WorkflowMoveNextExecutor<object>());
+            _next = new WorkflowExecutionNode<object, object>(new PassThroughExecutor());
 
             return (IWorkflowBuilderNext<object>)_next;
         }
@@ -173,13 +175,13 @@ namespace NetWorkflow
             return this;
         }
 
-        public override object Run(object args, CancellationToken token = default)
+        public override async ValueTask<object> RunAsync(object args, CancellationToken token = default)
         {
-            Result = _executor.Run((TIn)args, token);
+            Result = await _executor.RunAsync(args, token).ConfigureAwait(false);
 
             if (_next == null) return Result;
 
-            return _next?.Run(Result, token);
+            return await _next.RunAsync(Result, token).ConfigureAwait(false);
         }
 
         IWorkflowBuilderConditionalEnd IWorkflowBuilderConditionalFinal<TIn>.Do<TNext>(Expression<Func<IWorkflowStep<TIn, TNext>>> func)
@@ -209,7 +211,7 @@ namespace NetWorkflow
             {
                 if (disposing)
                 {
-                    _executor?.Dispose();
+                    _executor.Dispose();
                 }
 
                 _disposedValue = true;
@@ -219,4 +221,3 @@ namespace NetWorkflow
         }
     }
 }
-

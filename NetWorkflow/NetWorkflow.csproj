@@ -8,10 +8,11 @@
         <Description>Fluent .NET Workflow Library that allows a user to explicitly define their workflow steps in a single location with compile time validation.</Description>
         <PackageProjectUrl>https://github.com/Tmarndt1/NetWorkflow</PackageProjectUrl>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageReleaseNotes>See CHANGELOG.md for changes in 4.0.0.</PackageReleaseNotes>
         <RepositoryUrl>https://github.com/Tmarndt1/NetWorkflow</RepositoryUrl>
         <PackageTags>Fluent;NetWorkflow;Net;Workflow;</PackageTags>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
-		<Version>3.0.0</Version>
+		<Version>4.0.0</Version>
     </PropertyGroup>
 
     <ItemGroup>

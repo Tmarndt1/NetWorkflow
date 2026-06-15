@@ -1,9 +1,9 @@
-﻿using NetWorkflow.Exceptions;
+using NetWorkflow.Exceptions;
 using NetWorkflow.Scheduler;
 
 namespace NetWorkflow.Tests
 {
-    public class WorkflowTime_Tests
+    public class WorkflowSchedule_Tests
     {
         [Fact]
         public void Day_Range_Min_Success()
@@ -14,7 +14,7 @@ namespace NetWorkflow.Tests
             // Act
             try
             {
-                var time = WorkflowTime.AtDay(0);
+                var time = WorkflowSchedule.AtDay(0);
 
                 hit = true;
             }
@@ -36,7 +36,7 @@ namespace NetWorkflow.Tests
             // Act
             try
             {
-                var time = WorkflowTime.AtDay(32);
+                var time = WorkflowSchedule.AtDay(32);
 
                 hit = true;
             }
@@ -58,7 +58,7 @@ namespace NetWorkflow.Tests
             // Act
             try
             {
-                var time = WorkflowTime.AtHour(-1);
+                var time = WorkflowSchedule.AtHour(-1);
 
                 hit = true;
             }
@@ -80,7 +80,7 @@ namespace NetWorkflow.Tests
             // Act
             try
             {
-                var time = WorkflowTime.AtDay(60);
+                var time = WorkflowSchedule.AtDay(60);
 
                 hit = true;
             }
@@ -102,7 +102,7 @@ namespace NetWorkflow.Tests
             // Act
             try
             {
-                var time = WorkflowTime.AtMinute(-1);
+                var time = WorkflowSchedule.AtMinute(-1);
 
                 hit = true;
             }
@@ -124,7 +124,51 @@ namespace NetWorkflow.Tests
             // Act
             try
             {
-                var time = WorkflowTime.AtMinute(60);
+                var time = WorkflowSchedule.AtMinute(60);
+
+                hit = true;
+            }
+            catch (Exception ex)
+            {
+                Assert.IsType<WorkflowInvalidValueException>(ex);
+            }
+
+            // Assert
+            Assert.False(hit);
+        }
+
+        [Fact]
+        public void Frequency_Range_Min_Success()
+        {
+            // Arrange
+            bool hit = false;
+
+            // Act
+            try
+            {
+                var time = WorkflowSchedule.AtFrequency(TimeSpan.Zero);
+
+                hit = true;
+            }
+            catch (Exception ex)
+            {
+                Assert.IsType<WorkflowInvalidValueException>(ex);
+            }
+
+            // Assert
+            Assert.False(hit);
+        }
+
+        [Fact]
+        public void Until_Range_Min_Success()
+        {
+            // Arrange
+            bool hit = false;
+
+            // Act
+            try
+            {
+                var time = WorkflowSchedule.AtFrequency(TimeSpan.FromSeconds(1)).Until(0);
 
                 hit = true;
             }

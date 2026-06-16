@@ -79,13 +79,6 @@ namespace NetWorkflow
             return (IWorkflowBuilderNext<TOut, TNext>)_next;
         }
 
-        public IWorkflowBuilderNext<TOut, TNext> ThenAsync<TNext>(Expression<Func<IWorkflowStepAsync<TOut, TNext>>> func)
-        {
-            _next = new WorkflowExecutionNode<TOut, TNext>(new AsyncStepExecutor<TOut, TNext>(func));
-
-            return (IWorkflowBuilderNext<TOut, TNext>)_next;
-        }
-
         public IWorkflowBuilderConditional<TOut> If(Expression<Func<TOut, bool>> func)
         {
             _next = new ConditionalWorkflowBuilder<TOut>(new ConditionalExecutor<TOut>(func));

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using NetWorkflow.Extensions;
 using NetWorkflow.Scheduler;
 using NetWorkflow.Tests.Examples;
@@ -41,7 +42,7 @@ namespace NetWorkflow.Tests
             // Act
             try
             {
-                _ = new WorkflowScheduler<HelloWorldWorkflow, bool>(null, config => config.ExecuteAt = WorkflowTime.AtFrequency(TimeSpan.FromMilliseconds(200)));
+                _ = new WorkflowScheduler<HelloWorldWorkflow, bool>(null, config => config.Schedule = WorkflowSchedule.AtFrequency(TimeSpan.FromMilliseconds(200)));
 
                 hit = true;
             }
@@ -63,7 +64,7 @@ namespace NetWorkflow.Tests
 
             var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
             {
-                config.ExecuteAt = WorkflowTime.AtFrequency(TimeSpan.FromMilliseconds(50));
+                config.Schedule = WorkflowSchedule.AtFrequency(TimeSpan.FromMilliseconds(50));
                 config.OnExecuted = (result) => count++;
             });
 
@@ -81,6 +82,51 @@ namespace NetWorkflow.Tests
         }
 
         [Fact]
+        public void Frequency_RunImmediately_Success()
+        {
+            // Arrange
+            int count = 0;
+
+            var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
+            {
+                config.Schedule = WorkflowSchedule.AtFrequency(TimeSpan.FromSeconds(5)).Until(1);
+                config.RunImmediately = true;
+                config.OnExecuted = (result) => count++;
+            });
+
+            // Act
+            scheduler.StartAsync();
+
+            // Assert
+            Thread.Sleep(TimeSpan.FromMilliseconds(100));
+
+            Assert.Equal(1, count);
+        }
+
+        [Fact]
+        public async Task Frequency_OnExecutedAsync_Success()
+        {
+            // Arrange
+            int count = 0;
+
+            var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
+            {
+                config.Schedule = WorkflowSchedule.AtFrequency(TimeSpan.FromMilliseconds(50)).Until(1);
+                config.OnExecutedAsync = (result, token) =>
+                {
+                    count++;
+                    return Task.CompletedTask;
+                };
+            });
+
+            // Act
+            await scheduler.StartAsync();
+
+            // Assert
+            Assert.Equal(1, count);
+        }
+
+        [Fact]
         public void Frequency_Max_Count_Success()
         {
             // Arrange
@@ -88,7 +134,7 @@ namespace NetWorkflow.Tests
 
             var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
             {
-                config.ExecuteAt = WorkflowTime.AtFrequency(TimeSpan.FromMilliseconds(50)).Until(2);
+                config.Schedule = WorkflowSchedule.AtFrequency(TimeSpan.FromMilliseconds(50)).Until(2);
                 config.OnExecuted = (WorkflowResult<bool> result) => count++;
             });
 
@@ -113,7 +159,7 @@ namespace NetWorkflow.Tests
 
             var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
             {
-                config.ExecuteAt = WorkflowTime.AtMinute(DateTime.Now.Minute);
+                config.Schedule = WorkflowSchedule.AtMinute(DateTime.Now.Minute);
                 config.OnExecuted = (result) => count++;
             });
 
@@ -140,7 +186,7 @@ namespace NetWorkflow.Tests
 
             var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
             {
-                config.ExecuteAt = WorkflowTime.AtHour(now.Hour, now.Minute);
+                config.Schedule = WorkflowSchedule.AtHour(now.Hour, now.Minute);
                 config.OnExecuted = (result) => count++;
             });
 
@@ -167,7 +213,7 @@ namespace NetWorkflow.Tests
 
             var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
             {
-                config.ExecuteAt = WorkflowTime.AtDay(now.Day, now.Hour, now.Minute);
+                config.Schedule = WorkflowSchedule.AtDay(now.Day, now.Hour, now.Minute);
                 config.OnExecuted = (result) => count++;
             });
 
@@ -192,7 +238,7 @@ namespace NetWorkflow.Tests
 
             var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
             {
-                config.ExecuteAt = WorkflowTime.AtHour(1, DateTime.Now.Minute - 1);
+                config.Schedule = WorkflowSchedule.AtHour(1, DateTime.Now.Minute - 1);
                 config.OnExecuted = (result) => count++;
             });
 
@@ -217,13 +263,29 @@ namespace NetWorkflow.Tests
             var workflowScheduler = new ServiceCollection()
                 .AddWorkflowScheduler(() => new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
                 {
-                    config.ExecuteAt = WorkflowTime.AtHour(1);
+                    config.Schedule = WorkflowSchedule.AtHour(1);
                 }))
                 .BuildServiceProvider()
                 .GetRequiredService<WorkflowScheduler<HelloWorldWorkflow, bool>>();
 
             // Assert
             Assert.NotNull(workflowScheduler);
+        }
+
+        [Fact]
+        public void AddHostedWorkflow_Extensions_Success()
+        {
+            // Arrange
+            var services = new ServiceCollection()
+                .AddHostedWorkflow<HelloWorldWorkflow, bool>(config =>
+                {
+                    config.Schedule = WorkflowSchedule.AtFrequency(TimeSpan.FromMinutes(1));
+                })
+                .BuildServiceProvider()
+                .GetServices<IHostedService>();
+
+            // Assert
+            Assert.Single(services);
         }
 
         [Fact]
@@ -234,7 +296,7 @@ namespace NetWorkflow.Tests
 
             var scheduler = new WorkflowScheduler<HelloWorldWorkflow, bool>(() => new HelloWorldWorkflow(), config =>
             {
-                config.ExecuteAt = WorkflowTime.AtFrequency(TimeSpan.FromMilliseconds(50));
+                config.Schedule = WorkflowSchedule.AtFrequency(TimeSpan.FromMilliseconds(50));
                 config.OnExecuted = (result) => count++;
             });
 

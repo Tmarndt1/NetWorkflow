@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -9,8 +10,6 @@ namespace NetWorkflow
     /// </summary>
     public abstract class Workflow<TOut> : IWorkflow<TOut>, IDisposable
     {
-        private readonly WorkflowBuilder _next;
-
         private WorkflowOptions _options;
 
         private bool _disposedValue;
@@ -20,20 +19,19 @@ namespace NetWorkflow
         /// </summary>
         protected Workflow()
         {
-            _next = new WorkflowBuilder();
         }
 
         /// <summary>
         /// Overloaded Workflow constructor that requires WorkflowOptions for enhanced usablility.
         /// </summary>
         /// <param name="options">The WorkflowOptions to pass within a Workflow to provide tailored functionality.</param>
-        protected Workflow(WorkflowOptions options) : this()
+        protected Workflow(WorkflowOptions options)
         {
             _options = options;
         }
 
         /// <summary>
-        /// Abstract method that injects a IWorkflowBuilder to build the steps of the Workflow. 
+        /// Abstract method that injects a IWorkflowBuilder to build the steps of the Workflow.
         /// The Workflow is lazily built when the Run method is invoked.
         /// </summary>
         /// <param name="builder">The IWorkflowBuilder to build the Workflow's steps.</param>
@@ -48,47 +46,83 @@ namespace NetWorkflow
         {
             if (_disposedValue)
             {
-                throw new ObjectDisposedException(typeof(WorkflowResult<TOut>).Name);
+                throw new ObjectDisposedException(GetType().Name);
             }
 
-            // Builds the Workflow
-            Build(_next);
-
-            DateTime timestamp = DateTime.Now;
+            var stopwatch = Stopwatch.StartNew();
 
             try
             {
-                TOut result = (TOut)_next.Run(default, token);
+                using var builder = new WorkflowBuilder();
 
-                return WorkflowResult<TOut>.Success(result, DateTime.Now - timestamp);
+                Build(builder);
+
+                TOut result = (TOut)builder.Run(default, token);
+
+                return WorkflowResult<TOut>.Success(result, stopwatch.Elapsed);
             }
             catch (OperationCanceledException)
             {
-                if (_options?.Rethrow == true) throw;
+                if (_options?.RethrowExceptions == true) throw;
 
-                return WorkflowResult<TOut>.Cancelled(DateTime.Now - timestamp);
+                return WorkflowResult<TOut>.Cancelled(stopwatch.Elapsed);
             }
             catch (WorkflowStoppedException)
             {
-                if (_options?.Rethrow == true) throw;
+                if (_options?.RethrowExceptions == true) throw;
 
-                return WorkflowResult<TOut>.Cancelled(DateTime.Now - timestamp);
+                return WorkflowResult<TOut>.Cancelled(stopwatch.Elapsed);
             }
             catch (Exception ex)
             {
-                if (_options?.Rethrow == true) throw;
+                if (_options?.RethrowExceptions == true) throw;
 
-                return WorkflowResult<TOut>.Faulted(ex.InnerException ?? ex, DateTime.Now - timestamp);
+                return WorkflowResult<TOut>.Faulted(ex.InnerException ?? ex, stopwatch.Elapsed);
             }
         }
+
         /// <summary>
         /// Builds and runs the Workflow asynchronously and returns a final result if each step has executed successfully
         /// </summary>
         /// <param name="token">The CancellationToken to cancel the workflow.</param>
         /// <returns>A Task with a generic WorkflowResult.</returns>
-        public Task<WorkflowResult<TOut>> RunAsync(CancellationToken token = default)
+        public async Task<WorkflowResult<TOut>> RunAsync(CancellationToken token = default)
         {
-            return Task.Run(() => Run(token), token);
+            if (_disposedValue)
+            {
+                throw new ObjectDisposedException(GetType().Name);
+            }
+
+            var stopwatch = Stopwatch.StartNew();
+
+            try
+            {
+                using var builder = new WorkflowBuilder();
+
+                Build(builder);
+
+                TOut result = (TOut)await builder.RunAsync(default, token).ConfigureAwait(false);
+
+                return WorkflowResult<TOut>.Success(result, stopwatch.Elapsed);
+            }
+            catch (OperationCanceledException)
+            {
+                if (_options?.RethrowExceptions == true) throw;
+
+                return WorkflowResult<TOut>.Cancelled(stopwatch.Elapsed);
+            }
+            catch (WorkflowStoppedException)
+            {
+                if (_options?.RethrowExceptions == true) throw;
+
+                return WorkflowResult<TOut>.Cancelled(stopwatch.Elapsed);
+            }
+            catch (Exception ex)
+            {
+                if (_options?.RethrowExceptions == true) throw;
+
+                return WorkflowResult<TOut>.Faulted(ex.InnerException ?? ex, stopwatch.Elapsed);
+            }
         }
 
         protected virtual void Dispose(bool disposing)
@@ -97,10 +131,8 @@ namespace NetWorkflow
             {
                 if (disposing)
                 {
-                    _next.Dispose();
+                    _options = null;
                 }
-
-                _options = null;
 
                 _disposedValue = true;
             }
@@ -108,7 +140,6 @@ namespace NetWorkflow
 
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
 
             GC.SuppressFinalize(this);

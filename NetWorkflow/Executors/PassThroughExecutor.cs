@@ -1,14 +1,17 @@
-﻿
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace NetWorkflow
 {
-    internal class WorkflowMoveNextExecutor<TArgs> : IWorkflowExecutor<TArgs, TArgs>
+    internal class PassThroughExecutor : IWorkflowExecutor
     {
         private bool _disposedValue;
 
-        public TArgs Run(TArgs args, CancellationToken token = default) => args;
+        public ValueTask<object> RunAsync(object args, CancellationToken token = default)
+        {
+            return new ValueTask<object>(args);
+        }
 
         protected virtual void Dispose(bool disposing)
         {
@@ -20,7 +23,6 @@ namespace NetWorkflow
 
         public void Dispose()
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: true);
 
             GC.SuppressFinalize(this);

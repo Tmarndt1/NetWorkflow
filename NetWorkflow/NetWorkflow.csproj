@@ -2,32 +2,21 @@
 
     <PropertyGroup>
         <Authors>Travis Arndt</Authors>
-        <TargetFrameworks>netstandard2.1;net6.0;net7.0;</TargetFrameworks>
+        <TargetFrameworks>netstandard2.1;net6.0;net7.0;net8.0;</TargetFrameworks>
         <Nullable>disable</Nullable>
         <PackageId>NetWorkflow</PackageId>
         <Description>Fluent .NET Workflow Library that allows a user to explicitly define their workflow steps in a single location with compile time validation.</Description>
         <PackageProjectUrl>https://github.com/Tmarndt1/NetWorkflow</PackageProjectUrl>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageReleaseNotes>See CHANGELOG.md for changes in 4.0.0.</PackageReleaseNotes>
         <RepositoryUrl>https://github.com/Tmarndt1/NetWorkflow</RepositoryUrl>
         <PackageTags>Fluent;NetWorkflow;Net;Workflow;</PackageTags>
         <PackageLicenseFile>LICENSE</PackageLicenseFile>
-		<Version>3.0.0</Version>
+		<Version>4.0.0</Version>
     </PropertyGroup>
 
     <ItemGroup>
       <None Remove="Scheduler\" />
-    </ItemGroup>
-    <ItemGroup>
-	    <None Include="../LICENSE">
-		    <Pack>True</Pack>
-		    <PackagePath>\</PackagePath>
-	    </None>
-    </ItemGroup>
-    <ItemGroup>
-        <None Include="..\README.md">
-            <Pack>True</Pack>
-            <PackagePath>\</PackagePath>
-        </None>
     </ItemGroup>
     <ItemGroup>
         <PackageReference Include="System.Linq.Expressions" Version="4.3.0" />

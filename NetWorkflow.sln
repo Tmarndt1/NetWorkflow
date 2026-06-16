@@ -7,7 +7,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetWorkflow", "NetWorkflow\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetWorkflow.Tests", "NetWorkflow.Tests\NetWorkflow.Tests.csproj", "{2D8F7306-C9C4-449D-8B91-2E7AFA3D5052}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NetWorkflow.Extensions", "NetWorkflow.Extensions\NetWorkflow.Extensions.csproj", "{28352C87-A16B-4F76-82AD-7F57A5FADBD8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NetWorkflow.Extensions", "NetWorkflow.Extensions\NetWorkflow.Extensions.csproj", "{28352C87-A16B-4F76-82AD-7F57A5FADBD8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2BF32A65-B9F0-480D-8099-F1C1C81B69DA}"
+	ProjectSection(SolutionItems) = preProject
+		CHANGELOG.md = CHANGELOG.md
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

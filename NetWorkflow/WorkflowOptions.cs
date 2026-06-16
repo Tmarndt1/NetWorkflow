@@ -8,6 +8,6 @@
         /// <summary>
         /// Enables re-throwing exceptions within the Workflow when they are caught
         /// </summary>
-        public bool Rethrow { get; set; } = false;
+        public bool RethrowExceptions { get; set; } = false;
     }
 }

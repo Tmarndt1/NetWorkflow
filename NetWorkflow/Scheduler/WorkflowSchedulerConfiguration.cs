@@ -1,5 +1,6 @@
-﻿
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace NetWorkflow.Scheduler
 {
@@ -10,31 +11,61 @@ namespace NetWorkflow.Scheduler
     {
         private readonly string _changeExceptionMessage = $"Cannot change the {nameof(WorkflowSchedulerConfiguration<TResult>)} after initial definition.";
 
-        private bool _executeAtSet = false;
-
-        private WorkflowTime _executeAt;
+        private bool _scheduleSet = false;
+        private WorkflowSchedule _schedule;
 
         /// <summary>
-        /// The specific time when a Workflow should be executed.
+        /// The schedule that determines when a Workflow should be executed.
         /// </summary>
-        /// <remarks>
-        /// A specific day/hour/minute, hour/minute, or minute mark can be determined to run the Workflow.
-        /// </remarks>
-        public WorkflowTime ExecuteAt
+        public WorkflowSchedule Schedule
         {
-            get => _executeAt;
+            get => _schedule;
             set
             {
-                if (_executeAtSet) throw new InvalidOperationException(_changeExceptionMessage);
+                if (_scheduleSet) throw new InvalidOperationException(_changeExceptionMessage);
 
-                _executeAtSet = true;
+                _scheduleSet = true;
+                _schedule = value;
+            }
+        }
 
-                _executeAt = value;
+        private bool _runImmediatelySet = false;
+        private bool _runImmediately = false;
+
+        /// <summary>
+        /// Determines whether frequency schedules should execute once immediately before waiting for the first interval.
+        /// </summary>
+        public bool RunImmediately
+        {
+            get => _runImmediately;
+            set
+            {
+                if (_runImmediatelySet) throw new InvalidOperationException(_changeExceptionMessage);
+
+                _runImmediatelySet = true;
+                _runImmediately = value;
+            }
+        }
+
+        private bool _overlapPolicySet = false;
+        private WorkflowOverlapPolicy _overlapPolicy = WorkflowOverlapPolicy.Wait;
+
+        /// <summary>
+        /// Determines how the scheduler handles overlapping executions.
+        /// </summary>
+        public WorkflowOverlapPolicy OverlapPolicy
+        {
+            get => _overlapPolicy;
+            set
+            {
+                if (_overlapPolicySet) throw new InvalidOperationException(_changeExceptionMessage);
+
+                _overlapPolicySet = true;
+                _overlapPolicy = value;
             }
         }
 
         private bool _onExecutedSet = false;
-
         private Action<WorkflowResult<TResult>> _onExecuted;
 
         /// <summary>
@@ -48,9 +79,45 @@ namespace NetWorkflow.Scheduler
             {
                 if (_onExecutedSet) throw new InvalidOperationException(_changeExceptionMessage);
 
-                _onExecutedSet= true;
-
+                _onExecutedSet = true;
                 _onExecuted = value;
+            }
+        }
+
+        private bool _onExecutedAsyncSet = false;
+        private Func<WorkflowResult<TResult>, CancellationToken, Task> _onExecutedAsync;
+
+        /// <summary>
+        /// Provides an async hook into retrieving the result of an executed Workflow.
+        /// <remarks>Will be called once a Workflow has been completed, canceled or faulted.</remarks>
+        /// </summary>
+        public Func<WorkflowResult<TResult>, CancellationToken, Task> OnExecutedAsync
+        {
+            get => _onExecutedAsync;
+            set
+            {
+                if (_onExecutedAsyncSet) throw new InvalidOperationException(_changeExceptionMessage);
+
+                _onExecutedAsyncSet = true;
+                _onExecutedAsync = value;
+            }
+        }
+
+        private bool _onErrorAsyncSet = false;
+        private Func<Exception, CancellationToken, Task> _onErrorAsync;
+
+        /// <summary>
+        /// Provides an async hook for scheduler-level errors.
+        /// </summary>
+        public Func<Exception, CancellationToken, Task> OnErrorAsync
+        {
+            get => _onErrorAsync;
+            set
+            {
+                if (_onErrorAsyncSet) throw new InvalidOperationException(_changeExceptionMessage);
+
+                _onErrorAsyncSet = true;
+                _onErrorAsync = value;
             }
         }
 

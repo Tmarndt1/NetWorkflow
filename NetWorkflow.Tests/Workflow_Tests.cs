@@ -17,10 +17,11 @@ namespace NetWorkflow.Tests
 
             // Assert
             Assert.NotNull(result);
-            Assert.True(result.IsCompleted);
-            Assert.False(result.IsCanceled);
-            Assert.False(result.IsFaulted);
+            Assert.Equal(WorkflowResultStatus.Completed, result.Status);
             Assert.True(result);
+            Assert.True(result.TryGetOutput(out bool output));
+            Assert.True(output);
+            Assert.True(result.GetOutputOrThrow());
         }
 
         [Fact]
@@ -36,9 +37,7 @@ namespace NetWorkflow.Tests
 
             // Assert
             Assert.NotNull(result);
-            Assert.True(result.IsCompleted);
-            Assert.False(result.IsCanceled);
-            Assert.False(result.IsFaulted);
+            Assert.Equal(WorkflowResultStatus.Completed, result.Status);
             Assert.True(result);
         }
 
@@ -53,9 +52,22 @@ namespace NetWorkflow.Tests
 
             // Assert
             Assert.NotNull(result);
-            Assert.True(result.IsCompleted);
-            Assert.False(result.IsCanceled);
-            Assert.False(result.IsFaulted);
+            Assert.Equal(WorkflowResultStatus.Completed, result.Status);
+            Assert.True(result);
+        }
+
+        [Fact]
+        public async Task Parallel_Async_Success()
+        {
+            // Arrange
+            var workflow = new ParallelWorkflow(false);
+
+            // Act
+            var result = await workflow.RunAsync();
+
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(WorkflowResultStatus.Completed, result.Status);
             Assert.True(result);
         }
 
@@ -71,9 +83,10 @@ namespace NetWorkflow.Tests
             var result = workflow.Run(tokenSource.Token);
 
             // Assert
-            Assert.False(result.IsCompleted);
-            Assert.False(result.IsFaulted);
-            Assert.True(result.IsCanceled);
+            Assert.Equal(WorkflowResultStatus.Canceled, result.Status);
+            Assert.False(result.TryGetOutput(out bool output));
+            Assert.False(output);
+            Assert.Throws<OperationCanceledException>(() => result.GetOutputOrThrow());
         }
 
         [Fact]
@@ -87,9 +100,10 @@ namespace NetWorkflow.Tests
 
             // Assert
             Assert.NotNull(result);
-            Assert.False(result.IsCompleted);
-            Assert.False(result.IsCanceled);
-            Assert.True(result.IsFaulted);
+            Assert.Equal(WorkflowResultStatus.Faulted, result.Status);
+            Assert.False(result.TryGetOutput(out bool output));
+            Assert.False(output);
+            Assert.Throws<InvalidOperationException>(() => result.GetOutputOrThrow());
         }
 
         [Fact]
@@ -103,9 +117,7 @@ namespace NetWorkflow.Tests
 
             // Assert
             Assert.NotNull(result);
-            Assert.True(result.IsCompleted);
-            Assert.False(result.IsCanceled);
-            Assert.False(result.IsFaulted);
+            Assert.Equal(WorkflowResultStatus.Completed, result.Status);
             Assert.Equal(1, result.Output);
         }
 
@@ -120,9 +132,7 @@ namespace NetWorkflow.Tests
 
             // Assert
             Assert.NotNull(result);
-            Assert.False(result.IsCompleted);
-            Assert.False(result.IsCanceled);
-            Assert.True(result.IsFaulted);
+            Assert.Equal(WorkflowResultStatus.Faulted, result.Status);
             Assert.Equal(0, result.Output);
         }
 
@@ -138,9 +148,7 @@ namespace NetWorkflow.Tests
 
             // Assert
             Assert.NotNull(result);
-            Assert.True(result.IsCompleted);
-            Assert.False(result.IsCanceled);
-            Assert.False(result.IsFaulted);
+            Assert.Equal(WorkflowResultStatus.Completed, result.Status);
             Assert.Equal(1, result.Output); // This test should return a favorable result
         }
 
@@ -155,8 +163,7 @@ namespace NetWorkflow.Tests
 
             // Assert
             Assert.Null(result.Output); // Should be null if it passes
-            Assert.True(result.IsCanceled);
-            Assert.False(result.IsCompleted);
+            Assert.Equal(WorkflowResultStatus.Canceled, result.Status);
         }
 
         [Fact]
@@ -170,9 +177,7 @@ namespace NetWorkflow.Tests
 
             // Assert
             Assert.Null(result.Output); // Should be null if it passes
-            Assert.False(result.IsCanceled);
-            Assert.False(result.IsCompleted);
-            Assert.True(result.IsFaulted);
+            Assert.Equal(WorkflowResultStatus.Faulted, result.Status);
             Assert.IsType<InvalidOperationException>(result.Exception);
         }
 
@@ -182,7 +187,7 @@ namespace NetWorkflow.Tests
             // Arrange
             var workflow = new ConditionalThrowWorkflow(new WorkflowOptions()
             {
-                Rethrow = true
+                RethrowExceptions = true
             });
 
             bool hit = false;
@@ -213,8 +218,7 @@ namespace NetWorkflow.Tests
             var result = workflow.Run();
 
             // Assert
-            Assert.False(result.IsCompleted);
-            Assert.False(result.IsCanceled);
+            Assert.Equal(WorkflowResultStatus.Faulted, result.Status);
             Assert.IsType<InvalidOperationException>(result.Exception);
         }
 
@@ -232,26 +236,46 @@ namespace NetWorkflow.Tests
 
             // Assert
             Assert.NotNull(result);
-            Assert.True(result.IsCompleted);
-            Assert.False(result.IsCanceled);
-            Assert.False(result.IsFaulted);
+            Assert.Equal(WorkflowResultStatus.Completed, result.Status);
             Assert.True(result);
         }
 
         [Fact]
-        public void Retry_WorkflowStep_Success()
+        public void AddWorkflow_WithConstructorInjection_Extensions_Success()
         {
             // Arrange
-            var workflow = new RetryWorkflow();
+            var workflow = new ServiceCollection()
+                .AddSingleton<IDependencyMessageProvider, DependencyMessageProvider>()
+                .AddWorkflowStep<DependencyMessageStep>()
+                .AddWorkflow<DependencyWorkflow, string>()
+                .BuildServiceProvider()
+                .GetRequiredService<DependencyWorkflow>();
 
             // Act
             var result = workflow.Run();
 
             // Assert
-            Assert.Equal(2, RetryWorkflow.FirstStep.RanCount);
-            Assert.False(result.IsCompleted);
-            Assert.False(result.IsCanceled);
-            Assert.IsType<WorkflowMaxRetryException>(result.Exception);
+            Assert.Equal(WorkflowResultStatus.Completed, result.Status);
+            Assert.Equal(DependencyMessageProvider.Message, result.Output);
+        }
+
+        [Fact]
+        public async Task AddWorkflowRunner_Extensions_Success()
+        {
+            // Arrange
+            var runner = new ServiceCollection()
+                .AddSingleton<IDependencyMessageProvider, DependencyMessageProvider>()
+                .AddWorkflowStep<DependencyMessageStep>()
+                .AddWorkflow<DependencyWorkflow, string>()
+                .BuildServiceProvider()
+                .GetRequiredService<IWorkflowRunner<DependencyWorkflow, string>>();
+
+            // Act
+            var result = await runner.RunAsync();
+
+            // Assert
+            Assert.Equal(WorkflowResultStatus.Completed, result.Status);
+            Assert.Equal(DependencyMessageProvider.Message, result.Output);
         }
 
         [Fact]
@@ -278,6 +302,51 @@ namespace NetWorkflow.Tests
 
             // Assert
             Assert.False(hit);
+        }
+
+        private interface IDependencyMessageProvider
+        {
+            string GetMessage();
+        }
+
+        private sealed class DependencyMessageProvider : IDependencyMessageProvider
+        {
+            public const string Message = "Injected workflow dependency";
+
+            public string GetMessage()
+            {
+                return Message;
+            }
+        }
+
+        private sealed class DependencyMessageStep : IWorkflowStep<string>
+        {
+            private readonly IDependencyMessageProvider _messageProvider;
+
+            public DependencyMessageStep(IDependencyMessageProvider messageProvider)
+            {
+                _messageProvider = messageProvider;
+            }
+
+            public string Run(CancellationToken token = default)
+            {
+                return _messageProvider.GetMessage();
+            }
+        }
+
+        private sealed class DependencyWorkflow : Workflow<string>
+        {
+            private readonly DependencyMessageStep _step;
+
+            public DependencyWorkflow(DependencyMessageStep step)
+            {
+                _step = step;
+            }
+
+            public override IWorkflowBuilder<string> Build(IWorkflowBuilder builder)
+            {
+                return builder.StartWith(() => _step);
+            }
         }
     }
 }

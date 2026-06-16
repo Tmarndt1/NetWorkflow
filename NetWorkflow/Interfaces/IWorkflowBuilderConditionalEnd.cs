@@ -3,7 +3,7 @@
     /// <summary>
     /// Interace that defines the aggregation after else is used within a conditional WorkflowBuilder.
     /// </summary>
-    public interface IWorkflowBuilderConditionalFinalAggregate
+    public interface IWorkflowBuilderConditionalEnd
     {
         /// <summary>
         /// Ends the conditional statement within the Workflow and consolidates the result to use in the next WorkflowStep.

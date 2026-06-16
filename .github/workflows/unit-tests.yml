@@ -1,0 +1,40 @@
+
+name: Unit Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.x
+
+      - name: Restore dependencies
+        run: dotnet restore NetWorkflow.sln
+
+      - name: Build
+        run: dotnet build NetWorkflow.sln --configuration Release --no-restore
+
+      - name: Run unit tests
+        run: >
+          dotnet test NetWorkflow.Tests/NetWorkflow.Tests.csproj
+          --configuration Release
+          --no-build
+          --no-restore
+          --framework net8.0
+          --verbosity normal
+          --filter "TestCategory!=very.slow"
